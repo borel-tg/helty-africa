@@ -40,6 +40,22 @@ export const getById = query({
   },
 });
 
+export const getByEmail = query({
+  args: { email: v.string() },
+  handler: async (ctx, { email }) => {
+    const normalized = email.trim().toLowerCase();
+    const byIndex = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", normalized))
+      .first();
+    if (byIndex) return byIndex;
+
+    // Fallback: legacy rows may have non-normalized email casing
+    const all = await ctx.db.query("users").collect();
+    return all.find((u) => u.email?.toLowerCase() === normalized) ?? null;
+  },
+});
+
 // ── Mutations ──────────────────────────────────────────────────────────────
 
 export const create = mutation({

@@ -181,22 +181,28 @@ export default defineSchema({
     userId: v.id("users"),
     moduleId: v.id("modules"),
     organizationId: v.id("organizations"),
-    examAttemptId: v.id("examAttempts"),
+    examAttemptId: v.optional(v.id("examAttempts")),
     score: v.number(),
     issuedAt: v.number(),
+    certificateNumber: v.optional(v.string()),
     fileUrl: v.optional(v.string()), // generated PDF in Convex storage
   })
     .index("by_user", ["userId"])
-    .index("by_user_module", ["userId", "moduleId"]),
+    .index("by_user_module", ["userId", "moduleId"])
+    .index("by_certificate_number", ["certificateNumber"]),
 
   // ── Certificate Templates ──────────────────────────────────────
   certificateTemplates: defineTable({
     organizationId: v.id("organizations"),
     organizationName: v.string(),
+    programSubtitle: v.optional(v.string()),
     logoUrl: v.optional(v.string()),
     signatureLine: v.optional(v.string()),
+    signatureImageUrl: v.optional(v.string()),
     borderColor: v.string(), // hex
+    accentColor: v.optional(v.string()),
     backgroundImageUrl: v.optional(v.string()),
+    footerText: v.optional(v.string()),
     updatedAt: v.number(),
   }).index("by_org", ["organizationId"]),
 

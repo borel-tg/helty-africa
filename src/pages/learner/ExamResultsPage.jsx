@@ -1,16 +1,22 @@
+import { useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useMutation } from "convex/react";
 import { CheckCircle, XCircle, Award, RotateCcw, BookOpen } from "lucide-react";
+import { api } from "../../../convex/_generated/api";
 import { Button } from "../../components/ui/Button";
 import { CircularProgress } from "../../components/ui/Progress";
 import { MOCK_MODULES } from "../../lib/mockData";
 import { cn } from "../../lib/utils";
+import { useConvexSession } from "../../hooks/useConvexSession";
 
 export default function ExamResultsPage() {
   const { t } = useTranslation();
   const { moduleId } = useParams();
   const { state } = useLocation();
   const navigate = useNavigate();
+  const { convexUser, resolveModuleId } = useConvexSession();
+  const issueCertificate = useMutation(api.certificates.issue);
   const module = MOCK_MODULES.find((m) => m._id === moduleId);
 
   const score = state?.score ?? 75;
@@ -23,6 +29,25 @@ export default function ExamResultsPage() {
     maxRetakes === "unlimited"
       ? "unlimited"
       : Math.max(0, (typeof maxRetakes === "number" ? maxRetakes : 3) - retakesUsed);
+
+  useEffect(() => {
+    if (!passed || !convexUser?._id || !convexUser.organizationId) return;
+    const convexModuleId = resolveModuleId(moduleId);
+    if (!convexModuleId || String(convexModuleId).startsWith("mod")) return;
+    issueCertificate({
+      userId: convexUser._id,
+      moduleId: convexModuleId,
+      organizationId: convexUser.organizationId,
+      score,
+    }).catch(() => {});
+  }, [
+    passed,
+    score,
+    convexUser,
+    moduleId,
+    resolveModuleId,
+    issueCertificate,
+  ]);
 
   return (
     <div className="p-4 md:p-6 max-w-2xl mx-auto">

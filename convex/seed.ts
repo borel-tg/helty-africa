@@ -469,6 +469,17 @@ export const seedDemo = mutation({
       examAttemptId: attemptId,
       score: 85,
       issuedAt: now - 7000000,
+      certificateNumber: "EVT-2026-DEMO01",
+    });
+
+    await ctx.db.insert("certificates", {
+      userId: learner1Id,
+      moduleId: module1Id,
+      organizationId: orgId,
+      examAttemptId: attemptId,
+      score: 85,
+      issuedAt: now - 3600000,
+      certificateNumber: "EVT-2026-DEMO02",
     });
 
     // Notifications
@@ -513,9 +524,12 @@ export const seedDemo = mutation({
     await ctx.db.insert("certificateTemplates", {
       organizationId: orgId,
       organizationName: "PolioFree Africa NGO",
+      programSubtitle: "Employee Training Programme",
       signatureLine: "Dr. Amara Diallo, Training Director",
       borderColor: "#2E7D64",
-      logoUrl: "/demo/sample-pdf.pdf",
+      accentColor: "#2E7D64",
+      footerText:
+        "This document certifies completion of the stated training module as recorded in the organization's training system.",
       updatedAt: now,
     });
 

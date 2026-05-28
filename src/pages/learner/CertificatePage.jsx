@@ -1,111 +1,176 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { useRef } from "react";
-import { Download, ArrowLeft, Award, Printer } from "lucide-react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useRef, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useQuery, useMutation } from "convex/react";
+import { Download, ArrowLeft, Printer } from "lucide-react";
+import { api } from "../../../convex/_generated/api";
 import { Button } from "../../components/ui/Button";
 import { useAuth } from "../../hooks/useAuth";
+import { useConvexSession } from "../../hooks/useConvexSession";
 import { MOCK_MODULES } from "../../lib/mockData";
-import { formatDate } from "../../lib/utils";
+import { CertificateView } from "../../components/certificate/CertificateView";
+import { mergeTemplate } from "../../lib/certificate/defaults";
+import { downloadCertificatePdf } from "../../lib/certificate/downloadCertificate";
 
 export default function CertificatePage() {
-  const { moduleId } = useParams();
+  const { moduleId: routeModuleId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { t } = useTranslation();
   const { currentUser } = useAuth();
+  const { convexUser, template: savedTemplate, resolveModuleId } = useConvexSession();
   const certRef = useRef(null);
-  const module = MOCK_MODULES.find((m) => m._id === moduleId);
+  const [downloading, setDownloading] = useState(false);
 
-  const handlePrint = () => {
-    window.print();
+  const convexModuleId = resolveModuleId(routeModuleId);
+  const issueCertificate = useMutation(api.certificates.issue);
+
+  const certificate = useQuery(
+    api.certificates.getForUserModule,
+    convexUser?._id && convexModuleId
+      ? { userId: convexUser._id, moduleId: convexModuleId }
+      : "skip"
+  );
+
+  const convexModule = useQuery(
+    api.modules.getById,
+    convexModuleId && !String(convexModuleId).startsWith("mod")
+      ? { moduleId: convexModuleId }
+      : "skip"
+  );
+
+  const mockModule = MOCK_MODULES.find((m) => m._id === routeModuleId);
+  const examState = location.state;
+  const scoreFromState = examState?.score;
+  const passedFromState = examState?.passed;
+
+  useEffect(() => {
+    if (
+      !convexUser?._id ||
+      !convexModuleId ||
+      !convexUser.organizationId ||
+      certificate === undefined ||
+      certificate !== null
+    ) {
+      return;
+    }
+    const shouldIssue =
+      passedFromState === true || scoreFromState != null;
+    if (!shouldIssue) return;
+
+    issueCertificate({
+      userId: convexUser._id,
+      moduleId: convexModuleId,
+      organizationId: convexUser.organizationId,
+      score: scoreFromState ?? 0,
+    }).catch(() => {});
+  }, [
+    convexUser,
+    convexModuleId,
+    certificate,
+    passedFromState,
+    scoreFromState,
+    issueCertificate,
+  ]);
+
+  const template = mergeTemplate(savedTemplate);
+  const learnerName = currentUser?.name ?? "—";
+  const moduleTitle =
+    convexModule?.title ?? mockModule?.title ?? "Training module";
+  const score = certificate?.score ?? scoreFromState ?? null;
+  const issuedAt = certificate?.issuedAt ?? Date.now();
+  const certificateNumber = certificate?.certificateNumber;
+  const verifyUrl = certificateNumber
+    ? `${window.location.origin}/verify/${certificateNumber}`
+    : undefined;
+
+  const isLoading = convexUser === undefined && currentUser?.email;
+
+  const handleDownload = async () => {
+    if (!certRef.current) return;
+    setDownloading(true);
+    try {
+      const name = learnerName.replace(/\s+/g, "-").toLowerCase();
+      await downloadCertificatePdf(
+        certRef.current,
+        `certificate-${name}-${routeModuleId}.pdf`
+      );
+    } catch {
+      alert(t("certificate.downloadError"));
+    } finally {
+      setDownloading(false);
+    }
   };
 
-  const issueDate = formatDate(Date.now());
+  const handlePrint = () => window.print();
+
+  const certLoaded = !convexUser || certificate !== undefined;
+  const canView =
+    passedFromState || certificate || (!convexUser && certLoaded);
+
+  if (certLoaded && !canView) {
+    return (
+      <div className="p-6 max-w-lg mx-auto text-center">
+        <p className="text-text-secondary mb-4">{t("certificate.notEligible")}</p>
+        <Button variant="outline" onClick={() => navigate(`/learn/module/${routeModuleId}`)}>
+          {t("learner.backToModule")}
+        </Button>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-4 md:p-6 max-w-3xl mx-auto">
+    <div className="p-4 md:p-6 max-w-4xl mx-auto certificate-print-root">
       <button
-        onClick={() => navigate(`/learn/module/${moduleId}/results`)}
+        type="button"
+        onClick={() => navigate(`/learn/module/${routeModuleId}/results`)}
         className="flex items-center gap-2 text-sm text-text-secondary hover:text-primary mb-6 transition-colors print:hidden"
       >
         <ArrowLeft size={16} />
-        Back to Results
+        {t("learner.backToModule")}
       </button>
 
-      {/* Actions */}
       <div className="flex gap-3 mb-6 print:hidden">
-        <Button onClick={handlePrint} size="md">
+        <Button onClick={handleDownload} size="md" loading={downloading}>
           <Download size={16} />
-          Download Certificate
+          {t("certificate.downloadPdf")}
         </Button>
         <Button variant="outline" size="md" onClick={handlePrint}>
           <Printer size={16} />
-          Print
+          {t("certificate.print")}
         </Button>
       </div>
 
-      {/* Certificate */}
-      <div
-        ref={certRef}
-        className="bg-white rounded-card shadow-modal border-4 border-primary p-8 md:p-12 print:shadow-none print:border-4"
-        style={{ minHeight: "500px" }}
-      >
-        {/* Header decoration */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center mx-auto mb-4">
-            <Award size={32} className="text-white" />
-          </div>
-          <p className="text-xs uppercase tracking-[0.3em] text-text-secondary font-medium mb-1">
-            Certificate of Completion
-          </p>
-          <h1 className="text-3xl md:text-4xl font-bold text-primary">
-            PolioFree Africa NGO
-          </h1>
+      {isLoading ? (
+        <p className="text-center text-text-secondary">{t("certificate.loading")}</p>
+      ) : (
+        <div ref={certRef} className="mx-auto print:shadow-none">
+          <CertificateView
+            template={template}
+            learnerName={learnerName}
+            moduleTitle={moduleTitle}
+            score={score}
+            issuedAt={issuedAt}
+            certificateNumber={certificateNumber}
+            verifyUrl={verifyUrl}
+          />
         </div>
+      )}
 
-        {/* Certificate body */}
-        <div className="text-center space-y-4 border-t border-b border-gray-100 py-8">
-          <p className="text-lg text-text-secondary">
-            This certifies that
-          </p>
-          <h2 className="text-2xl md:text-3xl font-bold text-text-primary">
-            {currentUser?.name || "Fatima Coulibaly"}
-          </h2>
-          <p className="text-lg text-text-secondary">
-            has successfully completed
-          </p>
-          <h3 className="text-xl md:text-2xl font-semibold text-primary">
-            {module?.title || "Polio Campaign Protocols"}
-          </h3>
-          <p className="text-text-secondary">
-            with a passing score of{" "}
-            <span className="font-bold text-text-primary">85%</span>
-          </p>
-        </div>
-
-        {/* Footer */}
-        <div className="mt-8 flex items-end justify-between">
-          <div>
-            <div className="w-48 border-b-2 border-gray-300 mb-1" />
-            <p className="text-xs text-text-secondary">
-              Dr. Amara Diallo, Training Director
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="text-sm font-medium text-text-primary">{issueDate}</p>
-            <p className="text-xs text-text-secondary">Date of Completion</p>
-          </div>
-        </div>
-
-        {/* Watermark / border decoration */}
-        <div className="absolute inset-0 pointer-events-none opacity-[0.03] flex items-center justify-center">
-          <Award size={300} className="text-primary" />
-        </div>
-      </div>
-
-      {/* Print styles */}
       <style>{`
         @media print {
           body * { visibility: hidden; }
-          .print\\:shadow-none, .print\\:shadow-none * { visibility: visible; }
-          .print\\:shadow-none { position: fixed; top: 0; left: 0; width: 100%; }
+          .certificate-print-root,
+          .certificate-print-root * { visibility: visible; }
+          .certificate-print-root {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+          }
+          .print\\:hidden { display: none !important; }
         }
       `}</style>
     </div>

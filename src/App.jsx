@@ -8,6 +8,7 @@ import { AppLayout } from "./components/layout/AppLayout";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
+import VerifyCertificatePage from "./pages/public/VerifyCertificatePage";
 
 // Learner pages
 import LearnerDashboard from "./pages/learner/LearnerDashboard";
@@ -77,6 +78,7 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/verify/:certificateNumber" element={<VerifyCertificatePage />} />
 
         {/* Protected app routes */}
         <Route element={<RequireAuth />}>
