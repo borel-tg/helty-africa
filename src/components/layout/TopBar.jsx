@@ -77,7 +77,7 @@ export function TopBar({ title, onMenuToggle }) {
 
         {/* Dropdown */}
         {showNotifs && (
-          <div className="absolute right-0 top-full mt-1 w-80 bg-white rounded-card shadow-modal border border-gray-100 z-50">
+          <div className="fixed right-2 top-[4.25rem] w-[min(20rem,calc(100vw-1rem))] sm:absolute sm:right-0 sm:top-full sm:mt-1 sm:w-80 bg-white rounded-card shadow-modal border border-gray-100 z-50">
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
               <h3 className="text-sm font-semibold">{t("common.notifications")}</h3>
               <button className="text-xs text-primary hover:underline">

@@ -151,7 +151,7 @@ export default function EmployeesPage() {
   return (
     <div className="p-4 md:p-6 w-full">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-6">
         <div>
           <h2 className="text-xl font-semibold text-text-primary">{t("admin.learnersTitle")}</h2>
           <p className="text-sm text-text-secondary mt-0.5">
@@ -160,11 +160,20 @@ export default function EmployeesPage() {
             })}
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => setShowCreate(true)}>
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowCreate(true)}
+            className="w-full sm:w-auto justify-center"
+          >
             <UserPlus size={14} /> {t("admin.manualCreate")}
           </Button>
-          <Button size="sm" onClick={() => setShowInvite(true)}>
+          <Button
+            size="sm"
+            onClick={() => setShowInvite(true)}
+            className="w-full sm:w-auto justify-center"
+          >
             <Mail size={14} /> {t("admin.invite")}
           </Button>
         </div>
