@@ -18,16 +18,16 @@ import { MOCK_STATS, MOCK_EMPLOYEES, MOCK_MODULES } from "../../lib/mockData";
 function StatCard({ label, value, icon: Icon, color, sub }) {
   return (
     <Card className="p-5">
-      <div className="flex items-start justify-between">
-        <div>
+      <div className="flex flex-col items-center text-center gap-2 sm:flex-row sm:items-start sm:justify-between sm:text-left sm:gap-0">
+        <div
+          className={`w-10 h-10 rounded-lg flex items-center justify-center ${color} order-1 sm:order-2`}
+        >
+          <Icon size={20} className="text-white" />
+        </div>
+        <div className="order-2 sm:order-1">
           <p className="text-sm text-text-secondary mb-1">{label}</p>
           <p className="text-3xl font-bold text-text-primary">{value}</p>
           {sub && <p className="text-xs text-text-secondary mt-1">{sub}</p>}
-        </div>
-        <div
-          className={`w-10 h-10 rounded-lg flex items-center justify-center ${color}`}
-        >
-          <Icon size={20} className="text-white" />
         </div>
       </div>
     </Card>
