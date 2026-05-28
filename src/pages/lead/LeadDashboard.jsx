@@ -12,7 +12,7 @@ const LEAD_LEARNERS = [
   {
     _id: "user_learner",
     name: "Fatima Coulibaly",
-    email: "fatima@evtp.demo",
+    email: "fatima@helty.africa",
     phone: "+225 07 000 0004",
     status: "active",
     lastLoginAt: Date.now() - 43200000,
@@ -22,7 +22,7 @@ const LEAD_LEARNERS = [
   {
     _id: "user_learner2",
     name: "Ibrahim Traoré",
-    email: "ibrahim@evtp.demo",
+    email: "ibrahim@helty.africa",
     phone: "+226 70 000 0005",
     status: "active",
     lastLoginAt: Date.now() - 86400000,
@@ -32,7 +32,7 @@ const LEAD_LEARNERS = [
   {
     _id: "user_learner3",
     name: "Amina Diallo",
-    email: "amina@evtp.demo",
+    email: "amina@helty.africa",
     phone: "+221 76 000 0006",
     status: "active",
     lastLoginAt: Date.now() - 2 * 86400000,

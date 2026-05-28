@@ -35,13 +35,15 @@ import LearnerDetailPage from "./pages/lead/LearnerDetailPage";
 // ── Route Guards ─────────────────────────────────────────────────────────────
 
 function RequireAuth() {
-  const { currentUser } = useAuth();
+  const { currentUser, isInitializing } = useAuth();
+  if (isInitializing) return null;
   if (!currentUser) return <Navigate to="/login" replace />;
   return <Outlet />;
 }
 
 function RequireRole({ roles }) {
-  const { currentUser } = useAuth();
+  const { currentUser, isInitializing } = useAuth();
+  if (isInitializing) return null;
   if (!currentUser) return <Navigate to="/login" replace />;
   if (roles && !roles.includes(currentUser.role)) {
     // Redirect to appropriate default
@@ -53,7 +55,8 @@ function RequireRole({ roles }) {
 }
 
 function RootRedirect() {
-  const { currentUser } = useAuth();
+  const { currentUser, isInitializing } = useAuth();
+  if (isInitializing) return null;
   if (!currentUser) return <Navigate to="/login" replace />;
   if (currentUser.role === "learner") return <Navigate to="/learn" replace />;
   if (currentUser.role === "lead") return <Navigate to="/lead" replace />;

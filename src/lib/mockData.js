@@ -21,7 +21,7 @@ export const MOCK_USERS = {
     _id: "user_super",
     organizationId: "org1",
     name: "Dr. Amara Diallo",
-    email: "superadmin@evtp.demo",
+    email: "superadmin@helty.africa",
     phone: "+221 77 000 0001",
     role: "super_admin",
     status: "active",
@@ -32,7 +32,7 @@ export const MOCK_USERS = {
     _id: "user_admin",
     organizationId: "org1",
     name: "Sophie Mensah",
-    email: "admin@evtp.demo",
+    email: "admin@helty.africa",
     phone: "+233 20 000 0002",
     role: "admin",
     status: "active",
@@ -43,7 +43,7 @@ export const MOCK_USERS = {
     _id: "user_lead",
     organizationId: "org1",
     name: "Kwame Asante",
-    email: "lead@evtp.demo",
+    email: "lead@helty.africa",
     phone: "+233 24 000 0003",
     role: "lead",
     status: "active",
@@ -54,7 +54,7 @@ export const MOCK_USERS = {
     _id: "user_learner",
     organizationId: "org1",
     name: "Fatima Coulibaly",
-    email: "learner@evtp.demo",
+    email: "learner@helty.africa",
     phone: "+225 07 000 0004",
     role: "learner",
     status: "active",
@@ -376,7 +376,7 @@ export const MOCK_EMPLOYEES = [
   {
     _id: "user_learner",
     name: "Fatima Coulibaly",
-    email: "fatima@evtp.demo",
+    email: "fatima@helty.africa",
     phone: "+225 07 000 0004",
     role: "learner",
     status: "active",
@@ -387,7 +387,7 @@ export const MOCK_EMPLOYEES = [
   {
     _id: "user_learner2",
     name: "Ibrahim Traoré",
-    email: "ibrahim@evtp.demo",
+    email: "ibrahim@helty.africa",
     phone: "+226 70 000 0005",
     role: "learner",
     status: "active",
@@ -398,7 +398,7 @@ export const MOCK_EMPLOYEES = [
   {
     _id: "user_learner3",
     name: "Amina Diallo",
-    email: "amina@evtp.demo",
+    email: "amina@helty.africa",
     phone: "+221 76 000 0006",
     role: "learner",
     status: "active",
@@ -409,7 +409,7 @@ export const MOCK_EMPLOYEES = [
   {
     _id: "user_learner4",
     name: "Kofi Boateng",
-    email: "kofi@evtp.demo",
+    email: "kofi@helty.africa",
     phone: "+233 55 000 0007",
     role: "learner",
     status: "inactive",
@@ -419,7 +419,7 @@ export const MOCK_EMPLOYEES = [
   {
     _id: "user_lead",
     name: "Kwame Asante",
-    email: "kwame@evtp.demo",
+    email: "kwame@helty.africa",
     phone: "+233 24 000 0003",
     role: "lead",
     status: "active",
@@ -429,7 +429,7 @@ export const MOCK_EMPLOYEES = [
   {
     _id: "user_admin",
     name: "Sophie Mensah",
-    email: "sophie@evtp.demo",
+    email: "sophie@helty.africa",
     phone: "+233 20 000 0002",
     role: "admin",
     status: "active",
@@ -441,7 +441,7 @@ export const MOCK_EMPLOYEES = [
 export const MOCK_INVITATIONS = [
   {
     _id: "inv1",
-    email: "new.learner1@evtp.demo",
+    email: "new.learner1@helty.africa",
     role: "learner",
     status: "pending",
     invitedAt: Date.now() - 2 * 86400000,
@@ -450,7 +450,7 @@ export const MOCK_INVITATIONS = [
   },
   {
     _id: "inv2",
-    email: "new.learner2@evtp.demo",
+    email: "new.learner2@helty.africa",
     role: "learner",
     status: "signed_up",
     invitedAt: Date.now() - 8 * 86400000,
@@ -459,7 +459,7 @@ export const MOCK_INVITATIONS = [
   },
   {
     _id: "inv3",
-    email: "new.lead@evtp.demo",
+    email: "new.lead@helty.africa",
     role: "lead",
     status: "expired",
     invitedAt: Date.now() - 12 * 86400000,

@@ -46,7 +46,7 @@ export const seedDemo = mutation({
     const superAdminId = await ctx.db.insert("users", {
       organizationId: orgId,
       name: "Dr. Amara Diallo",
-      email: "superadmin@evtp.demo",
+      email: "superadmin@helty.africa",
       phone: "+221 77 000 0001",
       role: "super_admin",
       status: "active",
@@ -56,7 +56,7 @@ export const seedDemo = mutation({
     const adminId = await ctx.db.insert("users", {
       organizationId: orgId,
       name: "Sophie Mensah",
-      email: "admin@evtp.demo",
+      email: "admin@helty.africa",
       phone: "+233 20 000 0002",
       role: "admin",
       status: "active",
@@ -66,7 +66,7 @@ export const seedDemo = mutation({
     const leadId = await ctx.db.insert("users", {
       organizationId: orgId,
       name: "Kwame Asante",
-      email: "lead@evtp.demo",
+      email: "lead@helty.africa",
       phone: "+233 24 000 0003",
       role: "lead",
       status: "active",
@@ -76,7 +76,7 @@ export const seedDemo = mutation({
     const learner1Id = await ctx.db.insert("users", {
       organizationId: orgId,
       name: "Fatima Coulibaly",
-      email: "learner@evtp.demo",
+      email: "learner@helty.africa",
       phone: "+225 07 000 0004",
       role: "learner",
       status: "active",
@@ -87,7 +87,7 @@ export const seedDemo = mutation({
     const learner2Id = await ctx.db.insert("users", {
       organizationId: orgId,
       name: "Ibrahim Traoré",
-      email: "ibrahim@evtp.demo",
+      email: "ibrahim@helty.africa",
       phone: "+226 70 000 0005",
       role: "learner",
       status: "active",
@@ -98,7 +98,7 @@ export const seedDemo = mutation({
     const learner3Id = await ctx.db.insert("users", {
       organizationId: orgId,
       name: "Amina Diallo",
-      email: "amina@evtp.demo",
+      email: "amina@helty.africa",
       phone: "+221 76 000 0006",
       role: "learner",
       status: "active",
@@ -522,7 +522,7 @@ export const seedDemo = mutation({
     // Invitation sample
     await ctx.db.insert("invitations", {
       organizationId: orgId,
-      email: "new.staff@evtp.demo",
+      email: "new.staff@helty.africa",
       token: "seed-invite-token",
       role: "learner",
       invitedBy: adminId,

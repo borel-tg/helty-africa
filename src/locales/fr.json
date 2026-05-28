@@ -1,8 +1,8 @@
 {
   "app": {
-    "name": "EVTP",
-    "subtitle": "Plateforme de formation",
-    "title": "EVTP – Plateforme de formation à la vaccination"
+    "name": "Helty Africa",
+    "subtitle": "Plateforme de formation santé",
+    "title": "Helty Africa – Plateforme de formation santé"
   },
   "common": {
     "cancel": "Annuler",
@@ -106,7 +106,7 @@
   },
   "auth": {
     "welcomeBack": "Bon retour",
-    "signInSubtitle": "Connectez-vous à votre compte EVTP",
+    "signInSubtitle": "Connectez-vous à votre compte Helty Africa",
     "email": "Adresse e-mail",
     "emailPlaceholder": "vous@exemple.com",
     "password": "Mot de passe",
@@ -120,7 +120,7 @@
     "passwordRequired": "Le mot de passe est obligatoire",
     "invalidCredentials": "E-mail ou mot de passe incorrect",
     "registerTitle": "Créer votre compte",
-    "registerSubtitle": "Complétez votre inscription EVTP",
+    "registerSubtitle": "Complétez votre inscription Helty Africa",
     "fullName": "Nom complet",
     "fullNameRequired": "Le nom complet est obligatoire",
     "phone": "Numéro de téléphone",
@@ -144,7 +144,7 @@
     "invalidInvitation": "Invitation invalide",
     "invalidInvitationDesc": "Ce lien d'invitation est invalide ou a expiré. Demandez à votre administrateur d'en envoyer un nouveau.",
     "accountCreatedTitle": "Compte créé !",
-    "accountCreatedDesc": "Bienvenue sur EVTP. Redirection vers votre tableau de formation…",
+    "accountCreatedDesc": "Bienvenue sur Helty Africa. Redirection vers votre tableau de formation…",
     "completeAccount": "Finaliser votre compte",
     "invitedSubtitle": "Vous avez été invité à rejoindre la plateforme de formation à la vaccination",
     "fullNamePlaceholder": "ex. Fatima Coulibaly",

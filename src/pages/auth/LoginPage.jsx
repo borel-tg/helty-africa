@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Eye, EyeOff, LogIn } from "lucide-react";
@@ -13,9 +13,16 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
-  const { login, isLoading } = useAuth();
+  const { currentUser, isInitializing, login, isLoading } = useAuth();
   const toast = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isInitializing || !currentUser) return;
+    if (currentUser.role === "learner") navigate("/learn", { replace: true });
+    else if (currentUser.role === "lead") navigate("/lead", { replace: true });
+    else navigate("/admin", { replace: true });
+  }, [currentUser, isInitializing, navigate]);
 
   const validate = () => {
     const errs = {};
@@ -45,10 +52,10 @@ export default function LoginPage() {
   };
 
   const demoAccounts = [
-    ["superadmin@evtp.demo", "roles.super_admin"],
-    ["admin@evtp.demo", "roles.admin"],
-    ["lead@evtp.demo", "roles.lead"],
-    ["learner@evtp.demo", "roles.learner"],
+    ["superadmin@helty.africa", "roles.super_admin"],
+    ["admin@helty.africa", "roles.admin"],
+    ["lead@helty.africa", "roles.lead"],
+    ["learner@helty.africa", "roles.learner"],
   ];
 
   return (
@@ -56,7 +63,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center mx-auto mb-4">
-            <span className="text-white text-2xl font-bold">E</span>
+            <span className="text-white text-2xl font-bold">H</span>
           </div>
           <h1 className="text-2xl font-semibold text-text-primary">
             {t("auth.welcomeBack")}

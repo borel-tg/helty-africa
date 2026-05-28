@@ -10,7 +10,7 @@ import { ToastProvider } from "./components/ui/Toast";
 const convexUrl = import.meta.env.VITE_CONVEX_URL;
 if (!convexUrl) {
   console.warn(
-    "[EVTP] VITE_CONVEX_URL is not set — file uploads and Convex data will not work."
+    "[Helty Africa] VITE_CONVEX_URL is not set — file uploads and Convex data will not work."
   );
 }
 

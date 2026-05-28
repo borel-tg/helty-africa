@@ -1,7 +1,8 @@
-# EVTP — Current Limitations & Production Requirements
+# Helty Africa — Current Limitations & Production Requirements
 
-**Project:** Polio-Africa / EVTP (Employee Vaccination Training Platform)  
-**App location:** `evtp-app/`  
+**Project:** Helty Africa (health training platform for francophone Africa)  
+**Repository:** https://github.com/Borel-TG/helty-africa  
+**App location:** project root (`evtp-app/` folder locally — rename optional)  
 **Last updated:** May 2026  
 **Status:** Demo / MVP — **not production-ready**
 
@@ -22,11 +23,11 @@ Production requires: real authentication, wiring all screens to Convex (or anoth
 | Limitation | Current behavior | Required for production |
 |------------|------------------|------------------------|
 | **No real auth system** | Login checks email + shared password `demo1234` against `MOCK_USERS` in `src/lib/mockData.js`. No password hashing, no lockout, no MFA. | Integrate **Convex Auth** (or Auth0 / Clerk / custom JWT) with hashed passwords and org-scoped accounts. |
-| **Client-only session** | Session stored in `localStorage` (`evtp_session` user id). Anyone with devtools can impersonate a user id. | Server-validated sessions (httpOnly cookies or Convex Auth tokens). Short-lived tokens + refresh. |
+| **Client-only session** | Session stored in `localStorage` (`helty_session` user id). Anyone with devtools can impersonate a user id. | Server-validated sessions (httpOnly cookies or Convex Auth tokens). Short-lived tokens + refresh. |
 | **No server-side route protection** | `RequireAuth` / `RequireRole` in `App.jsx` only check React state. | Convex functions must enforce `organizationId`, role, and resource ownership on every query/mutation. |
 | **Demo accounts exposed** | Login page lists all demo emails and password. | Remove demo panel; use separate staging environment only. |
 | **Forgot password is fake** | `ForgotPasswordPage` waits 800ms and shows success; no email sent. | Password reset via secure token + transactional email (SendGrid, Resend, etc.). |
-| **Registration is fake** | `RegisterPage` accepts any token in URL; on submit always logs in as `learner@evtp.demo`. | Validate invitation token against `invitations` table; create user in DB; send welcome email. |
+| **Registration is fake** | `RegisterPage` accepts any token in URL; on submit always logs in as `learner@helty.africa`. | Validate invitation token against `invitations` table; create user in DB; send welcome email. |
 | **No audit logging** | Admin actions (deactivate, reset progress) are not logged. | Audit trail table (who, what, when, IP) for compliance. |
 | **No rate limiting** | Login and uploads can be spammed from the client. | Rate limits on auth and upload endpoints. |
 

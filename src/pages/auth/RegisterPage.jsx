@@ -54,7 +54,7 @@ export default function RegisterPage() {
     setLoading(false);
     setStep("success");
     setTimeout(async () => {
-      await login("learner@evtp.demo", "demo1234");
+      await login("learner@helty.africa", "demo1234");
       navigate("/learn");
     }, 1500);
   };
@@ -100,7 +100,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center mx-auto mb-4">
-            <span className="text-white text-2xl font-bold">E</span>
+            <span className="text-white text-2xl font-bold">H</span>
           </div>
           <h1 className="text-2xl font-semibold text-text-primary">
             {t("auth.completeAccount")}

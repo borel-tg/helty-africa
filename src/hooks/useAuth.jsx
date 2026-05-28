@@ -1,16 +1,43 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { MOCK_USERS } from "../lib/mockData";
 
 const AuthContext = createContext(null);
+const SESSION_KEY = "helty_session";
+
+function readStoredUser() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const { userId } = JSON.parse(raw);
+    return Object.values(MOCK_USERS).find((u) => u._id === userId) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function persistUser(user) {
+  if (user) {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ userId: user._id }));
+  } else {
+    localStorage.removeItem(SESSION_KEY);
+  }
+}
 
 /**
  * AuthProvider — in a real app this wraps ConvexProvider and uses
- * Convex Auth. For the mock/demo we manage a simple local state.
+ * Convex Auth. For the mock/demo we persist the session in localStorage.
  */
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
   const DEMO_PASSWORD = "demo1234";
+
+  useEffect(() => {
+    const stored = readStoredUser();
+    if (stored) setCurrentUser(stored);
+    setIsInitializing(false);
+  }, []);
 
   const login = async (email, password) => {
     setIsLoading(true);
@@ -25,26 +52,31 @@ export function AuthProvider({ children }) {
 
     if (user && normalizedPassword === DEMO_PASSWORD) {
       setCurrentUser(user);
+      persistUser(user);
       setIsLoading(false);
       return { success: true, user };
     }
 
     setCurrentUser(null);
+    persistUser(null);
     setIsLoading(false);
     return { success: false };
   };
 
   const logout = () => {
     setCurrentUser(null);
+    persistUser(null);
   };
 
   const switchRole = (role) => {
-    setCurrentUser(MOCK_USERS[role] || MOCK_USERS.learner);
+    const user = MOCK_USERS[role] || MOCK_USERS.learner;
+    setCurrentUser(user);
+    persistUser(user);
   };
 
   return (
     <AuthContext.Provider
-      value={{ currentUser, isLoading, login, logout, switchRole }}
+      value={{ currentUser, isLoading, isInitializing, login, logout, switchRole }}
     >
       {children}
     </AuthContext.Provider>

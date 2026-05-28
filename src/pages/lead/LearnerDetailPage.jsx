@@ -26,9 +26,9 @@ const DETAIL_PROGRESS = {
 };
 
 const LEARNERS = {
-  user_learner: { name: "Fatima Coulibaly", email: "fatima@evtp.demo", phone: "+225 07 000 0004", lastLoginAt: Date.now() - 43200000, createdAt: Date.now() - 30 * 86400000 },
-  user_learner2: { name: "Ibrahim Traoré", email: "ibrahim@evtp.demo", phone: "+226 70 000 0005", lastLoginAt: Date.now() - 86400000, createdAt: Date.now() - 25 * 86400000 },
-  user_learner3: { name: "Amina Diallo", email: "amina@evtp.demo", phone: "+221 76 000 0006", lastLoginAt: Date.now() - 2 * 86400000, createdAt: Date.now() - 20 * 86400000 },
+  user_learner: { name: "Fatima Coulibaly", email: "fatima@helty.africa", phone: "+225 07 000 0004", lastLoginAt: Date.now() - 43200000, createdAt: Date.now() - 30 * 86400000 },
+  user_learner2: { name: "Ibrahim Traoré", email: "ibrahim@helty.africa", phone: "+226 70 000 0005", lastLoginAt: Date.now() - 86400000, createdAt: Date.now() - 25 * 86400000 },
+  user_learner3: { name: "Amina Diallo", email: "amina@helty.africa", phone: "+221 76 000 0006", lastLoginAt: Date.now() - 2 * 86400000, createdAt: Date.now() - 20 * 86400000 },
 };
 
 export default function LearnerDetailPage() {
