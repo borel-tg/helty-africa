@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Eye, EyeOff, CheckCircle } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { useAuth } from "../../hooks/useAuth";
-import { useToast } from "../../components/ui/Toast";
+import { AuthLayout } from "../../components/auth/AuthLayout";
 
 export default function RegisterPage() {
   const { t } = useTranslation();
@@ -61,113 +61,112 @@ export default function RegisterPage() {
 
   if (step === "invalid") {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="bg-white rounded-card shadow-card p-8 max-w-md w-full text-center">
-          <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
-            <span className="text-red-500 text-2xl">!</span>
+      <AuthLayout
+        title={t("auth.invalidInvitation")}
+        subtitle={t("auth.invalidInvitationDesc")}
+        showFooter={false}
+      >
+        <div className="text-center py-2">
+          <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+            <span className="text-red-500 text-2xl font-bold">!</span>
           </div>
-          <h2 className="text-xl font-semibold text-text-primary mb-2">
-            {t("auth.invalidInvitation")}
-          </h2>
-          <p className="text-text-secondary">
-            {t("auth.invalidInvitationDesc")}
-          </p>
+          <Link
+            to="/login"
+            className="text-sm text-primary hover:underline font-medium"
+          >
+            {t("auth.backToLogin")}
+          </Link>
         </div>
-      </div>
+      </AuthLayout>
     );
   }
 
   if (step === "success") {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="bg-white rounded-card shadow-card p-8 max-w-md w-full text-center">
-          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+      <AuthLayout
+        title={t("auth.accountCreatedTitle")}
+        subtitle={t("auth.accountCreatedDesc")}
+        showFooter={false}
+      >
+        <div className="text-center py-2">
+          <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mx-auto">
             <CheckCircle size={32} className="text-green-500" />
           </div>
-          <h2 className="text-xl font-semibold text-text-primary mb-2">
-            {t("auth.accountCreatedTitle")}
-          </h2>
-          <p className="text-text-secondary">
-            {t("auth.accountCreatedDesc")}
-          </p>
         </div>
-      </div>
+      </AuthLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center mx-auto mb-4">
-            <span className="text-white text-2xl font-bold">H</span>
-          </div>
-          <h1 className="text-2xl font-semibold text-text-primary">
-            {t("auth.completeAccount")}
-          </h1>
-          <p className="text-text-secondary mt-1">
-            {t("auth.invitedSubtitle")}
-          </p>
-        </div>
+    <AuthLayout
+      title={t("auth.completeAccount")}
+      subtitle={t("auth.invitedSubtitle")}
+    >
+      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+        <Input
+          label={t("auth.fullName")}
+          type="text"
+          placeholder={t("auth.fullNamePlaceholder")}
+          value={form.name}
+          onChange={update("name")}
+          error={errors.name}
+          autoComplete="name"
+          className="rounded-xl"
+        />
 
-        <div className="bg-white rounded-card shadow-card p-6">
-          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-            <Input
-              label={t("auth.fullName")}
-              type="text"
-              placeholder={t("auth.fullNamePlaceholder")}
-              value={form.name}
-              onChange={update("name")}
-              error={errors.name}
-              autoComplete="name"
-            />
+        <Input
+          label={t("auth.phone")}
+          type="tel"
+          placeholder={t("admin.phonePlaceholder")}
+          value={form.phone}
+          onChange={update("phone")}
+          error={errors.phone}
+          helperText={t("auth.phoneHelper")}
+          autoComplete="tel"
+          className="rounded-xl"
+        />
 
-            <Input
-              label={t("auth.phone")}
-              type="tel"
-              placeholder={t("admin.phonePlaceholder")}
-              value={form.phone}
-              onChange={update("phone")}
-              error={errors.phone}
-              helperText={t("auth.phoneHelper")}
-              autoComplete="tel"
-            />
+        <Input
+          label={t("auth.password")}
+          type={showPassword ? "text" : "password"}
+          placeholder={t("auth.passwordMin")}
+          value={form.password}
+          onChange={update("password")}
+          error={errors.password}
+          autoComplete="new-password"
+          className="rounded-xl"
+          rightIcon={
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          }
+        />
 
-            <Input
-              label={t("auth.password")}
-              type={showPassword ? "text" : "password"}
-              placeholder={t("auth.passwordMin")}
-              value={form.password}
-              onChange={update("password")}
-              error={errors.password}
-              autoComplete="new-password"
-              rightIcon={
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              }
-            />
+        <Input
+          label={t("auth.confirmPassword")}
+          type={showPassword ? "text" : "password"}
+          placeholder={t("auth.confirmPasswordPlaceholder")}
+          value={form.confirmPassword}
+          onChange={update("confirmPassword")}
+          error={errors.confirmPassword}
+          autoComplete="new-password"
+          className="rounded-xl"
+        />
 
-            <Input
-              label={t("auth.confirmPassword")}
-              type={showPassword ? "text" : "password"}
-              placeholder={t("auth.confirmPasswordPlaceholder")}
-              value={form.confirmPassword}
-              onChange={update("confirmPassword")}
-              error={errors.confirmPassword}
-              autoComplete="new-password"
-            />
-
-            <Button type="submit" fullWidth size="lg" loading={loading}>
-              {t("auth.createAndStart")}
-            </Button>
-          </form>
-        </div>
-      </div>
-    </div>
+        <Button
+          type="submit"
+          fullWidth
+          size="lg"
+          loading={loading}
+          className="rounded-xl"
+        >
+          {t("auth.createAndStart")}
+        </Button>
+      </form>
+    </AuthLayout>
   );
 }

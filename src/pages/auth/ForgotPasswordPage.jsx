@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Mail, ArrowLeft, CheckCircle } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
+import { AuthLayout } from "../../components/auth/AuthLayout";
 
 export default function ForgotPasswordPage() {
   const { t } = useTranslation();
@@ -30,72 +31,66 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center mx-auto mb-4">
-            <span className="text-white text-2xl font-bold">H</span>
+    <AuthLayout
+      title={t("auth.forgotTitle")}
+      subtitle={t("auth.forgotSubtitle")}
+    >
+      {submitted ? (
+        <div className="text-center space-y-4">
+          <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mx-auto">
+            <CheckCircle size={28} className="text-green-500" />
           </div>
-          <h1 className="text-2xl font-semibold text-text-primary">
-            {t("auth.forgotTitle")}
-          </h1>
-          <p className="text-text-secondary mt-1">
-            {t("auth.forgotSubtitle")}
+          <h2 className="text-lg font-semibold text-text-primary">
+            {t("auth.checkEmail")}
+          </h2>
+          <p className="text-text-secondary text-sm leading-relaxed">
+            {t("auth.resetLinkSent")}{" "}
+            <span className="font-medium text-text-primary">{email}</span>.
+            {" "}{t("auth.linkExpires")}
           </p>
+          <Link
+            to="/login"
+            className="inline-flex items-center gap-2 text-sm text-primary hover:underline mt-2 font-medium"
+          >
+            <ArrowLeft size={14} />
+            {t("auth.backToLogin")}
+          </Link>
         </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+          <Input
+            label={t("auth.email")}
+            type="email"
+            placeholder={t("auth.emailPlaceholder")}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            error={error}
+            leftIcon={<Mail size={16} />}
+            autoComplete="email"
+            className="rounded-xl"
+          />
 
-        <div className="bg-white rounded-card shadow-card p-6">
-          {submitted ? (
-            <div className="text-center space-y-4">
-              <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mx-auto">
-                <CheckCircle size={28} className="text-green-500" />
-              </div>
-              <h2 className="text-lg font-semibold text-text-primary">
-                {t("auth.checkEmail")}
-              </h2>
-              <p className="text-text-secondary">
-                {t("auth.resetLinkSent")}{" "}
-                <span className="font-medium text-text-primary">{email}</span>.
-                {" "}{t("auth.linkExpires")}
-              </p>
-              <Link
-                to="/login"
-                className="inline-flex items-center gap-2 text-sm text-primary hover:underline mt-2"
-              >
-                <ArrowLeft size={14} />
-                {t("auth.backToLogin")}
-              </Link>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-              <Input
-                label={t("auth.email")}
-                type="email"
-                placeholder={t("auth.emailPlaceholder")}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                error={error}
-                leftIcon={<Mail size={16} />}
-                autoComplete="email"
-              />
+          <Button
+            type="submit"
+            fullWidth
+            size="lg"
+            loading={loading}
+            className="rounded-xl"
+          >
+            {t("auth.sendResetLink")}
+          </Button>
 
-              <Button type="submit" fullWidth size="lg" loading={loading}>
-                {t("auth.sendResetLink")}
-              </Button>
-
-              <div className="text-center">
-                <Link
-                  to="/login"
-                  className="inline-flex items-center gap-1 text-sm text-text-secondary hover:text-primary"
-                >
-                  <ArrowLeft size={14} />
-                  {t("auth.backToLogin")}
-                </Link>
-              </div>
-            </form>
-          )}
-        </div>
-      </div>
-    </div>
+          <div className="text-center">
+            <Link
+              to="/login"
+              className="inline-flex items-center gap-1 text-sm text-text-secondary hover:text-primary font-medium"
+            >
+              <ArrowLeft size={14} />
+              {t("auth.backToLogin")}
+            </Link>
+          </div>
+        </form>
+      )}
+    </AuthLayout>
   );
 }

@@ -40,8 +40,8 @@ export default {
       },
       borderRadius: {
         card: "12px",
-        btn: "8px",
-        input: "4px",
+        btn: "10px",
+        input: "10px",
       },
       boxShadow: {
         card: "0 2px 8px rgba(0,0,0,0.05)",

@@ -59,6 +59,46 @@
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
   }
+
+  /* Partner logo marquee (auth landing) */
+  .partner-marquee-track {
+    animation: partner-marquee 35s linear infinite;
+    will-change: transform;
+  }
+
+  .partner-marquee:hover .partner-marquee-track {
+    animation-play-state: paused;
+  }
+
+  @keyframes partner-marquee {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .partner-marquee {
+      overflow: visible;
+    }
+
+    .partner-marquee-track {
+      animation: none;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      max-width: 48rem;
+      margin-left: auto;
+      margin-right: auto;
+      row-gap: 0.75rem;
+    }
+
+    .partner-marquee-track > ul:nth-child(2) {
+      display: none;
+    }
+  }
 }
 
 /* Custom scrollbar */
