@@ -6,6 +6,7 @@ import "./i18n";
 import "./index.css";
 import { AuthProvider } from "./hooks/useAuth";
 import { ToastProvider } from "./components/ui/Toast";
+import { registerSW } from "virtual:pwa-register";
 
 const convexUrl = import.meta.env.VITE_CONVEX_URL;
 if (!convexUrl) {
@@ -15,6 +16,7 @@ if (!convexUrl) {
 }
 
 const convex = new ConvexReactClient(convexUrl || "https://placeholder.convex.cloud");
+registerSW({ immediate: true });
 
 function AppProviders({ children }) {
   return (
