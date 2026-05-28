@@ -38,7 +38,7 @@ export default function LearnerDetailPage() {
 
   return (
     <div className="p-4 md:p-6 w-full">
-      <button onClick={() => navigate("/lead")} className="flex items-center gap-2 text-sm text-text-secondary hover:text-primary mb-4 transition-colors">
+      <button onClick={() => navigate("/lead/learners")} className="flex items-center gap-2 text-sm text-text-secondary hover:text-primary mb-4 transition-colors">
         <ArrowLeft size={16} /> Back to Team
       </button>
 

@@ -167,6 +167,8 @@ export default defineSchema({
     moduleId: v.id("modules"),
     organizationId: v.id("organizations"),
     completed: v.boolean(),
+    /** Set once when the learner marks the lesson complete (used for weekly leaderboard). */
+    completedAt: v.optional(v.number()),
     firstAccessedAt: v.optional(v.number()),
     lastAccessedAt: v.optional(v.number()),
     timeSpentSeconds: v.number(), // aggregated

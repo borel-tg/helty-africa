@@ -11,6 +11,7 @@ import {
   MOCK_LESSONS,
   MOCK_LEARNER_PROGRESS,
 } from "../../lib/mockData";
+import { LeaderboardCard } from "../../components/leaderboard/LeaderboardCard";
 
 // Compute progress for a module
 function useModuleStatus(module) {
@@ -146,20 +147,23 @@ export default function LearnerDashboard() {
         ))}
       </div>
 
-      {/* Module grid */}
+      {/* Module grid — primary action for learners */}
       {publishedModules.length === 0 ? (
-        <div className="text-center py-16">
+        <div className="text-center py-16 mb-6">
           <BookOpen size={48} className="text-gray-300 mx-auto mb-4" />
           <p className="text-lg font-medium text-text-secondary">{t("learner.noModulesYet")}</p>
           <p className="text-sm text-gray-400 mt-1">{t("learner.checkBackLater")}</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           {publishedModules.map((module) => (
             <ModuleCard key={module._id} module={module} />
           ))}
         </div>
       )}
+
+      {/* Leaderboard — compact (top 2) with expand for the rest */}
+      <LeaderboardCard mode="learner" />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { ProgressBar } from "../../components/ui/Progress";
 import { StatusBadge } from "../../components/ui/Badge";
 import { MOCK_STATS, MOCK_EMPLOYEES, MOCK_MODULES } from "../../lib/mockData";
 import { formatTimeAgo } from "../../lib/utils";
+import { LeaderboardCard } from "../../components/leaderboard/LeaderboardCard";
 
 // Simulated per-employee module progress
 const EMPLOYEE_MODULE_PROGRESS = [
@@ -45,6 +46,8 @@ export default function StatisticsPage() {
           </div>
         ))}
       </div>
+
+      <LeaderboardCard mode="staff" />
 
       {/* Per-module stats */}
       <div className="bg-white rounded-card shadow-card">

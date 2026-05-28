@@ -30,6 +30,7 @@ import NotificationsPage from "./pages/admin/NotificationsPage";
 
 // Lead pages
 import LeadDashboard from "./pages/lead/LeadDashboard";
+import LeadStatisticsPage from "./pages/lead/LeadStatisticsPage";
 import LearnerDetailPage from "./pages/lead/LearnerDetailPage";
 
 // ── Route Guards ─────────────────────────────────────────────────────────────
@@ -48,7 +49,7 @@ function RequireRole({ roles }) {
   if (roles && !roles.includes(currentUser.role)) {
     // Redirect to appropriate default
     if (currentUser.role === "learner") return <Navigate to="/learn" replace />;
-    if (currentUser.role === "lead") return <Navigate to="/lead" replace />;
+    if (currentUser.role === "lead") return <Navigate to="/lead/learners" replace />;
     return <Navigate to="/admin" replace />;
   }
   return <Outlet />;
@@ -59,7 +60,7 @@ function RootRedirect() {
   if (isInitializing) return null;
   if (!currentUser) return <Navigate to="/login" replace />;
   if (currentUser.role === "learner") return <Navigate to="/learn" replace />;
-  if (currentUser.role === "lead") return <Navigate to="/lead" replace />;
+  if (currentUser.role === "lead") return <Navigate to="/lead/learners" replace />;
   return <Navigate to="/admin" replace />;
 }
 
@@ -80,7 +81,6 @@ export default function App() {
         {/* Protected app routes */}
         <Route element={<RequireAuth />}>
           <Route element={<AppLayout />}>
-
             {/* ── Learner ── */}
             <Route
               element={<RequireRole roles={["learner", "super_admin", "admin", "lead"]} />}
@@ -98,7 +98,9 @@ export default function App() {
             <Route
               element={<RequireRole roles={["lead", "admin", "super_admin"]} />}
             >
-              <Route path="/lead" element={<LeadDashboard />} />
+              <Route path="/lead" element={<Navigate to="/lead/learners" replace />} />
+              <Route path="/lead/learners" element={<LeadDashboard />} />
+              <Route path="/lead/stats" element={<LeadStatisticsPage />} />
               <Route path="/lead/learner/:learnerId" element={<LearnerDetailPage />} />
               <Route path="/lead/notifications" element={<NotificationsPage />} />
             </Route>

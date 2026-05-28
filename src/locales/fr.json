@@ -81,7 +81,31 @@
     "certificateTemplate": "Modèle de certificat",
     "notifications": "Notifications",
     "settings": "Paramètres",
-    "teamDashboard": "Tableau d'équipe"
+    "teamDashboard": "Tableau d'équipe",
+    "teamLearners": "Apprenants"
+  },
+  "leaderboard": {
+    "title": "Classement de l'organisation",
+    "subtitleLearner": "Les apprenants les plus actifs",
+    "subtitleStaff": "Activité des apprenants dans votre organisation",
+    "subtitleLead": "Classement de l'organisation (votre équipe)",
+    "periodLabel": "Période du classement",
+    "periodWeek": "Cette semaine",
+    "periodToday": "Aujourd'hui",
+    "legendLesson": "1 pt par leçon terminée",
+    "legendModule": "5 pts par module réussi",
+    "pointsLabel": "{{count}} pts",
+    "lessonsShort": "{{count}} leçons",
+    "modulesShort": "{{count}} modules",
+    "noActivityYet": "Pas encore d'activité",
+    "you": "vous",
+    "yourRankFooter": "Vous êtes #{{rank}} sur {{total}} apprenants actifs",
+    "viewAll": "Voir tout le classement",
+    "viewAllCount": "Voir les {{count}} suivants",
+    "showLess": "Réduire",
+    "staffFooter": "Classement basé sur {{total}} apprenants actifs",
+    "tooFewLearners": "Le classement s'affichera lorsqu'il y aura au moins 3 apprenants actifs dans votre organisation.",
+    "notEnoughActivity": "Pas encore assez d'activité cette période. Terminez des leçons ou réussissez un examen pour apparaître au classement !"
   },
   "roles": {
     "super_admin": "Super administrateur",
@@ -405,7 +429,12 @@
   "lead": {
     "dashboardTitle": "Tableau d'équipe",
     "teamProgress": "Progression de l'équipe",
-    "viewLearner": "Voir l'apprenant"
+    "viewLearner": "Voir l'apprenant",
+    "statsTitle": "Statistiques",
+    "statsSubtitle": "Vue d'ensemble de l'activité — {{name}}",
+    "teamLearners": "Apprenants assignés",
+    "teamCompleted": "Tout terminé",
+    "teamInProgress": "En cours"
   },
   "lessonTypes": {
     "text": "Texte",

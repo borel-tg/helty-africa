@@ -17,7 +17,8 @@ const MOBILE_NAV = {
     { to: "/learn/certificates", icon: Award, labelKey: "nav.certsShort" },
   ],
   lead: [
-    { to: "/lead", icon: LayoutDashboard, labelKey: "nav.dashboardShort" },
+    { to: "/lead/learners", icon: Users, labelKey: "nav.learners" },
+    { to: "/lead/stats", icon: BarChart2, labelKey: "nav.statsShort" },
     { to: "/lead/notifications", icon: Bell, labelKey: "nav.alertsShort" },
   ],
   admin: [
@@ -51,7 +52,7 @@ export function BottomNav() {
             to={item.to}
             end={
               item.to === "/admin" ||
-              item.to === "/lead" ||
+              item.to === "/lead/learners" ||
               item.to === "/learn"
             }
             className={({ isActive }) =>

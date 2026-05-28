@@ -20,7 +20,7 @@ export default function LoginPage() {
   useEffect(() => {
     if (isInitializing || !currentUser) return;
     if (currentUser.role === "learner") navigate("/learn", { replace: true });
-    else if (currentUser.role === "lead") navigate("/lead", { replace: true });
+    else if (currentUser.role === "lead") navigate("/lead/learners", { replace: true });
     else navigate("/admin", { replace: true });
   }, [currentUser, isInitializing, navigate]);
 
@@ -44,7 +44,7 @@ export default function LoginPage() {
     if (result.success) {
       const role = result.user.role;
       if (role === "learner") navigate("/learn");
-      else if (role === "lead") navigate("/lead");
+      else if (role === "lead") navigate("/lead/learners");
       else navigate("/admin");
     } else {
       toast.error(t("auth.invalidCredentials"));

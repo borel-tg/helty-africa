@@ -17,6 +17,8 @@ const ROUTE_TITLE_KEYS = {
   "/admin/notifications": "routes.notifications",
   "/admin/settings": "routes.settings",
   "/lead": "routes.teamDashboard",
+  "/lead/learners": "routes.learners",
+  "/lead/stats": "routes.statistics",
   "/lead/notifications": "routes.notifications",
 };
 

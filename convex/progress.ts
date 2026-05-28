@@ -82,11 +82,17 @@ export const markCompleted = mutation({
 
     const now = Date.now();
     if (existing) {
-      await ctx.db.patch(existing._id, { completed: true, lastAccessedAt: now });
+      await ctx.db.patch(existing._id, {
+        completed: true,
+        // Preserve original completion time for leaderboard accuracy.
+        completedAt: existing.completedAt ?? now,
+        lastAccessedAt: now,
+      });
     } else {
       await ctx.db.insert("lessonProgress", {
         ...args,
         completed: true,
+        completedAt: now,
         firstAccessedAt: now,
         lastAccessedAt: now,
         timeSpentSeconds: 0,

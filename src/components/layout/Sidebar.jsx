@@ -19,7 +19,8 @@ const NAV_ITEMS = {
     { to: "/learn/certificates", icon: Award, labelKey: "nav.certificates" },
   ],
   lead: [
-    { to: "/lead", icon: LayoutDashboard, labelKey: "nav.teamDashboard" },
+    { to: "/lead/learners", icon: Users, labelKey: "nav.learners" },
+    { to: "/lead/stats", icon: BarChart2, labelKey: "nav.statistics" },
     { to: "/lead/notifications", icon: Bell, labelKey: "nav.notifications" },
   ],
   admin: [
@@ -81,7 +82,11 @@ function SidebarContent({ collapsed, onNavigate }) {
             key={item.to}
             to={item.to}
             onClick={onNavigate}
-            end={item.to.endsWith("/admin") || item.to.endsWith("/lead") || item.to.endsWith("/learn")}
+            end={
+              item.to.endsWith("/admin") ||
+              item.to === "/lead/learners" ||
+              item.to.endsWith("/learn")
+            }
             className={({ isActive }) =>
               cn(
                 "flex items-center gap-3 px-4 py-2.5 text-sm font-medium",

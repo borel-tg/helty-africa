@@ -11,6 +11,7 @@
 import type * as certificates from "../certificates.js";
 import type * as exams from "../exams.js";
 import type * as invitations from "../invitations.js";
+import type * as leaderboard from "../leaderboard.js";
 import type * as lessons from "../lessons.js";
 import type * as moduleResources from "../moduleResources.js";
 import type * as modules from "../modules.js";
@@ -30,6 +31,7 @@ declare const fullApi: ApiFromModules<{
   certificates: typeof certificates;
   exams: typeof exams;
   invitations: typeof invitations;
+  leaderboard: typeof leaderboard;
   lessons: typeof lessons;
   moduleResources: typeof moduleResources;
   modules: typeof modules;

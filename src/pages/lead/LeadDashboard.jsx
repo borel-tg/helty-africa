@@ -6,7 +6,6 @@ import { StatusBadge } from "../../components/ui/Badge";
 import { ProgressBar } from "../../components/ui/Progress";
 import { MOCK_EMPLOYEES, MOCK_MODULES } from "../../lib/mockData";
 import { formatTimeAgo } from "../../lib/utils";
-
 // Simulated data for assigned learners
 const LEAD_LEARNERS = [
   {

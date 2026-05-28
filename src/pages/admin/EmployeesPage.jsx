@@ -12,7 +12,6 @@ import { Modal, ConfirmModal } from "../../components/ui/Modal";
 import { useToast } from "../../components/ui/Toast";
 import { MOCK_EMPLOYEES, MOCK_INVITATIONS, MOCK_USERS } from "../../lib/mockData";
 import { formatTimeAgo } from "../../lib/utils";
-
 function InviteModal({ open, onClose }) {
   const { t } = useTranslation();
   const toast = useToast();
