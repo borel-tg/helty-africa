@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
-import { BottomNav } from "./BottomNav";
 import { TopBar } from "./TopBar";
 
 const ROUTE_TITLE_KEYS = {
@@ -52,14 +51,16 @@ export function AppLayout() {
           onMenuToggle={() => setMobileMenuOpen((v) => !v)}
         />
 
-        <main className="flex-1 overflow-y-auto pb-20 md:pb-6">
+        <main className="flex-1 overflow-y-auto pb-6">
           <div className="page-enter">
             <Outlet />
           </div>
         </main>
       </div>
 
-      <BottomNav />
+      {/* Mobile bottom tabs are intentionally disabled for usability.
+          We rely on the burger/drawer navigation on small screens.
+          Keep `BottomNav` component for future re-enable if needed. */}
     </div>
   );
 }
