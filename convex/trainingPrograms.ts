@@ -70,6 +70,7 @@ async function getModuleExamSummaries(
       bestScore,
       passed: Boolean(passed),
       hasSubmittedAttempt: submitted.length > 0,
+      attemptCount: submitted.length,
     });
   }
 

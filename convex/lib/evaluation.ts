@@ -44,6 +44,7 @@ export type ModuleExamSummary = {
   bestScore: number | null;
   passed: boolean;
   hasSubmittedAttempt: boolean;
+  attemptCount: number;
 };
 
 export function canUnlockGeneralExam(

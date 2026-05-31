@@ -1,14 +1,23 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery } from "convex/react";
-import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, AlertCircle } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
 import { Button } from "../../components/ui/Button";
 import { ProgressBar } from "../../components/ui/Progress";
 import { cn } from "../../lib/utils";
 import { useConvexSession } from "../../hooks/useConvexSession";
 import { useProgramEvaluation } from "../../hooks/useProgramEvaluation";
+
+function shuffleArray(items) {
+  const arr = [...items];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 
 export default function GeneralExamPage() {
   const { t } = useTranslation();
@@ -22,19 +31,49 @@ export default function GeneralExamPage() {
     programId ? { programId } : "skip"
   );
 
+  const examSettings = useQuery(
+    api.generalExams.getSettings,
+    programId ? { programId } : "skip"
+  );
+
+  const attempts = useQuery(
+    api.generalExams.getAttempts,
+    convexUser?._id && programId
+      ? { userId: convexUser._id, programId }
+      : "skip"
+  );
+
   const startAttempt = useMutation(api.generalExams.startAttempt);
   const submitAttempt = useMutation(api.generalExams.submitAttempt);
 
-  const questions = convexQuestions ?? [];
-
   const [started, setStarted] = useState(false);
+  const [displayQuestions, setDisplayQuestions] = useState([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [answers, setAnswers] = useState({});
   const [timeLeft, setTimeLeft] = useState(45 * 60);
+  const [attemptId, setAttemptId] = useState(null);
   const timerRef = useRef(null);
 
+  const policy = evaluation?.policy;
+  const maxRetakes = policy?.generalExamMaxRetakes ?? 3;
+  const submittedAttempts = (attempts ?? []).filter((a) => a.submittedAt != null);
+  const retakesLeft =
+    maxRetakes === "unlimited"
+      ? Infinity
+      : Math.max(0, maxRetakes - submittedAttempts.length);
+  const canStartExam = retakesLeft > 0;
+
+  const defaultMinutes = examSettings?.timeLimitMinutes ?? 45;
+  const hasTimeLimit = defaultMinutes > 0;
+
   useEffect(() => {
-    if (!started) return;
+    if (examSettings === undefined) return;
+    const minutes = examSettings?.timeLimitMinutes ?? 45;
+    if (minutes > 0) setTimeLeft(minutes * 60);
+  }, [examSettings]);
+
+  useEffect(() => {
+    if (!started || !hasTimeLimit) return;
     timerRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
@@ -46,7 +85,12 @@ export default function GeneralExamPage() {
       });
     }, 1000);
     return () => clearInterval(timerRef.current);
-  }, [started]);
+  }, [started, hasTimeLimit]);
+
+  const sortedQuestions = useMemo(
+    () => [...(convexQuestions ?? [])].sort((a, b) => a.order - b.order),
+    [convexQuestions]
+  );
 
   if (!evaluation?.generalUnlocked) {
     return (
@@ -54,9 +98,9 @@ export default function GeneralExamPage() {
         <p className="text-text-secondary mb-4">{t("evaluation.finalLocked")}</p>
         <Button
           variant="outline"
-          onClick={() => navigate(`/learn/program/${programId}/evaluation`)}
+          onClick={() => navigate(`/learn/program/${programId}`)}
         >
-          {t("evaluation.backToEvaluation")}
+          {t("trainings.backToProgram")}
         </Button>
       </div>
     );
@@ -68,25 +112,41 @@ export default function GeneralExamPage() {
     return `${m}:${sec.toString().padStart(2, "0")}`;
   };
 
-  const currentQ = questions[currentIdx];
-  const totalQ = questions.length;
+  const totalQ = displayQuestions.length;
+  const currentQ = displayQuestions[currentIdx];
+
+  const handleStart = async () => {
+    if (!convexUser?._id || !programId || !canStartExam || sortedQuestions.length === 0) {
+      return;
+    }
+
+    const ordered = examSettings?.randomizeQuestions
+      ? shuffleArray(sortedQuestions)
+      : sortedQuestions;
+    setDisplayQuestions(ordered);
+
+    const id = await startAttempt({
+      userId: convexUser._id,
+      programId,
+      organizationId: convexUser.organizationId,
+      attemptNumber: submittedAttempts.length + 1,
+    });
+    setAttemptId(id);
+    setStarted(true);
+  };
 
   const handleSubmit = async (autoSubmit = false) => {
     clearInterval(timerRef.current);
+
+    const questions = displayQuestions.length > 0 ? displayQuestions : sortedQuestions;
     let correct = 0;
     for (const q of questions) {
       if (answers[q._id] === q.correctOptionId) correct++;
     }
     const score =
-      totalQ > 0 ? Math.round((correct / totalQ) * 1000) / 10 : 0;
+      questions.length > 0 ? Math.round((correct / questions.length) * 1000) / 10 : 0;
 
-    if (convexUser?._id && programId) {
-      const attemptId = await startAttempt({
-        userId: convexUser._id,
-        programId,
-        organizationId: convexUser.organizationId,
-        attemptNumber: 1,
-      });
+    if (convexUser?._id && programId && attemptId) {
       await submitAttempt({
         attemptId,
         answers: questions.map((q) => ({
@@ -106,66 +166,98 @@ export default function GeneralExamPage() {
     return (
       <div className="p-4 md:p-6 max-w-lg mx-auto">
         <button
-          onClick={() => navigate(`/learn/program/${programId}/evaluation`)}
+          onClick={() => navigate(`/learn/program/${programId}`)}
           className="flex items-center gap-2 text-sm text-text-secondary hover:text-primary mb-6"
         >
           <ChevronLeft size={16} />
-          {t("evaluation.backToEvaluation")}
+          {t("trainings.backToProgram")}
         </button>
-        <h1 className="text-xl font-semibold mb-2">
-          {t("evaluation.finalExamTitle")}
-        </h1>
-        <p className="text-sm text-text-secondary mb-6">
-          {evaluation.program?.title}
-        </p>
-        <ul className="text-sm space-y-2 mb-6 text-text-secondary">
-          <li>
-            {t("learner.questionsCount")}: {totalQ}
-          </li>
-          <li>
-            {t("learner.timeLimit")}: 45 {t("evaluation.minutes")}
-          </li>
-        </ul>
-        <Button
-          fullWidth
-          disabled={totalQ === 0}
-          onClick={() => setStarted(true)}
-        >
-          {t("learner.startExam")}
-        </Button>
-        {totalQ === 0 && (
-          <p className="text-xs text-amber-600 mt-2 text-center">
-            {t("evaluation.noFinalQuestions")}
+        <div className="bg-white rounded-card shadow-card p-6">
+          <AlertCircle size={40} className="text-primary mx-auto mb-4" />
+          <h1 className="text-xl font-bold text-text-primary text-center mb-2">
+            {t("evaluation.finalExamTitle")}
+          </h1>
+          <p className="text-sm text-text-secondary text-center mb-6">
+            {evaluation.program?.title}
           </p>
-        )}
+          <ul className="text-sm space-y-2 mb-4 text-text-secondary">
+            <li>
+              {t("learner.questionsCount")}: {sortedQuestions.length}
+            </li>
+            <li>
+              {t("learner.timeLimit")}:{" "}
+              {hasTimeLimit
+                ? `${defaultMinutes} ${t("evaluation.minutes")}`
+                : t("common.unlimited")}
+            </li>
+            <li>
+              {maxRetakes === "unlimited"
+                ? t("evaluation.finalExamAttemptsUnlimited", {
+                    used: submittedAttempts.length,
+                  })
+                : t("evaluation.finalExamAttemptsInfo", {
+                    used: submittedAttempts.length,
+                    max: maxRetakes,
+                    remaining: retakesLeft,
+                  })}
+            </li>
+          </ul>
+          {policy?.generalExamEnabled && (
+            <p className="text-sm text-primary-800 bg-primary-50 border border-primary-100 rounded-lg px-3 py-2.5 mb-6 leading-relaxed">
+              {t("evaluation.finalExamGradeWeight", {
+                general: policy.generalExamWeight,
+                module: policy.moduleExamWeight,
+              })}
+            </p>
+          )}
+          {!canStartExam && (
+            <p className="text-sm text-red-600 mb-4 text-center">
+              {t("evaluation.noRetakesLeftFinal")}
+            </p>
+          )}
+          <Button
+            fullWidth
+            disabled={sortedQuestions.length === 0 || !canStartExam}
+            onClick={handleStart}
+          >
+            {t("learner.startExam")}
+          </Button>
+          {sortedQuestions.length === 0 && (
+            <p className="text-xs text-amber-600 mt-2 text-center">
+              {t("evaluation.noFinalQuestions")}
+            </p>
+          )}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <div className="bg-white border-b px-4 py-3 flex items-center justify-between sticky top-0 z-10">
-        <span className="text-sm font-medium">
+    <div className="p-4 md:p-6 max-w-2xl mx-auto">
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-sm text-text-secondary">
           {t("learner.questionOf", {
             current: currentIdx + 1,
             total: totalQ,
           })}
         </span>
-        <span className="flex items-center gap-1 text-sm text-text-secondary">
-          <Clock size={14} />
-          {formatTime(timeLeft)}
-        </span>
+        {hasTimeLimit && (
+          <span className="flex items-center gap-1 text-sm font-medium text-secondary">
+            <Clock size={14} />
+            {formatTime(timeLeft)}
+          </span>
+        )}
       </div>
       <ProgressBar
-        value={((currentIdx + 1) / totalQ) * 100}
-        size="xs"
-        className="rounded-none"
+        value={totalQ > 0 ? ((currentIdx + 1) / totalQ) * 100 : 0}
+        size="sm"
+        className="mb-6"
       />
 
-      <div className="flex-1 p-4 max-w-lg mx-auto w-full">
+      <div className="bg-white rounded-card shadow-card p-5">
         {currentQ && (
           <>
-            <p className="font-medium text-text-primary mb-4">
+            <p className="text-base font-medium text-text-primary mb-4">
               {currentQ.questionText}
             </p>
             <div className="space-y-2">
@@ -177,9 +269,9 @@ export default function GeneralExamPage() {
                     setAnswers((prev) => ({ ...prev, [currentQ._id]: opt.id }))
                   }
                   className={cn(
-                    "w-full text-left p-3 rounded-xl border text-sm transition-colors",
+                    "w-full text-left px-4 py-3 rounded-lg border text-sm transition-colors",
                     answers[currentQ._id] === opt.id
-                      ? "border-primary bg-primary-50 text-primary"
+                      ? "border-primary bg-primary-50 text-primary font-medium"
                       : "border-gray-200 hover:border-primary-200"
                   )}
                 >
@@ -187,32 +279,32 @@ export default function GeneralExamPage() {
                 </button>
               ))}
             </div>
-          </>
-        )}
-      </div>
 
-      <div className="bg-white border-t p-4 flex gap-2 max-w-lg mx-auto w-full">
-        <Button
-          variant="outline"
-          disabled={currentIdx === 0}
-          onClick={() => setCurrentIdx((i) => i - 1)}
-        >
-          <ChevronLeft size={16} />
-          {t("common.previous")}
-        </Button>
-        {currentIdx < totalQ - 1 ? (
-          <Button
-            className="flex-1"
-            disabled={!answers[currentQ?._id]}
-            onClick={() => setCurrentIdx((i) => i + 1)}
-          >
-            {t("common.next")}
-            <ChevronRight size={16} />
-          </Button>
-        ) : (
-          <Button className="flex-1" onClick={() => handleSubmit(false)}>
-            {t("learner.submitExamBtn")}
-          </Button>
+            <div className="flex gap-3 mt-6 pt-2">
+              <Button
+                variant="outline"
+                disabled={currentIdx === 0}
+                onClick={() => setCurrentIdx((i) => i - 1)}
+              >
+                <ChevronLeft size={16} />
+                {t("common.previous")}
+              </Button>
+              {currentIdx < totalQ - 1 ? (
+                <Button
+                  className="ml-auto"
+                  disabled={!answers[currentQ._id]}
+                  onClick={() => setCurrentIdx((i) => i + 1)}
+                >
+                  {t("common.next")}
+                  <ChevronRight size={16} />
+                </Button>
+              ) : (
+                <Button className="ml-auto" onClick={() => handleSubmit(false)}>
+                  {t("learner.submitExamBtn")}
+                </Button>
+              )}
+            </div>
+          </>
         )}
       </div>
     </div>

@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
   ChevronDown,
-  ChevronRight,
+  CheckCircle,
+  Lock,
   Info,
-  ClipboardList,
 } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -39,7 +39,7 @@ export default function ProgramHubPage() {
       : "skip"
   );
 
-  const [policyOpen, setPolicyOpen] = useState(false);
+  const [policyOpen, setPolicyOpen] = useState(true);
 
   if (isLoading) {
     return (
@@ -64,6 +64,23 @@ export default function ProgramHubPage() {
   }
 
   const { program, policy, modules, moduleSummaries, enrolled } = evaluation;
+  const generalUnlocked = evaluation.generalUnlocked;
+  const bestGeneralScore = evaluation.bestGeneralScore;
+  const submittedGeneralCount = evaluation.submittedGeneralCount ?? 0;
+  const maxFinalRetakes = policy.generalExamMaxRetakes ?? 3;
+  const finalRetakesLeft =
+    maxFinalRetakes === "unlimited"
+      ? Infinity
+      : Math.max(0, maxFinalRetakes - submittedGeneralCount);
+  const canTakeFinalExam =
+    policy.generalExamEnabled &&
+    generalUnlocked &&
+    finalRetakesLeft > 0;
+  const requireModulePass =
+    policy.unlockGeneralExamMode === "all_module_passes";
+  const pendingModuleCount = (moduleSummaries ?? []).filter((m) =>
+    requireModulePass ? !m.passed || !m.hasSubmittedAttempt : !m.hasSubmittedAttempt
+  ).length;
   const displayModules =
     modules.length > 0
       ? modules
@@ -230,7 +247,7 @@ export default function ProgramHubPage() {
                       </li>
                       <li>{t("evaluation.ruleHighest")}</li>
                       <li>
-                        {policy.unlockGeneralExamMode === "all_module_passes"
+                        {requireModulePass
                           ? t("evaluation.ruleUnlockPass")
                           : t("evaluation.ruleUnlockAttempt")}
                       </li>
@@ -244,14 +261,81 @@ export default function ProgramHubPage() {
                     })}
                   </li>
                 </ul>
-                <Link
-                  to={`/learn/program/${programId}/evaluation`}
-                  className="inline-flex items-center gap-1 text-sm text-primary font-medium mt-4 hover:underline"
-                >
-                  <ClipboardList size={16} />
-                  {t("trainings.viewFullEvaluation")}
-                  <ChevronRight size={14} />
-                </Link>
+
+                {policy.generalExamEnabled && (
+                  <div
+                    className={cn(
+                      "mt-4 rounded-xl border p-4",
+                      canTakeFinalExam
+                        ? "border-primary-200 bg-primary-50/60"
+                        : "border-gray-200 bg-gray-50"
+                    )}
+                  >
+                    <div className="flex items-start gap-3">
+                      {canTakeFinalExam ? (
+                        <CheckCircle
+                          size={20}
+                          className="text-primary shrink-0 mt-0.5"
+                          aria-hidden
+                        />
+                      ) : (
+                        <Lock
+                          size={20}
+                          className="text-text-secondary shrink-0 mt-0.5"
+                          aria-hidden
+                        />
+                      )}
+                      <div className="flex-1 min-w-0 space-y-2">
+                        <p className="text-sm font-semibold text-text-primary">
+                          {t("evaluation.finalExamTitle")}
+                        </p>
+                        {canTakeFinalExam ? (
+                          <p className="text-sm text-primary-800">
+                            {t("evaluation.finalEligible")}
+                          </p>
+                        ) : !generalUnlocked ? (
+                          <p className="text-sm text-text-secondary">
+                            {requireModulePass
+                              ? t("evaluation.finalPendingPasses", {
+                                  count: pendingModuleCount,
+                                })
+                              : t("evaluation.finalPendingModules", {
+                                  count: pendingModuleCount,
+                                })}
+                          </p>
+                        ) : finalRetakesLeft <= 0 ? (
+                          <p className="text-sm text-text-secondary">
+                            {t("evaluation.noRetakesLeftFinal")}
+                          </p>
+                        ) : null}
+
+                        {bestGeneralScore != null && (
+                          <p className="text-sm text-text-secondary">
+                            {t("evaluation.bestGeneral", {
+                              score: bestGeneralScore,
+                            })}
+                          </p>
+                        )}
+
+                        {canTakeFinalExam && (
+                          <Button
+                            size="sm"
+                            className="mt-1"
+                            onClick={() =>
+                              navigate(
+                                `/learn/program/${programId}/final-exam`
+                              )
+                            }
+                          >
+                            {bestGeneralScore != null
+                              ? t("evaluation.retakeFinal")
+                              : t("evaluation.startFinal")}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </Card>

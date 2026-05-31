@@ -11,46 +11,52 @@ export const listQuestions = query({
   },
 });
 
-/** Search module questions in org for importing into general pool */
-export const searchModuleQuestions = query({
+/** Exam questions from one program module (import picker). */
+export const listImportableModuleQuestions = query({
   args: {
-    organizationId: v.id("organizations"),
-    search: v.string(),
-    limit: v.optional(v.number()),
+    programId: v.id("trainingPrograms"),
+    moduleId: v.id("modules"),
+    search: v.optional(v.string()),
   },
-  handler: async (ctx, { organizationId, search, limit = 20 }) => {
-    const term = search.trim().toLowerCase();
-    if (!term) return [];
+  handler: async (ctx, { programId, moduleId, search }) => {
+    const link = await ctx.db
+      .query("trainingProgramModules")
+      .withIndex("by_program", (q) => q.eq("programId", programId))
+      .collect();
+    if (!link.some((l) => l.moduleId === moduleId)) {
+      return { moduleTitle: "", questions: [] };
+    }
 
-    const modules = await ctx.db
-      .query("modules")
-      .withIndex("by_org", (q) => q.eq("organizationId", organizationId))
+    const mod = await ctx.db.get(moduleId);
+    const term = search?.trim().toLowerCase() ?? "";
+
+    const imported = await ctx.db
+      .query("generalExamQuestions")
+      .withIndex("by_program", (q) => q.eq("programId", programId))
+      .collect();
+    const importedSourceIds = new Set(
+      imported
+        .map((q) => q.sourceModuleQuestionId)
+        .filter((id): id is NonNullable<typeof id> => id != null)
+    );
+
+    const questions = await ctx.db
+      .query("examQuestions")
+      .withIndex("by_module_order", (q) => q.eq("moduleId", moduleId))
       .collect();
 
-    const results: Array<{
-      question: (typeof modules)[0] extends never ? never : any;
-      moduleTitle: string;
-      moduleId: any;
-    }> = [];
+    const filtered = questions.filter(
+      (q) => !term || q.questionText.toLowerCase().includes(term)
+    );
 
-    for (const mod of modules) {
-      const questions = await ctx.db
-        .query("examQuestions")
-        .withIndex("by_module", (q) => q.eq("moduleId", mod._id))
-        .collect();
-
-      for (const q of questions) {
-        if (q.questionText.toLowerCase().includes(term)) {
-          results.push({
-            question: q,
-            moduleTitle: mod.title,
-            moduleId: mod._id,
-          });
-          if (results.length >= limit) return results;
-        }
-      }
-    }
-    return results;
+    return {
+      moduleTitle: mod?.title ?? "",
+      questions: filtered.map((q) => ({
+        _id: q._id,
+        questionText: q.questionText,
+        alreadyImported: importedSourceIds.has(q._id),
+      })),
+    };
   },
 });
 
@@ -77,6 +83,21 @@ export const addQuestion = mutation({
   },
 });
 
+export const updateQuestion = mutation({
+  args: {
+    questionId: v.id("generalExamQuestions"),
+    questionText: v.optional(v.string()),
+    imageUrl: v.optional(v.string()),
+    options: v.optional(
+      v.array(v.object({ id: v.string(), text: v.string() }))
+    ),
+    correctOptionId: v.optional(v.string()),
+  },
+  handler: async (ctx, { questionId, ...updates }) => {
+    await ctx.db.patch(questionId, updates);
+  },
+});
+
 export const importFromModuleQuestion = mutation({
   args: {
     programId: v.id("trainingPrograms"),
@@ -86,6 +107,22 @@ export const importFromModuleQuestion = mutation({
   handler: async (ctx, args) => {
     const src = await ctx.db.get(args.moduleQuestionId);
     if (!src) throw new Error("Source question not found");
+
+    const links = await ctx.db
+      .query("trainingProgramModules")
+      .withIndex("by_program", (q) => q.eq("programId", args.programId))
+      .collect();
+    if (!links.some((l) => l.moduleId === src.moduleId)) {
+      throw new Error("Question must belong to a module in this program");
+    }
+
+    const existing = await ctx.db
+      .query("generalExamQuestions")
+      .withIndex("by_program", (q) => q.eq("programId", args.programId))
+      .collect();
+    if (existing.some((q) => q.sourceModuleQuestionId === src._id)) {
+      throw new Error("Question already added to final evaluation");
+    }
 
     return ctx.db.insert("generalExamQuestions", {
       programId: args.programId,

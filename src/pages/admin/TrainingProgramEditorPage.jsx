@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "convex/react";
-import { ArrowLeft, Plus, Trash2, Search } from "lucide-react";
+import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
@@ -10,6 +10,7 @@ import { Badge } from "../../components/ui/Badge";
 import { useToast } from "../../components/ui/Toast";
 import { useConvexSession } from "../../hooks/useConvexSession";
 import { DEFAULT_EVALUATION_POLICY } from "../../lib/evaluation";
+import { ProgramFinalExamEditor } from "../../components/admin/ProgramFinalExamEditor";
 
 export default function TrainingProgramEditorPage() {
   const { t } = useTranslation();
@@ -18,7 +19,6 @@ export default function TrainingProgramEditorPage() {
   const toast = useToast();
   const { convexUser } = useConvexSession();
 
-  const [searchTerm, setSearchTerm] = useState("");
   const [policy, setPolicy] = useState({ ...DEFAULT_EVALUATION_POLICY });
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -38,20 +38,9 @@ export default function TrainingProgramEditorPage() {
       : "skip"
   );
 
-  const searchResults = useQuery(
-    api.generalExams.searchModuleQuestions,
-    convexUser?.organizationId && searchTerm.length > 2
-      ? {
-          organizationId: convexUser.organizationId,
-          search: searchTerm,
-        }
-      : "skip"
-  );
-
   const updateProgram = useMutation(api.trainingPrograms.update);
   const addModule = useMutation(api.trainingPrograms.addModule);
   const removeModule = useMutation(api.trainingPrograms.removeModule);
-  const importQuestion = useMutation(api.generalExams.importFromModuleQuestion);
 
   useEffect(() => {
     if (!data?.program) return;
@@ -60,7 +49,7 @@ export default function TrainingProgramEditorPage() {
     setDescription(p.description);
     setAccessMode(p.accessMode);
     setStatus(p.status);
-    setPolicy(p.evaluationPolicy ?? { ...DEFAULT_EVALUATION_POLICY });
+    setPolicy({ ...DEFAULT_EVALUATION_POLICY, ...(p.evaluationPolicy ?? {}) });
   }, [data?.program?._id]);
 
   const handleSave = async () => {
@@ -337,47 +326,14 @@ export default function TrainingProgramEditorPage() {
         )}
       </Card>
 
-      {policy.generalExamEnabled && (
-        <Card className="p-5 mb-6">
-          <h2 className="font-semibold mb-3">{t("evaluation.finalQuestionPool")}</h2>
-          <p className="text-xs text-text-secondary mb-3">
-            {t("evaluation.searchModuleQuestions")} ({data.generalQuestionCount ?? 0}{" "}
-            {t("evaluation.questionsInPool")})
-          </p>
-          <div className="flex gap-2 mb-3">
-            <input
-              className="input flex-1"
-              placeholder={t("evaluation.searchPlaceholder")}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <Search size={18} className="text-gray-400 self-center" />
-          </div>
-          {searchResults?.map(({ question, moduleTitle }) => (
-            <div
-              key={question._id}
-              className="flex items-start justify-between gap-2 p-2 border-b text-sm"
-            >
-              <div>
-                <p className="text-xs text-text-secondary">{moduleTitle}</p>
-                <p>{question.questionText}</p>
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() =>
-                  importQuestion({
-                    programId,
-                    organizationId: convexUser.organizationId,
-                    moduleQuestionId: question._id,
-                  })
-                }
-              >
-                {t("evaluation.addToPool")}
-              </Button>
-            </div>
-          ))}
-        </Card>
+      {policy.generalExamEnabled && convexUser?.organizationId && (
+        <ProgramFinalExamEditor
+          programId={programId}
+          organizationId={convexUser.organizationId}
+          programModules={data.modules}
+          policy={policy}
+          setPolicy={setPolicy}
+        />
       )}
 
       <Button onClick={handleSave} loading={saving}>
