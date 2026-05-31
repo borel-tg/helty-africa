@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { APP_CONTACT_EMAIL } from "../../lib/brand";
 
 export function AuthFooter() {
   const { t } = useTranslation();
@@ -8,7 +9,10 @@ export function AuthFooter() {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-2 text-xs sm:text-sm text-text-secondary sm:flex-row sm:items-center sm:justify-between">
         <p>{t("auth.footerCopyright")}</p>
         <div className="flex flex-wrap items-center gap-4">
-          <a href="mailto:contact@helty.africa" className="hover:text-primary transition-colors">
+          <a
+            href={`mailto:${APP_CONTACT_EMAIL}`}
+            className="hover:text-primary transition-colors"
+          >
             {t("auth.footerEmail")}
           </a>
           <a href="tel:+2250700000000" className="hover:text-primary transition-colors">

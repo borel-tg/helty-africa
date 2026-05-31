@@ -1,6 +1,8 @@
+import { APP_SUPPORT_EMAIL } from "./brand";
+
 /** Support desk contact details — override via VITE_* env vars in .env.local */
 export const SUPPORT_EMAIL =
-  import.meta.env.VITE_SUPPORT_EMAIL || "support@helty.africa";
+  import.meta.env.VITE_SUPPORT_EMAIL || APP_SUPPORT_EMAIL;
 
 export const SUPPORT_PHONE =
   import.meta.env.VITE_SUPPORT_PHONE || "+233 20 000 0002";

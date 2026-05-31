@@ -7,11 +7,12 @@ import "./index.css";
 import { AuthProvider } from "./hooks/useAuth";
 import { ToastProvider } from "./components/ui/Toast";
 import { registerSW } from "virtual:pwa-register";
+import { APP_BRAND_NAME } from "./lib/brand";
 
 const convexUrl = import.meta.env.VITE_CONVEX_URL;
 if (!convexUrl) {
   console.warn(
-    "[Helty Africa] VITE_CONVEX_URL is not set — file uploads and Convex data will not work."
+    `[${APP_BRAND_NAME}] VITE_CONVEX_URL is not set — file uploads and Convex data will not work.`
   );
 }
 

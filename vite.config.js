@@ -1,17 +1,37 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
+import {
+  APP_BRAND_NAME,
+  APP_BRAND_SHORT_NAME,
+  getAppPageTitle,
+} from "./src/lib/brand.js";
 
 export default defineConfig({
   plugins: [
     react(),
+    {
+      name: "inject-brand-html",
+      transformIndexHtml(html) {
+        return html
+          .replace(
+            /<title>.*?<\/title>/,
+            `<title>${getAppPageTitle()}</title>`
+          )
+          .replace(
+            /content="Helty"/g,
+            `content="${APP_BRAND_SHORT_NAME}"`
+          )
+          .replace(/aria-label="Helty Africa icon"/g, `aria-label="${APP_BRAND_NAME} icon"`);
+      },
+    },
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["app-icon.svg", "icon-192.png", "icon-512.png"],
       manifest: {
-        name: "Helty Africa",
-        short_name: "Helty",
-        description: "Plateforme de formation sante Helty Africa",
+        name: APP_BRAND_NAME,
+        short_name: APP_BRAND_SHORT_NAME,
+        description: `Plateforme de formation santé ${APP_BRAND_NAME}`,
         start_url: "/",
         scope: "/",
         display: "standalone",

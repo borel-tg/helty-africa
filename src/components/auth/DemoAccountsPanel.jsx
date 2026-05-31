@@ -2,12 +2,13 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronDown } from "lucide-react";
 import { cn } from "../../lib/utils";
+import { demoAccountEmail } from "../../lib/brand";
 
 const DEMO_ACCOUNTS = [
-  ["superadmin@helty.africa", "roles.super_admin"],
-  ["admin@helty.africa", "roles.admin"],
-  ["lead@helty.africa", "roles.lead"],
-  ["learner@helty.africa", "roles.learner"],
+  [demoAccountEmail("superadmin"), "roles.super_admin"],
+  [demoAccountEmail("admin"), "roles.admin"],
+  [demoAccountEmail("lead"), "roles.lead"],
+  [demoAccountEmail("learner"), "roles.learner"],
 ];
 
 export function DemoAccountsPanel({ onSelect }) {

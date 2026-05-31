@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { APP_BRAND_INITIAL, APP_BRAND_NAME } from "../../lib/brand";
 import { AuthBrandPanel } from "./AuthBrandPanel";
 import { AuthFooter } from "./AuthFooter";
 
@@ -28,10 +29,10 @@ export function AuthLayout({
             className="inline-flex items-center gap-2 mb-8 lg:mb-10 group"
           >
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white font-bold text-lg shadow-sm group-hover:bg-primary-600 transition-colors">
-              H
+              {APP_BRAND_INITIAL}
             </span>
             <span className="text-lg font-semibold text-text-primary tracking-tight">
-              Helty Africa
+              {APP_BRAND_NAME}
             </span>
           </Link>
 
