@@ -1,5 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { hashPassword } from "./lib/password";
+import { learnerCategoryKeyValidator } from "./lib/learnerCategories";
 
 // ── Queries ────────────────────────────────────────────────────────────────
 
@@ -71,13 +73,22 @@ export const create = mutation({
       v.literal("learner")
     ),
     passwordHash: v.optional(v.string()),
+    password: v.optional(v.string()),
     mustChangePassword: v.optional(v.boolean()),
     tokenIdentifier: v.optional(v.string()),
+    leadId: v.optional(v.id("users")),
+    learnerCategoryKey: v.optional(learnerCategoryKeyValidator),
   },
   handler: async (ctx, args) => {
     const now = Date.now();
+    const { password, passwordHash: providedHash, ...rest } = args;
+    let passwordHash = providedHash;
+    if (password && !passwordHash) {
+      passwordHash = await hashPassword(password);
+    }
     return ctx.db.insert("users", {
-      ...args,
+      ...rest,
+      passwordHash,
       status: "active",
       createdAt: now,
     });
@@ -98,6 +109,7 @@ export const update = mutation({
       )
     ),
     leadId: v.optional(v.id("users")),
+    learnerCategoryKey: v.optional(learnerCategoryKeyValidator),
     status: v.optional(v.union(v.literal("active"), v.literal("inactive"))),
     passwordHash: v.optional(v.string()),
     mustChangePassword: v.optional(v.boolean()),

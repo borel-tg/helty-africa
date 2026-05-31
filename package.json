@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "convex:dev": "convex dev",
+    "seed": "convex run seed:seedDemo",
     "check:i18n": "node scripts/check-i18n.mjs"
   },
   "dependencies": {

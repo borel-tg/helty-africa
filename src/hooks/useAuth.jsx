@@ -1,82 +1,89 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { MOCK_USERS } from "../lib/mockData";
+import { useConvex, useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 const AuthContext = createContext(null);
 const SESSION_KEY = "helty_session";
 
-function readStoredUser() {
+function readStoredUserId() {
   try {
     const raw = localStorage.getItem(SESSION_KEY);
     if (!raw) return null;
     const { userId } = JSON.parse(raw);
-    return Object.values(MOCK_USERS).find((u) => u._id === userId) ?? null;
+    return userId ?? null;
   } catch {
     return null;
   }
 }
 
-function persistUser(user) {
-  if (user) {
-    localStorage.setItem(SESSION_KEY, JSON.stringify({ userId: user._id }));
+function persistUserId(userId) {
+  if (userId) {
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ userId }));
   } else {
     localStorage.removeItem(SESSION_KEY);
   }
 }
 
-/**
- * AuthProvider — in a real app this wraps ConvexProvider and uses
- * Convex Auth. For the mock/demo we persist the session in localStorage.
- */
+/** Auth against Convex users table (email + passwordHash). */
 export function AuthProvider({ children }) {
+  const convex = useConvex();
+  const loginMutation = useMutation(api.auth.login);
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
-  const DEMO_PASSWORD = "demo1234";
 
   useEffect(() => {
-    const stored = readStoredUser();
-    if (stored) setCurrentUser(stored);
-    setIsInitializing(false);
-  }, []);
+    let cancelled = false;
+    const userId = readStoredUserId();
+    if (!userId) {
+      setIsInitializing(false);
+      return;
+    }
+
+    convex
+      .query(api.auth.getSession, { userId })
+      .then((user) => {
+        if (cancelled) return;
+        if (user) setCurrentUser(user);
+        else persistUserId(null);
+        setIsInitializing(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        persistUserId(null);
+        setIsInitializing(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [convex]);
 
   const login = async (email, password) => {
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 800)); // simulate network
-
-    const normalizedEmail = String(email || "").trim().toLowerCase();
-    const normalizedPassword = String(password || "").trim();
-
-    const user = Object.values(MOCK_USERS).find(
-      (u) => u.email.toLowerCase() === normalizedEmail
-    );
-
-    if (user && normalizedPassword === DEMO_PASSWORD) {
-      setCurrentUser(user);
-      persistUser(user);
+    try {
+      const result = await loginMutation({ email, password });
+      if (result.success) {
+        setCurrentUser(result.user);
+        persistUserId(result.user._id);
+        return { success: true, user: result.user };
+      }
+      setCurrentUser(null);
+      persistUserId(null);
+      return { success: false };
+    } finally {
       setIsLoading(false);
-      return { success: true, user };
     }
-
-    setCurrentUser(null);
-    persistUser(null);
-    setIsLoading(false);
-    return { success: false };
   };
 
   const logout = () => {
     setCurrentUser(null);
-    persistUser(null);
-  };
-
-  const switchRole = (role) => {
-    const user = MOCK_USERS[role] || MOCK_USERS.learner;
-    setCurrentUser(user);
-    persistUser(user);
+    persistUserId(null);
   };
 
   return (
     <AuthContext.Provider
-      value={{ currentUser, isLoading, isInitializing, login, logout, switchRole }}
+      value={{ currentUser, isLoading, isInitializing, login, logout }}
     >
       {children}
     </AuthContext.Provider>

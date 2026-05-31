@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { learnerCategoryKeyValidator } from "./lib/learnerCategories";
 
 /** Per training program — fully configurable evaluation rules. */
 export const evaluationPolicyValidator = v.object({
@@ -37,6 +38,8 @@ export default defineSchema({
     ),
     status: v.union(v.literal("active"), v.literal("inactive")),
     leadId: v.optional(v.id("users")), // learner's assigned lead
+    /** Stats only — national / provincial / zonal */
+    learnerCategoryKey: v.optional(learnerCategoryKeyValidator),
     passwordHash: v.optional(v.string()),
     mustChangePassword: v.optional(v.boolean()),
     lastLoginAt: v.optional(v.number()),
@@ -47,7 +50,8 @@ export default defineSchema({
     .index("by_org", ["organizationId"])
     .index("by_email", ["email"])
     .index("by_token", ["tokenIdentifier"])
-    .index("by_lead", ["leadId"]),
+    .index("by_lead", ["leadId"])
+    .index("by_org_category", ["organizationId", "learnerCategoryKey"]),
 
   // ── Invitations ────────────────────────────────────────────────
   invitations: defineTable({

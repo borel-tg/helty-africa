@@ -8,13 +8,20 @@
  * @module
  */
 
+import type * as auth from "../auth.js";
 import type * as certificates from "../certificates.js";
+import type * as emails from "../emails.js";
 import type * as exams from "../exams.js";
 import type * as generalExams from "../generalExams.js";
 import type * as invitations from "../invitations.js";
 import type * as leaderboard from "../leaderboard.js";
 import type * as lessons from "../lessons.js";
+import type * as lib_brand from "../lib/brand.js";
 import type * as lib_evaluation from "../lib/evaluation.js";
+import type * as lib_learnerCategories from "../lib/learnerCategories.js";
+import type * as lib_password from "../lib/password.js";
+import type * as lib_programStatsHelpers from "../lib/programStatsHelpers.js";
+import type * as lib_siteUrl from "../lib/siteUrl.js";
 import type * as migrations from "../migrations.js";
 import type * as moduleResources from "../moduleResources.js";
 import type * as modules from "../modules.js";
@@ -22,6 +29,7 @@ import type * as notifications from "../notifications.js";
 import type * as progress from "../progress.js";
 import type * as recentModules from "../recentModules.js";
 import type * as seed from "../seed.js";
+import type * as stats from "../stats.js";
 import type * as storage from "../storage.js";
 import type * as trainingPrograms from "../trainingPrograms.js";
 import type * as users from "../users.js";
@@ -33,13 +41,20 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  auth: typeof auth;
   certificates: typeof certificates;
+  emails: typeof emails;
   exams: typeof exams;
   generalExams: typeof generalExams;
   invitations: typeof invitations;
   leaderboard: typeof leaderboard;
   lessons: typeof lessons;
+  "lib/brand": typeof lib_brand;
   "lib/evaluation": typeof lib_evaluation;
+  "lib/learnerCategories": typeof lib_learnerCategories;
+  "lib/password": typeof lib_password;
+  "lib/programStatsHelpers": typeof lib_programStatsHelpers;
+  "lib/siteUrl": typeof lib_siteUrl;
   migrations: typeof migrations;
   moduleResources: typeof moduleResources;
   modules: typeof modules;
@@ -47,6 +62,7 @@ declare const fullApi: ApiFromModules<{
   progress: typeof progress;
   recentModules: typeof recentModules;
   seed: typeof seed;
+  stats: typeof stats;
   storage: typeof storage;
   trainingPrograms: typeof trainingPrograms;
   users: typeof users;

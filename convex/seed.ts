@@ -1,17 +1,33 @@
 import { mutation } from "./_generated/server";
-import { v } from "convex/values";
+import { demoAccountEmail } from "./lib/brand";
+import { hashPassword } from "./lib/password";
+
+const DEMO_PASSWORD = "demo1234";
 
 /**
  * Seed the database with demo data for development/testing.
- * Run once via: npx convex run seed:seedDemo
+ * Run via: npm run seed
  */
 export const seedDemo = mutation({
   args: {},
   handler: async (ctx) => {
     const now = Date.now();
+    const demoHash = await hashPassword(DEMO_PASSWORD);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async function insertUser(fields: any) {
+      const { createdAt, status, ...rest } = fields;
+      return ctx.db.insert("users", {
+        ...rest,
+        passwordHash: demoHash,
+        status: status ?? "active",
+        createdAt: createdAt ?? now,
+      });
+    }
 
     // Clear existing demo data to keep this seed idempotent.
     const tableNames = [
+      "learnerModuleAccess",
       "moduleNotificationSettings",
       "notifications",
       "certificates",
@@ -48,69 +64,107 @@ export const seedDemo = mutation({
       createdAt: now,
     });
 
-    // Users
-    const superAdminId = await ctx.db.insert("users", {
+    // Users — 4 staff + 6 learners (diverse progress profiles)
+    const superAdminId = await insertUser({
       organizationId: orgId,
       name: "Dr. Amara Diallo",
-      email: "superadmin@helty.africa",
+      email: demoAccountEmail("superadmin"),
       phone: "+221 77 000 0001",
       role: "super_admin",
-      status: "active",
       createdAt: now - 90 * 86400000,
       lastLoginAt: now - 3600000,
     });
-    const adminId = await ctx.db.insert("users", {
+    const adminId = await insertUser({
       organizationId: orgId,
       name: "Sophie Mensah",
-      email: "admin@helty.africa",
+      email: demoAccountEmail("admin"),
       phone: "+233 20 000 0002",
       role: "admin",
-      status: "active",
       createdAt: now - 60 * 86400000,
       lastLoginAt: now - 7200000,
     });
-    const leadId = await ctx.db.insert("users", {
+    const leadId = await insertUser({
       organizationId: orgId,
       name: "Kwame Asante",
-      email: "lead@helty.africa",
+      email: demoAccountEmail("lead"),
       phone: "+233 24 000 0003",
       role: "lead",
-      status: "active",
       createdAt: now - 45 * 86400000,
       lastLoginAt: now - 86400000,
     });
-    const learner1Id = await ctx.db.insert("users", {
+
+    // 1. Fatima — in progress on module 1 (partial lessons + passed mod1 exam)
+    const learner1Id = await insertUser({
       organizationId: orgId,
       name: "Fatima Coulibaly",
-      email: "learner@helty.africa",
+      email: demoAccountEmail("learner"),
       phone: "+225 07 000 0004",
       role: "learner",
-      status: "active",
+      learnerCategoryKey: "zonal",
       leadId,
       createdAt: now - 30 * 86400000,
       lastLoginAt: now - 43200000,
     });
-    const learner2Id = await ctx.db.insert("users", {
+    // 2. Ibrahim — completed program + certificate
+    const learner2Id = await insertUser({
       organizationId: orgId,
       name: "Ibrahim Traoré",
-      email: "ibrahim@helty.africa",
+      email: demoAccountEmail("ibrahim"),
       phone: "+226 70 000 0005",
       role: "learner",
-      status: "active",
+      learnerCategoryKey: "national",
       leadId,
       createdAt: now - 25 * 86400000,
       lastLoginAt: now - 86400000,
     });
-    const learner3Id = await ctx.db.insert("users", {
+    // 3. Amina — active on module 2 (mod1 passed, mod2 in progress)
+    const learner3Id = await insertUser({
       organizationId: orgId,
       name: "Amina Diallo",
-      email: "amina@helty.africa",
+      email: demoAccountEmail("amina"),
       phone: "+221 76 000 0006",
       role: "learner",
-      status: "active",
+      learnerCategoryKey: "provincial",
       leadId,
       createdAt: now - 20 * 86400000,
       lastLoginAt: now - 2 * 86400000,
+    });
+    // 4. Mariam — enrolled, not started
+    const learner4Id = await insertUser({
+      organizationId: orgId,
+      name: "Mariam Keita",
+      email: demoAccountEmail("mariam"),
+      phone: "+223 65 000 0007",
+      role: "learner",
+      learnerCategoryKey: "zonal",
+      leadId,
+      createdAt: now - 18 * 86400000,
+      lastLoginAt: now - 5 * 86400000,
+    });
+    // 5. Kofi — inactive, enrolled but dormant
+    const learner5Id = await insertUser({
+      organizationId: orgId,
+      name: "Kofi Boateng",
+      email: demoAccountEmail("kofi"),
+      phone: "+233 55 000 0008",
+      role: "learner",
+      learnerCategoryKey: "provincial",
+      status: "inactive",
+      leadId,
+      createdAt: now - 35 * 86400000,
+      lastLoginAt: now - 10 * 86400000,
+    });
+    // 6. Ousmane — started mod1 lessons only, no exam yet
+    const learner6Id = await insertUser({
+      organizationId: orgId,
+      name: "Ousmane Barry",
+      email: demoAccountEmail("ousmane"),
+      phone: "+224 62 000 0009",
+      role: "learner",
+      learnerCategoryKey: "zonal",
+      leadId,
+      createdAt: now - 12 * 86400000,
+      lastLoginAt: now - 86400000,
     });
 
     // Modules
@@ -122,7 +176,7 @@ export const seedDemo = mutation({
       status: "published",
       order: 0,
       passingScore: 70,
-      maxRetakes: 3,
+      maxRetakes: 2,
       createdBy: adminId,
       createdAt: now - 20 * 86400000,
       updatedAt: now - 2 * 86400000,
@@ -135,7 +189,7 @@ export const seedDemo = mutation({
       status: "published",
       order: 1,
       passingScore: 70,
-      maxRetakes: 3,
+      maxRetakes: 2,
       createdBy: adminId,
       createdAt: now - 15 * 86400000,
       updatedAt: now - 86400000,
@@ -148,7 +202,7 @@ export const seedDemo = mutation({
       status: "published",
       order: 2,
       passingScore: 70,
-      maxRetakes: 3,
+      maxRetakes: 2,
       createdBy: adminId,
       createdAt: now - 5 * 86400000,
       updatedAt: now - 86400000,
@@ -234,7 +288,7 @@ export const seedDemo = mutation({
     });
 
     // Lessons for module 2
-    await ctx.db.insert("lessons", {
+    const les4Id = await ctx.db.insert("lessons", {
       moduleId: module2Id,
       organizationId: orgId,
       title: "Understanding Vaccine Hesitancy",
@@ -558,22 +612,31 @@ export const seedDemo = mutation({
       randomizeQuestions: false,
     });
 
-    // Enrollments
-    await ctx.db.insert("programEnrollments", {
-      userId: learner1Id,
-      programId,
-      organizationId: orgId,
-      enrolledAt: now - 20 * 86400000,
-    });
-    await ctx.db.insert("programEnrollments", {
-      userId: learner2Id,
-      programId,
-      organizationId: orgId,
-      enrolledAt: now - 15 * 86400000,
+    // Enrollments — all 6 learners in the program
+    const enroll = async (
+      userId: typeof learner1Id,
+      enrolledAt: number,
+      extra?: { finalScore?: number; passed?: boolean; completedAt?: number }
+    ) => {
+      await ctx.db.insert("programEnrollments", {
+        userId,
+        programId,
+        organizationId: orgId,
+        enrolledAt,
+        ...extra,
+      });
+    };
+
+    await enroll(learner1Id, now - 20 * 86400000);
+    await enroll(learner2Id, now - 15 * 86400000, {
       finalScore: 81.5,
       passed: true,
       completedAt: now - 7000000,
     });
+    await enroll(learner3Id, now - 14 * 86400000);
+    await enroll(learner4Id, now - 10 * 86400000);
+    await enroll(learner5Id, now - 30 * 86400000);
+    await enroll(learner6Id, now - 8 * 86400000);
 
     // Exam attempts — learner2 (John-style: 80, 70, 90 module + 85 general → 81.5)
     const submitModuleAttempt = async (
@@ -638,6 +701,62 @@ export const seedDemo = mutation({
       submittedAt: now - 3500000,
     });
 
+    // Amina — mod1 passed, mod2 lesson in progress
+    await submitModuleAttempt(learner3Id, module1Id, 88, 1, 5000000);
+    await ctx.db.insert("lessonProgress", {
+      userId: learner3Id,
+      lessonId: les4Id,
+      moduleId: module2Id,
+      organizationId: orgId,
+      completed: true,
+      completedAt: now - 86400000,
+      firstAccessedAt: now - 2 * 86400000,
+      lastAccessedAt: now - 86400000,
+      timeSpentSeconds: 540,
+    });
+
+    // Ousmane — mod1 lessons started, no exam
+    await ctx.db.insert("lessonProgress", {
+      userId: learner6Id,
+      lessonId: les1Id,
+      moduleId: module1Id,
+      organizationId: orgId,
+      completed: true,
+      completedAt: now - 86400000,
+      firstAccessedAt: now - 2 * 86400000,
+      lastAccessedAt: now - 86400000,
+      timeSpentSeconds: 600,
+    });
+    await ctx.db.insert("lessonProgress", {
+      userId: learner6Id,
+      lessonId: les2Id,
+      moduleId: module1Id,
+      organizationId: orgId,
+      completed: false,
+      firstAccessedAt: now - 86400000,
+      lastAccessedAt: now - 3600000,
+      timeSpentSeconds: 180,
+    });
+
+    // Recent module access (for "Continue learning" section)
+    const recordAccess = async (
+      userId: typeof learner1Id,
+      moduleId: typeof module1Id,
+      lastAccessedAt: number
+    ) => {
+      await ctx.db.insert("learnerModuleAccess", {
+        userId,
+        moduleId,
+        programId,
+        organizationId: orgId,
+        lastAccessedAt,
+      });
+    };
+    await recordAccess(learner1Id, module1Id, now - 3600000);
+    await recordAccess(learner3Id, module2Id, now - 86400000);
+    await recordAccess(learner6Id, module1Id, now - 3600000);
+    await recordAccess(learner2Id, module3Id, now - 7000000);
+
     // Notifications
     await ctx.db.insert("notifications", {
       recipientId: leadId,
@@ -689,15 +808,34 @@ export const seedDemo = mutation({
       updatedAt: now,
     });
 
-    // Invitation sample
+    // Invitations — pending, signed up, expired
     await ctx.db.insert("invitations", {
       organizationId: orgId,
-      email: "new.staff@helty.africa",
-      token: "seed-invite-token",
+      email: demoAccountEmail("new.learner1"),
+      token: "seed-invite-pending",
       role: "learner",
       invitedBy: adminId,
-      expiresAt: now + 7 * 86400000,
-      createdAt: now,
+      expiresAt: now + 5 * 86400000,
+      createdAt: now - 2 * 86400000,
+    });
+    await ctx.db.insert("invitations", {
+      organizationId: orgId,
+      email: demoAccountEmail("new.learner2"),
+      token: "seed-invite-used",
+      role: "learner",
+      invitedBy: adminId,
+      expiresAt: now + 2 * 86400000,
+      usedAt: now - 3 * 86400000,
+      createdAt: now - 8 * 86400000,
+    });
+    await ctx.db.insert("invitations", {
+      organizationId: orgId,
+      email: demoAccountEmail("new.lead"),
+      token: "seed-invite-expired",
+      role: "lead",
+      invitedBy: adminId,
+      expiresAt: now - 5 * 86400000,
+      createdAt: now - 12 * 86400000,
     });
 
     return {
@@ -708,6 +846,11 @@ export const seedDemo = mutation({
       adminId,
       leadId,
       learner1Id,
+      learner2Id,
+      learner3Id,
+      learner4Id,
+      learner5Id,
+      learner6Id,
       module1Id,
       module2Id,
       module3Id,
