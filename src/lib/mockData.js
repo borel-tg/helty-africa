@@ -99,10 +99,10 @@ export const MOCK_MODULES = [
     title: "Safety & Emergency Protocols",
     description:
       "Handling adverse events following immunization (AEFI) and emergency procedures during field campaigns.",
-    status: "draft",
+    status: "published",
     order: 2,
-    passingScore: 80,
-    maxRetakes: 2,
+    passingScore: 70,
+    maxRetakes: 3,
     createdBy: "user_admin",
     createdAt: Date.now() - 5 * 86400000,
     updatedAt: Date.now() - 86400000,
@@ -496,6 +496,80 @@ export const MOCK_STATS = {
     },
   ],
 };
+
+/** Demo training program (evaluation + certificate unit). */
+export const MOCK_TRAINING_PROGRAM = {
+  _id: "prog1",
+  organizationId: "org1",
+  title: "Polio Field Worker Certification",
+  description:
+    "Complete all module tests and the final evaluation to earn your program certificate.",
+  status: "published",
+  accessMode: "open",
+  moduleIds: ["mod1", "mod2", "mod3"],
+  evaluationPolicy: {
+    programPassThreshold: 80,
+    moduleExamWeight: 70,
+    generalExamWeight: 30,
+    generalExamEnabled: true,
+    generalExamMaxRetakes: 3,
+    unlockGeneralExamMode: "all_module_attempts",
+  },
+};
+
+/** Per-user mock module exam bests (user_learner) */
+export const MOCK_PROGRAM_EXAM_BEST = {
+  user_learner: { mod1: 75, mod2: null, mod3: null },
+  user_learner2: { mod1: 80, mod2: 70, mod3: 90 },
+};
+
+export const MOCK_GENERAL_EXAM_BEST = {
+  user_learner: null,
+  user_learner2: 85,
+};
+
+export const MOCK_PROGRAM_ENROLLMENTS = {
+  user_learner: ["prog1"],
+  user_learner2: ["prog1"],
+};
+
+export const MOCK_PROGRAM_CERTIFICATES = {
+  user_learner2: {
+    programId: "prog1",
+    score: 81.5,
+    issuedAt: Date.now() - 7000000,
+    certificateNumber: "EVT-2026-DEMO01",
+  },
+};
+
+export const MOCK_GENERAL_EXAM_QUESTIONS = [
+  {
+    _id: "genq1",
+    programId: "prog1",
+    questionText: "At what temperature should oral polio vaccine (OPV) be stored?",
+    options: [
+      { id: "a", text: "Between 2°C and 8°C" },
+      { id: "b", text: "Between -15°C and -25°C" },
+      { id: "c", text: "At room temperature (20-25°C)" },
+      { id: "d", text: "Between 10°C and 15°C" },
+    ],
+    correctOptionId: "a",
+    order: 0,
+  },
+  {
+    _id: "genq2",
+    programId: "prog1",
+    questionText: "What is vaccine hesitancy?",
+    options: [
+      { id: "a", text: "Delay or refusal of vaccination despite availability" },
+      { id: "b", text: "Allergic reaction to vaccines" },
+      { id: "c", text: "Mandatory vaccination policy" },
+      { id: "d", text: "Cold chain failure" },
+    ],
+    correctOptionId: "a",
+    order: 1,
+  },
+];
 
 export const MOCK_NOTIFICATIONS = [
   {

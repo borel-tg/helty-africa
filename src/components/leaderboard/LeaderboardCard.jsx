@@ -95,7 +95,7 @@ function LeaderboardList({ entries, viewerId, t, className }) {
 }
 
 /**
- * Live organization leaderboard (this week / today) with animal avatars.
+ * Live learner rankings (this week / today) with animal avatars.
  *
  * @param {"learner"|"staff"|"lead"} [mode="learner"]
  *   - learner: top 2 by default, expandable to full top 5; personal rank footer
