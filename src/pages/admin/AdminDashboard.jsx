@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "convex/react";
 import {
   Users,
   BookOpen,
@@ -10,10 +11,11 @@ import {
   XCircle,
   Clock,
 } from "lucide-react";
-import { Card, CardBody } from "../../components/ui/Card";
+import { api } from "../../../convex/_generated/api";
+import { useConvexSession } from "../../hooks/useConvexSession";
+import { Card } from "../../components/ui/Card";
 import { ProgressBar } from "../../components/ui/Progress";
 import { Button } from "../../components/ui/Button";
-import { MOCK_STATS, MOCK_EMPLOYEES, MOCK_MODULES } from "../../lib/mockData";
 
 function StatCard({ label, value, icon: Icon, color, sub }) {
   return (
@@ -37,11 +39,25 @@ function StatCard({ label, value, icon: Icon, color, sub }) {
 export default function AdminDashboard() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const stats = MOCK_STATS;
+  const { convexUser } = useConvexSession();
+
+  const stats = useQuery(
+    api.stats.getOrgDashboard,
+    convexUser?.organizationId
+      ? { organizationId: convexUser.organizationId }
+      : "skip"
+  );
+
+  if (!stats) {
+    return (
+      <div className="p-6 text-center text-text-secondary">
+        {t("common.loading")}
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-6 w-full space-y-6">
-      {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           label={t("admin.activeLearners")}
@@ -70,7 +86,6 @@ export default function AdminDashboard() {
         />
       </div>
 
-      {/* Module Performance */}
       <Card>
         <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
           <h2 className="text-base font-semibold text-text-primary">
@@ -109,7 +124,7 @@ export default function AdminDashboard() {
               </div>
               <ProgressBar
                 value={m.passed}
-                max={m.started}
+                max={m.started || 1}
                 size="sm"
                 color="success"
               />
@@ -118,7 +133,6 @@ export default function AdminDashboard() {
         </div>
       </Card>
 
-      {/* Quick actions */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           {
@@ -152,7 +166,6 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* Recent learners */}
       <Card>
         <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
           <h2 className="text-base font-semibold text-text-primary">
@@ -167,7 +180,7 @@ export default function AdminDashboard() {
           </Button>
         </div>
         <div className="divide-y divide-gray-50">
-          {MOCK_EMPLOYEES.slice(0, 5).map((emp) => (
+          {stats.recentLearners.map((emp) => (
             <div
               key={emp._id}
               className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50 cursor-pointer"

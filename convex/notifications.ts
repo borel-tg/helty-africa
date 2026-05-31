@@ -12,6 +12,32 @@ export const listForRecipient = query({
   },
 });
 
+/** Notifications with learner and module names for UI display */
+export const listEnrichedForRecipient = query({
+  args: { recipientId: v.id("users") },
+  handler: async (ctx, { recipientId }) => {
+    const rows = await ctx.db
+      .query("notifications")
+      .withIndex("by_recipient", (q) => q.eq("recipientId", recipientId))
+      .order("desc")
+      .take(50);
+
+    const enriched = [];
+    for (const n of rows) {
+      const [learner, mod] = await Promise.all([
+        ctx.db.get(n.learnerId),
+        ctx.db.get(n.moduleId),
+      ]);
+      enriched.push({
+        ...n,
+        learnerName: learner?.name ?? "—",
+        moduleName: mod?.title ?? "—",
+      });
+    }
+    return enriched;
+  },
+});
+
 export const countUnread = query({
   args: { recipientId: v.id("users") },
   handler: async (ctx, { recipientId }) => {

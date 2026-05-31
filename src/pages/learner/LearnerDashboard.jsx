@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { Play, ChevronRight, Clock } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
 import { useAuth } from "../../hooks/useAuth";
@@ -9,14 +9,28 @@ import { Card } from "../../components/ui/Card";
 import { ProgressBar } from "../../components/ui/Progress";
 import { TrainingProgramCard } from "../../components/learner/TrainingProgramCard";
 import { useAvailablePrograms } from "../../hooks/useProgramEvaluation";
-import { MOCK_TRAINING_PROGRAM } from "../../lib/mockData";
 import { useRecentModules } from "../../hooks/useRecentModules";
-import { getModuleLessonProgress } from "../../lib/moduleProgress";
 
-function RecentModuleRow({ entry }) {
+function RecentModuleRow({ entry, userId }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { pct } = getModuleLessonProgress(entry.moduleId);
+
+  const progressData = useQuery(
+    api.progress.getModuleProgress,
+    userId && entry.moduleId
+      ? { userId, moduleId: entry.moduleId }
+      : "skip"
+  );
+
+  const lessons = useQuery(
+    api.lessons.listByModule,
+    entry.moduleId ? { moduleId: entry.moduleId } : "skip"
+  );
+
+  const total = lessons?.length ?? 0;
+  const completed =
+    progressData?.filter((p) => p.completed).length ?? 0;
+  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
 
   return (
     <button
@@ -51,26 +65,16 @@ export default function LearnerDashboard() {
   const { currentUser } = useAuth();
   const { convexUser } = useConvexSession();
   const navigate = useNavigate();
-  const { programs, isMock, isLoading: programsLoading } = useAvailablePrograms();
+  const { programs, isLoading: programsLoading } = useAvailablePrograms();
   const enrollMutation = useMutation(api.trainingPrograms.enroll);
-  const displayPrograms =
-    programs.length > 0
-      ? programs
-      : isMock
-        ? [MOCK_TRAINING_PROGRAM]
-        : programs;
 
-  const enrolledPrograms = displayPrograms.filter((p) => p.enrolled);
-  const discoverPrograms = displayPrograms.filter((p) => !p.enrolled && p.canJoin);
+  const enrolledPrograms = programs.filter((p) => p.enrolled);
+  const discoverPrograms = programs.filter((p) => !p.enrolled && p.canJoin);
 
   const { recentModules, isLoading: recentLoading } =
     useRecentModules(enrolledPrograms, 3);
 
   const onJoinProgram = async (program) => {
-    if (isMock || program._id.startsWith("prog")) {
-      navigate(`/learn/program/${program._id}`);
-      return;
-    }
     if (!convexUser?._id) return;
     await enrollMutation({
       userId: convexUser._id,
@@ -105,6 +109,7 @@ export default function LearnerDashboard() {
                 <RecentModuleRow
                   key={`${entry.moduleId}-${entry.accessedAt}`}
                   entry={entry}
+                  userId={convexUser?._id}
                 />
               ))}
             </div>

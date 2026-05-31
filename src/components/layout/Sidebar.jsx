@@ -14,15 +14,11 @@ import {
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useAuth } from "../../hooks/useAuth";
+import { useAvailablePrograms } from "../../hooks/useProgramEvaluation";
 
 const NAV_ITEMS = {
   learner: [
     { to: "/learn", icon: LayoutDashboard, labelKey: "nav.myTrainings" },
-    {
-      to: "/learn/program/prog1/evaluation",
-      icon: ClipboardList,
-      labelKey: "nav.evaluation",
-    },
     { to: "/learn/certificates", icon: Award, labelKey: "nav.certificates" },
   ],
   lead: [
@@ -54,8 +50,23 @@ const NAV_ITEMS = {
 function SidebarContent({ collapsed, onNavigate }) {
   const { t } = useTranslation();
   const { currentUser, logout } = useAuth();
+  const { programs } = useAvailablePrograms();
   const role = currentUser?.role || "learner";
-  const navItems = NAV_ITEMS[role] || NAV_ITEMS.learner;
+  const baseItems = NAV_ITEMS[role] || NAV_ITEMS.learner;
+
+  const enrolledProgram = programs.find((p) => p.enrolled);
+  const navItems =
+    role === "learner" && enrolledProgram
+      ? [
+          baseItems[0],
+          {
+            to: `/learn/program/${enrolledProgram._id}/evaluation`,
+            icon: ClipboardList,
+            labelKey: "nav.evaluation",
+          },
+          ...baseItems.slice(1),
+        ]
+      : baseItems;
 
   const handleLogout = () => {
     onNavigate?.();

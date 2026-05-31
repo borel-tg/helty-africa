@@ -3,20 +3,6 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useAuth } from "./useAuth";
 import { useConvexSession } from "./useConvexSession";
-import { isConvexModuleId } from "../lib/convexIds";
-import {
-  recordRecentModule,
-  getRecentStorageUserId,
-} from "../lib/recentModules";
-import { getProgramForModule } from "../lib/moduleProgram";
-import {
-  MOCK_MODULES,
-  MOCK_LESSONS,
-  MOCK_MODULE_RESOURCES,
-  MOCK_LEARNER_PROGRESS,
-  MOCK_PROGRAM_ENROLLMENTS,
-  MOCK_EXAM_QUESTIONS,
-} from "../lib/mockData";
 
 function computeProgress(lessons, isCompleted) {
   const total = lessons.length;
@@ -31,33 +17,28 @@ function computeProgress(lessons, isCompleted) {
   return { completedCount, total, pct, allComplete, status };
 }
 
-/**
- * Module + lessons + resources + progress for learner module/lesson routes.
- * Supports Convex module ids and mock `mod*` ids.
- */
+/** Module + lessons + resources + progress for learner module/lesson routes. */
 export function useLearnerModule(moduleId) {
   const { currentUser } = useAuth();
-  const { convexUser, userLookup } = useConvexSession();
+  const { convexUser } = useConvexSession();
   const recordAccess = useMutation(api.recentModules.recordAccess);
-
-  const useConvex = Boolean(moduleId && isConvexModuleId(moduleId));
 
   const convexModule = useQuery(
     api.modules.getById,
-    useConvex ? { moduleId } : "skip"
+    moduleId ? { moduleId } : "skip"
   );
 
   const convexLessons = useQuery(
     api.lessons.listByModule,
-    useConvex && convexModule ? { moduleId } : "skip"
+    convexModule ? { moduleId } : "skip"
   );
 
   const convexResources = useQuery(
     api.moduleResources.listByModule,
-    useConvex && convexModule ? { moduleId } : "skip"
+    convexModule ? { moduleId } : "skip"
   );
 
-  const needsUserData = Boolean(useConvex && convexModule && convexUser?._id);
+  const needsUserData = Boolean(convexModule && convexUser?._id);
 
   const convexProgress = useQuery(
     api.progress.getModuleProgress,
@@ -71,36 +52,21 @@ export function useLearnerModule(moduleId) {
 
   const convexExamQuestions = useQuery(
     api.exams.listQuestions,
-    useConvex && convexModule ? { moduleId } : "skip"
+    convexModule ? { moduleId } : "skip"
   );
 
-  const mockModule = MOCK_MODULES.find((m) => m._id === moduleId);
-  const mockLessons = MOCK_LESSONS[moduleId] || [];
-  const mockResources = MOCK_MODULE_RESOURCES[moduleId] || [];
-  const mockProgram =
-    mockModule && !useConvex ? getProgramForModule(moduleId) : null;
-
-  const module = useConvex ? convexModule : mockModule;
-  const lessons = useConvex ? (convexLessons ?? []) : mockLessons;
-  const resources = useConvex ? (convexResources ?? []) : mockResources;
-  const program = useConvex ? enrolledCtx?.program ?? null : mockProgram;
+  const module = convexModule;
+  const lessons = convexLessons ?? [];
+  const resources = convexResources ?? [];
+  const program = enrolledCtx?.program ?? null;
 
   const completedLessonIds = useMemo(() => {
-    if (useConvex) {
-      const set = new Set();
-      for (const row of convexProgress ?? []) {
-        if (row.completed) set.add(row.lessonId);
-      }
-      return set;
-    }
     const set = new Set();
-    for (const lesson of mockLessons) {
-      if (MOCK_LEARNER_PROGRESS[lesson._id]?.completed) {
-        set.add(lesson._id);
-      }
+    for (const row of convexProgress ?? []) {
+      if (row.completed) set.add(row.lessonId);
     }
     return set;
-  }, [useConvex, convexProgress, mockLessons]);
+  }, [convexProgress]);
 
   const isLessonCompleted = (lessonId) => completedLessonIds.has(lessonId);
 
@@ -110,63 +76,27 @@ export function useLearnerModule(moduleId) {
   );
 
   const isLoading =
-    (useConvex &&
-      (convexModule === undefined ||
-        (convexModule &&
-          (convexLessons === undefined ||
-            convexResources === undefined ||
-            convexExamQuestions === undefined ||
-            (needsUserData &&
-              (convexProgress === undefined || enrolledCtx === undefined)))))) ||
-    (useConvex &&
-      Boolean(currentUser?.email) &&
-      userLookup === "loading" &&
-      convexModule === undefined);
+    moduleId &&
+    (convexModule === undefined ||
+      (convexModule &&
+        (convexLessons === undefined ||
+          convexResources === undefined ||
+          convexExamQuestions === undefined ||
+          (needsUserData &&
+            (convexProgress === undefined || enrolledCtx === undefined)))));
 
-  const notFound = useConvex
-    ? convexModule === null
-    : Boolean(moduleId) && !mockModule;
+  const notFound = moduleId && convexModule === null;
 
   useEffect(() => {
-    if (!moduleId || !module || !program) return;
+    if (!moduleId || !module || !program || !convexUser?._id) return;
 
-    if (useConvex && convexUser?._id) {
-      recordAccess({
-        userId: convexUser._id,
-        moduleId,
-        programId: program._id,
-        organizationId: convexUser.organizationId,
-      }).catch(() => {});
-      return;
-    }
-
-    if (useConvex) return;
-
-    const storageId = getRecentStorageUserId(currentUser);
-    if (!storageId) return;
-    const enrolledPrograms = MOCK_PROGRAM_ENROLLMENTS[storageId] ?? [];
-    if (!enrolledPrograms.includes(program._id)) return;
-
-    recordRecentModule({
-      userId: storageId,
+    recordAccess({
+      userId: convexUser._id,
       moduleId,
       programId: program._id,
-      programTitle: program.title,
-      moduleTitle: module.title,
-    });
-  }, [
-    moduleId,
-    module,
-    program,
-    useConvex,
-    convexUser,
-    currentUser,
-    recordAccess,
-  ]);
-
-  const examQuestions = useConvex
-    ? (convexExamQuestions ?? [])
-    : (MOCK_EXAM_QUESTIONS[moduleId] ?? []);
+      organizationId: convexUser.organizationId,
+    }).catch(() => {});
+  }, [moduleId, module, program, convexUser, recordAccess]);
 
   return {
     module,
@@ -175,10 +105,9 @@ export function useLearnerModule(moduleId) {
     program,
     progress,
     isLessonCompleted,
-    examQuestions,
+    examQuestions: convexExamQuestions ?? [],
     isLoading,
     notFound,
-    isConvex: useConvex,
     convexUser,
   };
 }

@@ -16,15 +16,11 @@ import { Card } from "../../components/ui/Card";
 import { ProgressBar } from "../../components/ui/Progress";
 import { useProgramEvaluation } from "../../hooks/useProgramEvaluation";
 import { projectFinalScore } from "../../lib/evaluation";
-import { MOCK_TRAINING_PROGRAM } from "../../lib/mockData";
-
-const MOCK_PROGRAM_ROUTE_ID = "prog1";
 
 export default function ProgramEvaluationPage() {
   const { t } = useTranslation();
-  const { programId: routeProgramId } = useParams();
+  const { programId } = useParams();
   const navigate = useNavigate();
-  const programId = routeProgramId || MOCK_PROGRAM_ROUTE_ID;
   const { evaluation, isLoading, sessionBlocked, handleEnroll, handleFinalize } =
     useProgramEvaluation(programId);
 

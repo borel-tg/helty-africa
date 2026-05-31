@@ -9,27 +9,23 @@ import { ProgressBar } from "../../components/ui/Progress";
 import { cn } from "../../lib/utils";
 import { useConvexSession } from "../../hooks/useConvexSession";
 import { useProgramEvaluation } from "../../hooks/useProgramEvaluation";
-import { MOCK_GENERAL_EXAM_QUESTIONS } from "../../lib/mockData";
 
 export default function GeneralExamPage() {
   const { t } = useTranslation();
   const { programId } = useParams();
   const navigate = useNavigate();
   const { convexUser } = useConvexSession();
-  const { evaluation, mockGeneralQuestions, isMock } =
-    useProgramEvaluation(programId);
+  const { evaluation, handleFinalize } = useProgramEvaluation(programId);
 
   const convexQuestions = useQuery(
     api.generalExams.listQuestions,
-    programId && !isMock ? { programId } : "skip"
+    programId ? { programId } : "skip"
   );
 
   const startAttempt = useMutation(api.generalExams.startAttempt);
   const submitAttempt = useMutation(api.generalExams.submitAttempt);
 
-  const questions = isMock
-    ? mockGeneralQuestions
-    : (convexQuestions ?? []);
+  const questions = convexQuestions ?? [];
 
   const [started, setStarted] = useState(false);
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -84,7 +80,7 @@ export default function GeneralExamPage() {
     const score =
       totalQ > 0 ? Math.round((correct / totalQ) * 1000) / 10 : 0;
 
-    if (convexUser?._id && !isMock && programId) {
+    if (convexUser?._id && programId) {
       const attemptId = await startAttempt({
         userId: convexUser._id,
         programId,
@@ -98,6 +94,7 @@ export default function GeneralExamPage() {
           selectedOptionId: answers[q._id] ?? "",
         })),
       });
+      await handleFinalize();
     }
 
     navigate(`/learn/program/${programId}/final-results`, {

@@ -7,19 +7,12 @@ import { api } from "../../../convex/_generated/api";
 import { Button } from "../../components/ui/Button";
 import { useAuth } from "../../hooks/useAuth";
 import { useConvexSession } from "../../hooks/useConvexSession";
-import {
-  MOCK_TRAINING_PROGRAM,
-  MOCK_PROGRAM_CERTIFICATES,
-} from "../../lib/mockData";
 import { CertificateView } from "../../components/certificate/CertificateView";
 import { mergeTemplate } from "../../lib/certificate/defaults";
 import { downloadCertificatePdf } from "../../lib/certificate/downloadCertificate";
 
-const MOCK_PROGRAM_ROUTE = "prog1";
-
 export default function CertificatePage() {
-  const { programId: routeProgramId, moduleId: legacyModuleId } = useParams();
-  const programId = routeProgramId || (legacyModuleId ? null : MOCK_PROGRAM_ROUTE);
+  const { programId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
@@ -28,34 +21,26 @@ export default function CertificatePage() {
   const certRef = useRef(null);
   const [downloading, setDownloading] = useState(false);
 
-  const isMockProgram = !programId || programId.startsWith("prog");
-  const convexProgramId =
-    programId && !isMockProgram ? programId : undefined;
-
   const issueCertificate = useMutation(api.certificates.issue);
 
   const certificate = useQuery(
     api.certificates.getForUserProgram,
-    convexUser?._id && convexProgramId
-      ? { userId: convexUser._id, programId: convexProgramId }
+    convexUser?._id && programId
+      ? { userId: convexUser._id, programId }
       : "skip"
   );
 
   const convexProgram = useQuery(
     api.trainingPrograms.getById,
-    convexProgramId ? { programId: convexProgramId } : "skip"
+    programId ? { programId } : "skip"
   );
 
-  const mockCert = currentUser?._id
-    ? MOCK_PROGRAM_CERTIFICATES[currentUser._id]
-    : null;
-  const examState = location.state;
-  const scoreFromState = examState?.score;
+  const scoreFromState = location.state?.score;
 
   useEffect(() => {
     if (
       !convexUser?._id ||
-      !convexProgramId ||
+      !programId ||
       !convexUser.organizationId ||
       certificate === undefined ||
       certificate !== null
@@ -66,30 +51,25 @@ export default function CertificatePage() {
 
     issueCertificate({
       userId: convexUser._id,
-      programId: convexProgramId,
+      programId,
       organizationId: convexUser.organizationId,
       score: scoreFromState,
     }).catch(() => {});
-  }, [convexUser, convexProgramId, certificate, scoreFromState, issueCertificate]);
+  }, [convexUser, programId, certificate, scoreFromState, issueCertificate]);
 
   const template = mergeTemplate(savedTemplate);
   const learnerName = currentUser?.name ?? "—";
   const programTitle =
-    convexProgram?.program?.title ??
-    MOCK_TRAINING_PROGRAM.title ??
-    "Training program";
-  const score =
-    certificate?.score ?? mockCert?.score ?? scoreFromState ?? null;
-  const issuedAt =
-    certificate?.issuedAt ?? mockCert?.issuedAt ?? Date.now();
-  const certificateNumber =
-    certificate?.certificateNumber ?? mockCert?.certificateNumber;
+    convexProgram?.program?.title ?? "Training program";
+  const score = certificate?.score ?? scoreFromState ?? null;
+  const issuedAt = certificate?.issuedAt ?? Date.now();
+  const certificateNumber = certificate?.certificateNumber;
   const verifyUrl = certificateNumber
     ? `${window.location.origin}/verify/${certificateNumber}`
     : undefined;
 
-  const isLoading = convexUser === undefined && currentUser?.email;
-  const hasCert = certificate || mockCert || scoreFromState != null;
+  const isLoading = convexUser?._id && certificate === undefined;
+  const hasCert = certificate || scoreFromState != null;
 
   if (!hasCert && !isLoading) {
     return (
@@ -98,7 +78,7 @@ export default function CertificatePage() {
         <Button
           variant="outline"
           onClick={() =>
-            navigate(`/learn/program/${programId || MOCK_PROGRAM_ROUTE}/evaluation`)
+            navigate(`/learn/program/${programId}/evaluation`)
           }
         >
           {t("evaluation.backToEvaluation")}
@@ -127,60 +107,40 @@ export default function CertificatePage() {
     <div className="p-4 md:p-6 max-w-4xl mx-auto certificate-print-root">
       <button
         type="button"
-        onClick={() =>
-          navigate(
-            `/learn/program/${programId || MOCK_PROGRAM_ROUTE}/evaluation`
-          )
-        }
+        onClick={() => navigate(`/learn/program/${programId}/evaluation`)}
         className="flex items-center gap-2 text-sm text-text-secondary hover:text-primary mb-6 transition-colors print:hidden"
       >
         <ArrowLeft size={16} />
         {t("evaluation.backToEvaluation")}
       </button>
 
-      <div className="flex gap-3 mb-6 print:hidden">
-        <Button onClick={handleDownload} size="md" loading={downloading}>
-          <Download size={16} />
-          {t("certificate.downloadPdf")}
-        </Button>
-        <Button variant="outline" size="md" onClick={() => window.print()}>
-          <Printer size={16} />
-          {t("certificate.print")}
-        </Button>
-      </div>
-
       {isLoading ? (
         <p className="text-center text-text-secondary">{t("certificate.loading")}</p>
       ) : (
-        <div ref={certRef} className="mx-auto print:shadow-none">
+        <>
+          <div className="flex flex-wrap gap-3 mb-6 print:hidden">
+            <Button onClick={handleDownload} loading={downloading}>
+              <Download size={16} />
+              {t("certificate.downloadPdf")}
+            </Button>
+            <Button variant="outline" onClick={() => window.print()}>
+              <Printer size={16} />
+              {t("certificate.print")}
+            </Button>
+          </div>
+
           <CertificateView
+            ref={certRef}
             template={template}
             learnerName={learnerName}
-            moduleTitle={programTitle}
+            programTitle={programTitle}
             score={score}
             issuedAt={issuedAt}
             certificateNumber={certificateNumber}
             verifyUrl={verifyUrl}
           />
-        </div>
+        </>
       )}
-
-      <style>{`
-        @media print {
-          body * { visibility: hidden; }
-          .certificate-print-root,
-          .certificate-print-root * { visibility: visible; }
-          .certificate-print-root {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            padding: 0;
-            margin: 0;
-          }
-          .print\\:hidden { display: none !important; }
-        }
-      `}</style>
     </div>
   );
 }

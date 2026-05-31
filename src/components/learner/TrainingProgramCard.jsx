@@ -1,38 +1,34 @@
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "convex/react";
 import { GraduationCap, ChevronRight } from "lucide-react";
+import { api } from "../../../convex/_generated/api";
 import { Card } from "../ui/Card";
 import { Button } from "../ui/Button";
 import { ProgressBar } from "../ui/Progress";
-import { getModuleLessonProgress } from "../../lib/moduleProgress";
-import { MOCK_PROGRAM_EXAM_BEST } from "../../lib/mockData";
-
-function getProgramProgress(program, userId) {
-  const moduleIds = program.moduleIds ?? [];
-  if (moduleIds.length === 0) {
-    return { completedModules: 0, totalModules: 0, pct: 0 };
-  }
-
-  let completed = 0;
-  for (const modId of moduleIds) {
-    const { allComplete } = getModuleLessonProgress(modId);
-    const best = MOCK_PROGRAM_EXAM_BEST[userId]?.[modId];
-    if (allComplete || best != null) completed++;
-  }
-
-  return {
-    completedModules: completed,
-    totalModules: moduleIds.length,
-    pct: Math.round((completed / moduleIds.length) * 100),
-  };
-}
 
 export function TrainingProgramCard({ program, userId, onJoin }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const enrolled = program.enrolled;
   const moduleCount = program.moduleCount ?? program.moduleIds?.length ?? 0;
-  const progress = enrolled ? getProgramProgress(program, userId) : null;
+
+  const progress = useQuery(
+    api.trainingPrograms.getLearnerProgramProgress,
+    enrolled && userId && program._id
+      ? { userId, programId: program._id }
+      : "skip"
+  );
+
+  const moduleSummaries = progress?.moduleSummaries ?? [];
+  const totalModules = moduleSummaries.length || moduleCount;
+  const completedModules = moduleSummaries.filter(
+    (m) => m.passed || m.hasSubmittedAttempt
+  ).length;
+  const pct =
+    totalModules > 0
+      ? Math.round((completedModules / totalModules) * 100)
+      : 0;
 
   const openProgram = () => {
     navigate(`/learn/program/${program._id}`);
@@ -54,18 +50,18 @@ export function TrainingProgramCard({ program, userId, onJoin }) {
           </p>
           <p className="text-xs text-text-secondary mt-2">
             {t("trainings.moduleCount", { count: moduleCount })}
-            {enrolled && progress && progress.totalModules > 0 && (
+            {enrolled && totalModules > 0 && (
               <>
                 {" · "}
                 {t("trainings.modulesProgress", {
-                  done: progress.completedModules,
-                  total: progress.totalModules,
+                  done: completedModules,
+                  total: totalModules,
                 })}
               </>
             )}
           </p>
-          {enrolled && progress && progress.totalModules > 0 && (
-            <ProgressBar value={progress.pct} className="mt-2" size="sm" />
+          {enrolled && totalModules > 0 && (
+            <ProgressBar value={pct} className="mt-2" size="sm" />
           )}
         </div>
         <ChevronRight size={18} className="text-gray-300 shrink-0 mt-1" />

@@ -1,21 +1,38 @@
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useQuery } from "convex/react";
 import { BookOpen, ChevronRight, Play, RotateCcw } from "lucide-react";
+import { api } from "../../../convex/_generated/api";
 import { Card } from "../ui/Card";
 import { StatusBadge } from "../ui/Badge";
 import { ProgressBar } from "../ui/Progress";
 import { Button } from "../ui/Button";
-import { getModuleLessonProgress } from "../../lib/moduleProgress";
 
-export function ProgramModuleCard({ module, examSummary }) {
+export function ProgramModuleCard({ module, examSummary, userId }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { completedCount, total, pct, status } = getModuleLessonProgress(module._id);
 
-  const displayStatus =
-    examSummary?.passed && examSummary?.hasSubmittedAttempt
-      ? "completed"
-      : status;
+  const lessons = useQuery(api.lessons.listByModule, { moduleId: module._id });
+  const progressRows = useQuery(
+    api.progress.getModuleProgress,
+    userId ? { userId, moduleId: module._id } : "skip"
+  );
+
+  const total = lessons?.length ?? 0;
+  const completedIds = new Set(
+    (progressRows ?? []).filter((p) => p.completed).map((p) => p.lessonId)
+  );
+  const completedCount = completedIds.size;
+  const pct = total > 0 ? Math.round((completedCount / total) * 100) : 0;
+
+  let status = "not_started";
+  if (examSummary?.passed && examSummary?.hasSubmittedAttempt) {
+    status = "completed";
+  } else if (total > 0 && completedCount === total) {
+    status = "ready_for_exam";
+  } else if (completedCount > 0) {
+    status = "in_progress";
+  }
 
   const ctaLabel = {
     not_started: t("learner.start"),
@@ -35,7 +52,7 @@ export function ProgramModuleCard({ module, examSummary }) {
         <div className="absolute bottom-0 left-0 right-0">
           <ProgressBar
             value={pct}
-            color={displayStatus === "completed" ? "success" : "primary"}
+            color={status === "completed" ? "success" : "primary"}
             size="xs"
           />
         </div>
@@ -45,7 +62,7 @@ export function ProgramModuleCard({ module, examSummary }) {
           <h3 className="text-base font-semibold text-text-primary leading-snug flex-1">
             {module.title}
           </h3>
-          <StatusBadge status={displayStatus} />
+          <StatusBadge status={status} />
         </div>
         <p className="text-sm text-text-secondary line-clamp-2 mb-3">
           {module.description}
@@ -55,21 +72,23 @@ export function ProgramModuleCard({ module, examSummary }) {
             {t("learner.lessonsDone", { done: completedCount, total })}
           </span>
           {examSummary?.bestScore != null && (
-            <span>{t("trainings.moduleBestScore", { score: examSummary.bestScore })}</span>
+            <span>
+              {t("trainings.moduleBestScore", { score: examSummary.bestScore })}
+            </span>
           )}
         </div>
         <Button
           size="sm"
-          variant={displayStatus === "ready_for_exam" ? "secondary" : "primary"}
+          variant={status === "ready_for_exam" ? "secondary" : "primary"}
           fullWidth
           onClick={(e) => {
             e.stopPropagation();
             navigate(`/learn/module/${module._id}`);
           }}
         >
-          {displayStatus === "in_progress" ? <Play size={14} /> : null}
-          {displayStatus === "ready_for_exam" ? <RotateCcw size={14} /> : null}
-          {ctaLabel[displayStatus] ?? ctaLabel.in_progress}
+          {status === "in_progress" ? <Play size={14} /> : null}
+          {status === "ready_for_exam" ? <RotateCcw size={14} /> : null}
+          {ctaLabel[status] ?? ctaLabel.in_progress}
           <ChevronRight size={14} className="ml-auto" />
         </Button>
       </div>

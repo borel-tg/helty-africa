@@ -1,41 +1,46 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
 import { useAuth } from "./useAuth";
+import { useConvexSession } from "./useConvexSession";
 import { LEADERBOARD_PERIODS } from "../lib/leaderboard/constants";
-import { getMockOrgLeaderboard } from "../lib/mockLeaderboard";
 
 /**
- * Organization leaderboard (learners, admins, leads).
- *
- * @param {object} [options]
- * @param {boolean} [options.highlightViewer=true] — false for admin/lead staff views
- * @param {"week"|"today"} [options.initialPeriod]
- *
- * When Convex auth is wired, swap the body for:
- *   useQuery(api.leaderboard.getOrgLeaderboard, { organizationId, viewerUserId, period })
+ * Organization leaderboard for learners, admins, and leads.
  */
 export function useOrgLeaderboard(options = {}) {
-  const { highlightViewer = true, initialPeriod = LEADERBOARD_PERIODS.WEEK } = options;
+  const {
+    highlightViewer = true,
+    initialPeriod = LEADERBOARD_PERIODS.WEEK,
+    programId,
+    learnerCategoryKey,
+  } = options;
   const { currentUser } = useAuth();
+  const { convexUser } = useConvexSession();
   const [period, setPeriod] = useState(initialPeriod);
 
   const viewerUserId =
-    highlightViewer && currentUser?.role === "learner" ? currentUser._id : null;
+    highlightViewer && currentUser?.role === "learner"
+      ? currentUser._id
+      : convexUser?._id;
 
-  const data = useMemo(() => {
-    if (!currentUser?.organizationId) {
-      return null;
-    }
-    return getMockOrgLeaderboard(
-      period,
-      viewerUserId,
-      currentUser.organizationId
-    );
-  }, [period, viewerUserId, currentUser?.organizationId]);
+  const data = useQuery(
+    api.leaderboard.getOrgLeaderboard,
+    convexUser?.organizationId && viewerUserId
+      ? {
+          organizationId: convexUser.organizationId,
+          viewerUserId,
+          period,
+          ...(programId ? { programId } : {}),
+          ...(learnerCategoryKey ? { learnerCategoryKey } : {}),
+        }
+      : "skip"
+  );
 
   return {
     period,
     setPeriod,
-    data,
-    isLoading: false,
+    data: data ?? null,
+    isLoading: Boolean(convexUser?.organizationId && data === undefined),
   };
 }

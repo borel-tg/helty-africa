@@ -89,7 +89,11 @@ async function buildEvaluationSnapshot(
   for (const link of links) {
     const mod = await ctx.db.get(link.moduleId);
     if (!mod || mod.status !== "published") continue;
-    modules.push({ ...mod, order: link.order });
+    const lessons = await ctx.db
+      .query("lessons")
+      .withIndex("by_module_order", (q: any) => q.eq("moduleId", mod._id))
+      .collect();
+    modules.push({ ...mod, order: link.order, lessonCount: lessons.length });
     const [summary] = await getModuleExamSummaries(ctx, userId, [mod._id]);
     moduleSummaries.push(summary);
   }

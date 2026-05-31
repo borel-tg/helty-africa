@@ -1,10 +1,11 @@
+import { useNavigate } from "react-router-dom";
+import { useQuery, useMutation } from "convex/react";
 import { Bell, ChevronDown, LogOut, Menu } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { api } from "../../../convex/_generated/api";
 import { cn } from "../../lib/utils";
 import { useAuth } from "../../hooks/useAuth";
-import { MOCK_NOTIFICATIONS } from "../../lib/mockData";
 import { formatTimeAgo } from "../../lib/utils";
 
 export function TopBar({ title, onMenuToggle }) {
@@ -14,6 +15,15 @@ export function TopBar({ title, onMenuToggle }) {
   const [showProfile, setShowProfile] = useState(false);
   const profileRef = useRef(null);
   const navigate = useNavigate();
+
+  const notifications = useQuery(
+    api.notifications.listEnrichedForRecipient,
+    currentUser?._id && (currentUser.role === "lead" || currentUser.role === "admin" || currentUser.role === "super_admin")
+      ? { recipientId: currentUser._id }
+      : "skip"
+  );
+
+  const markAllRead = useMutation(api.notifications.markAllRead);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -31,16 +41,21 @@ export function TopBar({ title, onMenuToggle }) {
     };
   }, [showProfile]);
 
-  const unread = MOCK_NOTIFICATIONS.filter((n) => !n.read).length;
+  const unread = (notifications ?? []).filter((n) => !n.read).length;
 
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
+  const handleMarkAllRead = () => {
+    if (currentUser?._id) {
+      markAllRead({ recipientId: currentUser._id }).catch(() => {});
+    }
+  };
+
   return (
     <header className="bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3 sticky top-0 z-30 shadow-sm">
-      {/* Mobile menu toggle */}
       <button
         className="md:hidden p-2 text-gray-500 hover:text-text-primary min-h-[44px] min-w-[44px]"
         onClick={onMenuToggle}
@@ -49,12 +64,10 @@ export function TopBar({ title, onMenuToggle }) {
         <Menu size={20} />
       </button>
 
-      {/* Title */}
       <h1 className="text-base font-semibold text-text-primary flex-1 truncate">
         {title}
       </h1>
 
-      {/* Notification bell */}
       <div className="relative">
         <button
           onClick={() => {
@@ -75,22 +88,25 @@ export function TopBar({ title, onMenuToggle }) {
           )}
         </button>
 
-        {/* Dropdown */}
         {showNotifs && (
           <div className="fixed right-2 top-[4.25rem] w-[min(20rem,calc(100vw-1rem))] sm:absolute sm:right-0 sm:top-full sm:mt-1 sm:w-80 bg-white rounded-card shadow-modal border border-gray-100 z-50">
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
               <h3 className="text-sm font-semibold">{t("common.notifications")}</h3>
-              <button className="text-xs text-primary hover:underline">
+              <button
+                type="button"
+                onClick={handleMarkAllRead}
+                className="text-xs text-primary hover:underline"
+              >
                 {t("common.markAllRead")}
               </button>
             </div>
             <div className="max-h-72 overflow-y-auto">
-              {MOCK_NOTIFICATIONS.length === 0 ? (
+              {!notifications || notifications.length === 0 ? (
                 <p className="text-sm text-text-secondary text-center py-6">
                   {t("common.noNotifications")}
                 </p>
               ) : (
-                MOCK_NOTIFICATIONS.map((n) => (
+                notifications.map((n) => (
                   <div
                     key={n._id}
                     className={cn(
@@ -116,7 +132,6 @@ export function TopBar({ title, onMenuToggle }) {
         )}
       </div>
 
-      {/* User profile */}
       <div className="relative flex items-center gap-1" ref={profileRef}>
         <button
           type="button"

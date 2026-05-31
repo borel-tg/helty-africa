@@ -3,18 +3,8 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useAuth } from "./useAuth";
 import { useConvexSession } from "./useConvexSession";
-import {
-  recordRecentModule,
-  getRecentStorageUserId,
-} from "../lib/recentModules";
-import { isConvexModuleId } from "../lib/convexIds";
-import { getProgramForModule } from "../lib/moduleProgram";
-import { MOCK_MODULES, MOCK_PROGRAM_ENROLLMENTS } from "../lib/mockData";
 
-/**
- * Records module access when the learner opens a module or lesson.
- * Convex: DB row (enrolled programs only). Mock: localStorage (enrolled only).
- */
+/** Record module access when a learner opens a module page. */
 export function useRecordModuleAccess(moduleId) {
   const { currentUser } = useAuth();
   const { convexUser } = useConvexSession();
@@ -22,54 +12,24 @@ export function useRecordModuleAccess(moduleId) {
 
   const convexCtx = useQuery(
     api.recentModules.findEnrolledProgramForModule,
-    convexUser?._id && moduleId && isConvexModuleId(moduleId)
+    convexUser?._id && moduleId
       ? { userId: convexUser._id, moduleId }
       : "skip"
   );
 
-  const mockModule = MOCK_MODULES.find((m) => m._id === moduleId);
-  const mockProgram =
-    mockModule && !isConvexModuleId(moduleId)
-      ? getProgramForModule(moduleId)
-      : null;
-
-  const program = convexCtx?.program ?? mockProgram;
-  const module = convexCtx?.module ?? mockModule;
+  const program = convexCtx?.program ?? null;
+  const module = convexCtx?.module ?? null;
 
   useEffect(() => {
-    if (!moduleId || !program || !module) return;
+    if (!moduleId || !program || !convexUser?._id) return;
 
-    if (convexUser?._id && isConvexModuleId(moduleId)) {
-      recordAccess({
-        userId: convexUser._id,
-        moduleId,
-        programId: program._id,
-        organizationId: convexUser.organizationId,
-      }).catch(() => {});
-      return;
-    }
-
-    const storageId = getRecentStorageUserId(currentUser);
-    if (!storageId) return;
-
-    const enrolledPrograms = MOCK_PROGRAM_ENROLLMENTS[storageId] ?? [];
-    if (!enrolledPrograms.includes(program._id)) return;
-
-    recordRecentModule({
-      userId: storageId,
+    recordAccess({
+      userId: convexUser._id,
       moduleId,
       programId: program._id,
-      programTitle: program.title,
-      moduleTitle: module.title,
-    });
-  }, [
-    moduleId,
-    program,
-    module,
-    convexUser,
-    currentUser,
-    recordAccess,
-  ]);
+      organizationId: convexUser.organizationId,
+    }).catch(() => {});
+  }, [moduleId, program, convexUser, recordAccess]);
 
-  return { program, module };
+  return { program, module, currentUser };
 }
