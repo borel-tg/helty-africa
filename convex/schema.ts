@@ -1,6 +1,19 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
+/** Per training program — fully configurable evaluation rules. */
+export const evaluationPolicyValidator = v.object({
+  programPassThreshold: v.number(),
+  moduleExamWeight: v.number(),
+  generalExamWeight: v.number(),
+  generalExamEnabled: v.boolean(),
+  generalExamMaxRetakes: v.union(v.number(), v.literal("unlimited")),
+  unlockGeneralExamMode: v.union(
+    v.literal("all_module_attempts"),
+    v.literal("all_module_passes")
+  ),
+});
+
 export default defineSchema({
   // ── Organizations ──────────────────────────────────────────────
   organizations: defineTable({
@@ -49,6 +62,106 @@ export default defineSchema({
   })
     .index("by_token", ["token"])
     .index("by_email", ["email"]),
+
+  // ── Training programs ─────────────────────────────────────────
+  trainingPrograms: defineTable({
+    organizationId: v.id("organizations"),
+    title: v.string(),
+    description: v.string(),
+    status: v.union(v.literal("draft"), v.literal("published")),
+    /** open = learners can self-enroll; closed = admin assigns only */
+    accessMode: v.union(v.literal("open"), v.literal("closed")),
+    evaluationPolicy: evaluationPolicyValidator,
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_org", ["organizationId"])
+    .index("by_org_status", ["organizationId", "status"]),
+
+  trainingProgramModules: defineTable({
+    programId: v.id("trainingPrograms"),
+    moduleId: v.id("modules"),
+    organizationId: v.id("organizations"),
+    order: v.number(),
+  })
+    .index("by_program", ["programId"])
+    .index("by_program_order", ["programId", "order"])
+    .index("by_module", ["moduleId"]),
+
+  programEnrollments: defineTable({
+    userId: v.id("users"),
+    programId: v.id("trainingPrograms"),
+    organizationId: v.id("organizations"),
+    enrolledAt: v.number(),
+    completedAt: v.optional(v.number()),
+    finalScore: v.optional(v.number()),
+    passed: v.optional(v.boolean()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_program", ["programId"])
+    .index("by_user_program", ["userId", "programId"]),
+
+  /** Last time a learner opened a module (enrolled programs only). */
+  learnerModuleAccess: defineTable({
+    userId: v.id("users"),
+    moduleId: v.id("modules"),
+    programId: v.id("trainingPrograms"),
+    organizationId: v.id("organizations"),
+    lastAccessedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_module", ["userId", "moduleId"]),
+
+  generalExamQuestions: defineTable({
+    programId: v.id("trainingPrograms"),
+    organizationId: v.id("organizations"),
+    questionText: v.string(),
+    imageUrl: v.optional(v.string()),
+    options: v.array(v.object({ id: v.string(), text: v.string() })),
+    correctOptionId: v.string(),
+    /** Copied from a module question for traceability */
+    sourceModuleQuestionId: v.optional(v.id("examQuestions")),
+    order: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_program", ["programId"])
+    .index("by_program_order", ["programId", "order"]),
+
+  generalExamSettings: defineTable({
+    programId: v.id("trainingPrograms"),
+    organizationId: v.id("organizations"),
+    timeLimitMinutes: v.optional(v.number()),
+    showCorrectAnswers: v.boolean(),
+    allowReview: v.boolean(),
+    randomizeQuestions: v.boolean(),
+  }).index("by_program", ["programId"]),
+
+  generalExamAttempts: defineTable({
+    userId: v.id("users"),
+    programId: v.id("trainingPrograms"),
+    organizationId: v.id("organizations"),
+    attemptNumber: v.number(),
+    answers: v.array(
+      v.object({
+        questionId: v.id("generalExamQuestions"),
+        selectedOptionId: v.string(),
+      })
+    ),
+    score: v.optional(v.number()),
+    startedAt: v.number(),
+    submittedAt: v.optional(v.number()),
+    savedAnswers: v.optional(
+      v.array(
+        v.object({
+          questionId: v.id("generalExamQuestions"),
+          selectedOptionId: v.string(),
+        })
+      )
+    ),
+  })
+    .index("by_user_program", ["userId", "programId"])
+    .index("by_program", ["programId"]),
 
   // ── Modules ────────────────────────────────────────────────────
   modules: defineTable({
@@ -176,11 +289,14 @@ export default defineSchema({
     .index("by_user_lesson", ["userId", "lessonId"])
     .index("by_user_module", ["userId", "moduleId"]),
 
-  // ── Certificates ───────────────────────────────────────────────
+  // ── Certificates (program-level; legacy moduleId rows migrated away) ──
   certificates: defineTable({
     userId: v.id("users"),
-    moduleId: v.id("modules"),
+    programId: v.optional(v.id("trainingPrograms")),
     organizationId: v.id("organizations"),
+    generalExamAttemptId: v.optional(v.id("generalExamAttempts")),
+    /** @deprecated Removed after migration — was per-module certificate */
+    moduleId: v.optional(v.id("modules")),
     examAttemptId: v.optional(v.id("examAttempts")),
     score: v.number(),
     issuedAt: v.number(),
@@ -188,6 +304,7 @@ export default defineSchema({
     fileUrl: v.optional(v.string()), // generated PDF in Convex storage
   })
     .index("by_user", ["userId"])
+    .index("by_user_program", ["userId", "programId"])
     .index("by_user_module", ["userId", "moduleId"])
     .index("by_certificate_number", ["certificateNumber"]),
 
