@@ -5,9 +5,11 @@ import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
 
 const ROUTE_TITLE_KEYS = {
-  "/learn": "routes.myTraining",
+  "/learn": "routes.myTrainings",
   "/learn/certificates": "routes.myCertificates",
+  "/learn/program": "routes.programHub",
   "/admin": "routes.adminOverview",
+  "/admin/programs": "routes.programs",
   "/admin/modules": "routes.modules",
   "/admin/employees": "routes.learners",
   "/admin/learners": "routes.learners",
@@ -31,9 +33,14 @@ export function AppLayout() {
     setMobileMenuOpen(false);
   }, [location.pathname]);
 
-  const titleKey = Object.entries(ROUTE_TITLE_KEYS)
-    .sort(([a], [b]) => b.length - a.length)
-    .find(([path]) => location.pathname.startsWith(path))?.[1];
+  const titleKey = (() => {
+    if (location.pathname.includes("/evaluation")) {
+      return "routes.evaluation";
+    }
+    return Object.entries(ROUTE_TITLE_KEYS)
+      .sort(([a], [b]) => b.length - a.length)
+      .find(([path]) => location.pathname.startsWith(path))?.[1];
+  })();
 
   const title = titleKey ? t(titleKey) : t("app.name");
 

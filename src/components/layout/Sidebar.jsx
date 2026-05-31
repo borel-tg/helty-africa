@@ -9,13 +9,20 @@ import {
   Bell,
   Settings,
   LogOut,
+  GraduationCap,
+  ClipboardList,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useAuth } from "../../hooks/useAuth";
 
 const NAV_ITEMS = {
   learner: [
-    { to: "/learn", icon: LayoutDashboard, labelKey: "nav.myTraining" },
+    { to: "/learn", icon: LayoutDashboard, labelKey: "nav.myTrainings" },
+    {
+      to: "/learn/program/prog1/evaluation",
+      icon: ClipboardList,
+      labelKey: "nav.evaluation",
+    },
     { to: "/learn/certificates", icon: Award, labelKey: "nav.certificates" },
   ],
   lead: [
@@ -25,6 +32,7 @@ const NAV_ITEMS = {
   ],
   admin: [
     { to: "/admin", icon: LayoutDashboard, labelKey: "nav.overview" },
+    { to: "/admin/programs", icon: GraduationCap, labelKey: "nav.programs" },
     { to: "/admin/modules", icon: BookOpen, labelKey: "nav.modules" },
     { to: "/admin/learners", icon: Users, labelKey: "nav.learners" },
     { to: "/admin/stats", icon: BarChart2, labelKey: "nav.statistics" },
@@ -33,6 +41,7 @@ const NAV_ITEMS = {
   ],
   super_admin: [
     { to: "/admin", icon: LayoutDashboard, labelKey: "nav.overview" },
+    { to: "/admin/programs", icon: GraduationCap, labelKey: "nav.programs" },
     { to: "/admin/modules", icon: BookOpen, labelKey: "nav.modules" },
     { to: "/admin/learners", icon: Users, labelKey: "nav.learners" },
     { to: "/admin/stats", icon: BarChart2, labelKey: "nav.statistics" },

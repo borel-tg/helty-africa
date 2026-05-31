@@ -18,6 +18,12 @@ import ExamPage from "./pages/learner/ExamPage";
 import ExamResultsPage from "./pages/learner/ExamResultsPage";
 import CertificatePage from "./pages/learner/CertificatePage";
 import MyCertificatesPage from "./pages/learner/MyCertificatesPage";
+import ProgramHubPage from "./pages/learner/ProgramHubPage";
+import ProgramEvaluationPage from "./pages/learner/ProgramEvaluationPage";
+import GeneralExamPage from "./pages/learner/GeneralExamPage";
+import GeneralExamResultsPage from "./pages/learner/GeneralExamResultsPage";
+import TrainingProgramsPage from "./pages/admin/TrainingProgramsPage";
+import TrainingProgramEditorPage from "./pages/admin/TrainingProgramEditorPage";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -89,6 +95,23 @@ export default function App() {
             >
               <Route path="/learn" element={<LearnerDashboard />} />
               <Route path="/learn/certificates" element={<MyCertificatesPage />} />
+              <Route
+                path="/learn/program/:programId/evaluation"
+                element={<ProgramEvaluationPage />}
+              />
+              <Route
+                path="/learn/program/:programId/final-exam"
+                element={<GeneralExamPage />}
+              />
+              <Route
+                path="/learn/program/:programId/final-results"
+                element={<GeneralExamResultsPage />}
+              />
+              <Route
+                path="/learn/program/:programId/certificate"
+                element={<CertificatePage />}
+              />
+              <Route path="/learn/program/:programId" element={<ProgramHubPage />} />
               <Route path="/learn/module/:moduleId" element={<ModulePage />} />
               <Route path="/learn/module/:moduleId/lesson/:lessonId" element={<LessonPage />} />
               <Route path="/learn/module/:moduleId/exam" element={<ExamPage />} />
@@ -112,6 +135,11 @@ export default function App() {
               element={<RequireRole roles={["admin", "super_admin"]} />}
             >
               <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/programs" element={<TrainingProgramsPage />} />
+              <Route
+                path="/admin/programs/:programId"
+                element={<TrainingProgramEditorPage />}
+              />
               <Route path="/admin/modules" element={<ModulesPage />} />
               <Route path="/admin/modules/:moduleId" element={<ModuleEditorPage />} />
               <Route path="/admin/learners" element={<EmployeesPage />} />
