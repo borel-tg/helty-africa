@@ -58,6 +58,8 @@ Open: `http://localhost:5173/register?token=seed-invite-pending`
 
 Flow: email prefilled → prénom, nom, téléphone (+243), catégorie (National / Provincial / Zonal), mot de passe → accès au portail apprenant.
 
+**Manual account create (admin):** requires an email; Resend sends a welcome message with `{SITE_URL}/login`. Share the temporary password with the user separately (not included in the email).
+
 ---
 
 ## Repository

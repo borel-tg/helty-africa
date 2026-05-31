@@ -10,3 +10,7 @@ export function getSiteUrl(): string {
 export function buildRegisterUrl(token: string): string {
   return `${getSiteUrl()}/register?token=${encodeURIComponent(token)}`;
 }
+
+export function buildLoginUrl(): string {
+  return `${getSiteUrl()}/login`;
+}

@@ -1,5 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 import { hashPassword } from "./lib/password";
 import { learnerCategoryKeyValidator } from "./lib/learnerCategories";
 
@@ -60,18 +61,20 @@ export const getByEmail = query({
 
 // ── Mutations ──────────────────────────────────────────────────────────────
 
+const userRoleValidator = v.union(
+  v.literal("super_admin"),
+  v.literal("admin"),
+  v.literal("lead"),
+  v.literal("learner")
+);
+
 export const create = mutation({
   args: {
     organizationId: v.id("organizations"),
     name: v.string(),
     email: v.optional(v.string()),
     phone: v.optional(v.string()),
-    role: v.union(
-      v.literal("super_admin"),
-      v.literal("admin"),
-      v.literal("lead"),
-      v.literal("learner")
-    ),
+    role: userRoleValidator,
     passwordHash: v.optional(v.string()),
     password: v.optional(v.string()),
     mustChangePassword: v.optional(v.boolean()),
@@ -92,6 +95,62 @@ export const create = mutation({
       status: "active",
       createdAt: now,
     });
+  },
+});
+
+/** Admin manual create — inserts user and emails login link (requires email). */
+export const createManualAccount = mutation({
+  args: {
+    organizationId: v.id("organizations"),
+    name: v.string(),
+    email: v.string(),
+    phone: v.optional(v.string()),
+    role: userRoleValidator,
+    password: v.string(),
+    learnerCategoryKey: v.optional(learnerCategoryKeyValidator),
+    leadId: v.optional(v.id("users")),
+  },
+  handler: async (ctx, args) => {
+    const normalizedEmail = args.email.trim().toLowerCase();
+    if (!normalizedEmail) {
+      throw new Error("L'adresse e-mail est obligatoire pour envoyer le lien de connexion.");
+    }
+
+    const existing = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", normalizedEmail))
+      .first();
+    if (existing) {
+      throw new Error("Un compte existe déjà avec cette adresse e-mail.");
+    }
+
+    const passwordHash = await hashPassword(args.password);
+    const now = Date.now();
+
+    const userId = await ctx.db.insert("users", {
+      organizationId: args.organizationId,
+      name: args.name.trim(),
+      email: normalizedEmail,
+      phone: args.phone,
+      role: args.role,
+      learnerCategoryKey:
+        args.role === "learner" ? args.learnerCategoryKey : undefined,
+      leadId: args.leadId,
+      passwordHash,
+      mustChangePassword: true,
+      status: "active",
+      createdAt: now,
+    });
+
+    const org = await ctx.db.get(args.organizationId);
+    await ctx.scheduler.runAfter(0, internal.emails.sendManualAccountEmail, {
+      to: normalizedEmail,
+      name: args.name.trim(),
+      role: args.role,
+      organizationName: org?.name,
+    });
+
+    return { userId, email: normalizedEmail };
   },
 });
 

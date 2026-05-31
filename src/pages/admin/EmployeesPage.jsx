@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "convex/react";
@@ -15,6 +15,21 @@ import { useToast } from "../../components/ui/Toast";
 import { useConvexSession } from "../../hooks/useConvexSession";
 import { formatTimeAgo } from "../../lib/utils";
 import { LEARNER_CATEGORIES } from "../../lib/learnerCategories";
+import {
+  DRC_COUNTRY_CODE,
+  formatDrcPhoneInput,
+  isValidDrcPhone,
+  normalizeDrcPhone,
+} from "../../lib/phoneDrc";
+
+const MANUAL_CREATE_INITIAL = {
+  name: "",
+  email: "",
+  phone: DRC_COUNTRY_CODE + " ",
+  role: "learner",
+  learnerCategoryKey: "zonal",
+  tempPassword: "",
+};
 function InviteModal({ open, onClose, organizationId, invitedBy }) {
   const { t } = useTranslation();
   const toast = useToast();
@@ -65,36 +80,63 @@ function InviteModal({ open, onClose, organizationId, invitedBy }) {
 function CreateManualModal({ open, onClose, organizationId }) {
   const { t } = useTranslation();
   const toast = useToast();
-  const createUser = useMutation(api.users.create);
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    role: "learner",
-    learnerCategoryKey: "zonal",
-    tempPassword: "",
-  });
+  const createManualAccount = useMutation(api.users.createManualAccount);
+  const [form, setForm] = useState(MANUAL_CREATE_INITIAL);
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const update = (f) => (e) => setForm((p) => ({ ...p, [f]: e.target.value }));
 
+  useEffect(() => {
+    if (open) {
+      setForm(MANUAL_CREATE_INITIAL);
+      setErrors({});
+    }
+  }, [open]);
+
+  const handlePhoneChange = (e) => {
+    setForm((prev) => ({
+      ...prev,
+      phone: formatDrcPhoneInput(e.target.value),
+    }));
+  };
+
   const handleCreate = async () => {
     if (!form.name.trim() || !organizationId) return;
+    const nextErrors = {};
+    const email = form.email.trim();
+    if (!email) {
+      nextErrors.email = t("admin.emailRequiredForManualCreate");
+    }
+    if (!isValidDrcPhone(form.phone)) {
+      nextErrors.phone = t("auth.phoneInvalidDrc");
+    }
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
+      return;
+    }
+    setErrors({});
     setLoading(true);
     try {
-      await createUser({
+      const phone = normalizeDrcPhone(form.phone);
+      await createManualAccount({
         organizationId,
         name: form.name.trim(),
-        email: form.email.trim() || undefined,
-        phone: form.phone.trim() || undefined,
+        email,
+        phone: phone ?? undefined,
         role: form.role,
         learnerCategoryKey:
           form.role === "learner" ? form.learnerCategoryKey || undefined : undefined,
         password: form.tempPassword || "demo1234",
       });
-      toast.success(t("admin.accountCreatedFor", { name: form.name }));
+      toast.success(
+        t("admin.accountCreatedWithLoginEmail", {
+          name: form.name,
+          email,
+        })
+      );
       onClose();
-    } catch {
-      toast.error(t("common.error"));
+    } catch (err) {
+      toast.error(err.message || t("common.error"));
     } finally {
       setLoading(false);
     }
@@ -111,8 +153,26 @@ function CreateManualModal({ open, onClose, organizationId }) {
     >
       <div className="space-y-4">
         <Input label={`${t("admin.fullName")} *`} placeholder={t("admin.fullNamePlaceholder")} value={form.name} onChange={update("name")} />
-        <Input label={t("admin.phoneOptional")} type="email" placeholder={t("admin.emailPlaceholder")} value={form.email} onChange={update("email")} leftIcon={<Mail size={16} />} />
-        <Input label={`${t("admin.phoneNumber")} *`} type="tel" placeholder={t("admin.phonePlaceholder")} value={form.phone} onChange={update("phone")} leftIcon={<Phone size={16} />} />
+        <Input
+          label={`${t("admin.emailAddress")} *`}
+          type="email"
+          placeholder={t("admin.emailPlaceholder")}
+          value={form.email}
+          onChange={update("email")}
+          error={errors.email}
+          helperText={t("admin.manualCreateEmailHelper")}
+          leftIcon={<Mail size={16} />}
+        />
+        <Input
+          label={`${t("admin.phoneNumber")} *`}
+          type="tel"
+          value={form.phone}
+          onChange={handlePhoneChange}
+          error={errors.phone}
+          helperText={t("auth.phoneHelperDrc")}
+          autoComplete="tel"
+          leftIcon={<Phone size={16} />}
+        />
         <Select label={t("admin.role")} value={form.role} onChange={update("role")}>
           <option value="learner">{t("roles.learner")}</option>
           <option value="lead">{t("roles.lead")}</option>
