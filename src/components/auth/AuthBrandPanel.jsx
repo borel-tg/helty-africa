@@ -2,9 +2,10 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { cn } from "../../lib/utils";
+import congoMap from "../../assets/congo-logo.png";
 import { PartnerLogos } from "./PartnerLogos";
 
-const TESTIMONIAL_KEYS = ["testimonial1", "testimonial2"];
+const TESTIMONIAL_KEYS = ["testimonial1", "testimonial2", "testimonial3"];
 
 const AVATAR_COLORS = ["bg-primary-300", "bg-secondary-300", "bg-primary-400"];
 

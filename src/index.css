@@ -62,7 +62,7 @@
 
   /* Partner logo marquee (auth landing) */
   .partner-marquee-track {
-    animation: partner-marquee 35s linear infinite;
+    animation: partner-marquee 28s linear infinite;
     will-change: transform;
   }
 

@@ -1,43 +1,111 @@
 /**
- * Partner / supporter logos for the auth marquee.
- *
- * To use a logo: add the image under `src/assets/partners/` and set `logo`
- * to a static import, e.g. `import whoLogo from "../assets/partners/who.svg"`.
- * Leave `logo` null to show the text fallback until assets are ready.
+ * Partner logos for the auth marquee — auto-loaded from `src/assets/partners/`.
+ * Add svg/png/jpg/webp files to that folder (one brand per normalized id).
  */
 
-import omsLogo from "../assets/partners/oms.svg";
-import unicefLogo from "../assets/partners/unicef.svg";
+const logoModules = import.meta.glob("../assets/partners/*.{svg,png,jpg,jpeg,webp}", {
+  eager: true,
+  import: "default",
+  query: "?url",
+});
 
-export const PARTNERS = [
-  {
-    id: "etat-congolais",
-    name: "État congolais",
-    logo: null,
-    logoAlt: "État congolais",
+const EXT_PRIORITY = { svg: 0, png: 1, webp: 2, jpg: 3, jpeg: 4 };
+
+/** Display names / alt text by normalized id (filename without extension, `-logo` stripped). */
+const PARTNER_META = {
+  cdc: {
+    name: "CDC",
+    logoAlt: "Centers for Disease Control and Prevention",
   },
-  {
-    id: "ministere-sante-rdc",
-    name: "Ministère de la Santé (RDC)",
-    logo: null,
-    logoAlt: "Ministère de la Santé Publique, Hygiène et Prévoyance Sociale de la RDC",
+  "gates-foundation": {
+    name: "Fondation Gates",
+    logoAlt: "Fondation Bill & Melinda Gates",
   },
-  {
-    id: "oms",
+  oim: {
+    name: "OIM",
+    logoAlt: "Organisation internationale pour les migrations",
+  },
+  oms: {
     name: "OMS",
-    logo: omsLogo,
     logoAlt: "Organisation mondiale de la Santé",
   },
-  {
-    id: "unicef",
+  path: {
+    name: "PATH",
+    logoAlt: "PATH",
+  },
+  rdc: {
+    name: "RDC",
+    logoAlt: "République démocratique du Congo",
+  },
+  rotary: {
+    name: "Rotary",
+    logoAlt: "Rotary International",
+  },
+  "solina-center": {
+    name: "Solina Center",
+    logoAlt: "Solina Center",
+  },
+  unicef: {
     name: "UNICEF",
-    logo: unicefLogo,
     logoAlt: "UNICEF",
   },
-  {
-    id: "pev-rdc",
-    name: "PEV RDC",
-    logo: null,
-    logoAlt: "Programme Élargi de Vaccination de la RDC",
+  "village-reach": {
+    name: "VillageReach",
+    logoAlt: "VillageReach",
   },
-];
+};
+
+function stemFromPath(path) {
+  const file = path.split("/").pop() ?? "";
+  return file.replace(/\.[^.]+$/, "");
+}
+
+function extensionFromPath(path) {
+  const match = path.match(/\.([^.]+)$/);
+  return match ? match[1].toLowerCase() : "";
+}
+
+/** `oms-logo` and `oms` → `oms` so we keep one asset per partner. */
+function normalizePartnerId(stem) {
+  return stem.replace(/-logo$/i, "").toLowerCase();
+}
+
+function defaultNameFromStem(stem) {
+  return stem
+    .split(/[-_]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function pickBestLogoPerPartner(entries) {
+  const byId = new Map();
+
+  for (const [path, logo] of entries) {
+    const stem = stemFromPath(path);
+    const id = normalizePartnerId(stem);
+    const ext = extensionFromPath(path);
+    const priority = EXT_PRIORITY[ext] ?? 99;
+    const existing = byId.get(id);
+
+    if (!existing || priority < existing.priority) {
+      byId.set(id, { id, logo, priority, stem });
+    }
+  }
+
+  return [...byId.values()];
+}
+
+const resolved = pickBestLogoPerPartner(Object.entries(logoModules));
+
+export const PARTNERS = resolved
+  .map(({ id, logo }) => {
+    const meta = PARTNER_META[id];
+    return {
+      id,
+      name: meta?.name ?? defaultNameFromStem(id),
+      logo,
+      logoAlt: meta?.logoAlt ?? meta?.name ?? defaultNameFromStem(id),
+    };
+  })
+  .sort((a, b) => a.name.localeCompare(b.name, "fr"));
