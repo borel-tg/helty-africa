@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import congoMap from "../../assets/congo-logo.png";
 import { APP_BRAND_INITIAL, APP_BRAND_NAME } from "../../lib/brand";
 import { AuthBrandPanel } from "./AuthBrandPanel";
 import { AuthFooter } from "./AuthFooter";
@@ -22,8 +23,14 @@ export function AuthLayout({
       </div>
 
       {/* Form panel */}
-      <div className="order-2 lg:order-2 lg:row-start-1 flex flex-col justify-center px-5 py-8 sm:px-10 lg:px-14 xl:px-20">
-        <div className="w-full max-w-md mx-auto lg:mx-0 lg:max-w-sm xl:max-w-md">
+      <div className="relative order-2 lg:order-2 lg:row-start-1 flex flex-col justify-center overflow-hidden px-5 py-8 sm:px-10 lg:px-14 xl:px-20">
+        <img
+          src={congoMap}
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-6 -right-4 w-[min(72vw,320px)] max-w-none object-contain opacity-[0.06] select-none lg:opacity-[0.05] lg:w-[min(42vw,380px)] lg:-right-8"
+        />
+        <div className="relative z-10 w-full max-w-md mx-auto lg:mx-0 lg:max-w-sm xl:max-w-md">
           <Link
             to="/login"
             className="inline-flex items-center gap-2 mb-8 lg:mb-10 group"
@@ -47,7 +54,7 @@ export function AuthLayout({
             )}
           </div>
 
-          <div className="bg-white rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.06)] border border-gray-100/80 p-6 sm:p-8">
+          <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.06)] border border-gray-100/80 p-6 sm:p-8">
             {children}
           </div>
         </div>

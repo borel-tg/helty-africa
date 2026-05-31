@@ -21,6 +21,10 @@ const PARTNER_META = {
     name: "Fondation Gates",
     logoAlt: "Fondation Bill & Melinda Gates",
   },
+  geip: {
+    name: "GEIP",
+    logoAlt: "GEIP",
+  },
   oim: {
     name: "OIM",
     logoAlt: "Organisation internationale pour les migrations",

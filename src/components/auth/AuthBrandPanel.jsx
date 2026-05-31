@@ -30,17 +30,26 @@ export function AuthBrandPanel({ compact = false }) {
           : "min-h-[200px] p-8 lg:min-h-screen lg:p-12",
       )}
     >
-      {/* Decorative glow */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-30"
-        aria-hidden="true"
-      >
-        <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary-300 blur-3xl" />
-        <div className="absolute bottom-1/3 -left-16 h-48 w-48 rounded-full bg-primary-400 blur-2xl" />
-        <Sparkles
-          className="absolute top-1/4 right-1/4 h-32 w-32 text-white/10"
-          strokeWidth={1}
+      {/* DRC map watermark + decorative glow */}
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+        <img
+          src={congoMap}
+          alt=""
+          className={cn(
+            "absolute object-contain select-none",
+            compact
+              ? "right-0 top-1/2 w-[55%] max-w-[200px] -translate-y-1/2 opacity-[0.12]"
+              : "right-[-6%] bottom-[-4%] w-[min(88%,480px)] max-h-[78%] opacity-[0.16] sm:opacity-[0.14]",
+          )}
         />
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary-300 blur-3xl" />
+          <div className="absolute bottom-1/3 -left-16 h-48 w-48 rounded-full bg-primary-400 blur-2xl" />
+          <Sparkles
+            className="absolute top-1/4 right-1/4 h-32 w-32 text-white/10"
+            strokeWidth={1}
+          />
+        </div>
       </div>
 
       <div className="relative z-10 flex flex-col flex-1 gap-6 lg:gap-8">
