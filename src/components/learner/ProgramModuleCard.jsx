@@ -1,0 +1,78 @@
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { BookOpen, ChevronRight, Play, RotateCcw } from "lucide-react";
+import { Card } from "../ui/Card";
+import { StatusBadge } from "../ui/Badge";
+import { ProgressBar } from "../ui/Progress";
+import { Button } from "../ui/Button";
+import { getModuleLessonProgress } from "../../lib/moduleProgress";
+
+export function ProgramModuleCard({ module, examSummary }) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { completedCount, total, pct, status } = getModuleLessonProgress(module._id);
+
+  const displayStatus =
+    examSummary?.passed && examSummary?.hasSubmittedAttempt
+      ? "completed"
+      : status;
+
+  const ctaLabel = {
+    not_started: t("learner.start"),
+    in_progress: t("learner.resume"),
+    ready_for_exam: t("learner.takeExam"),
+    completed: t("learner.review"),
+    failed: t("learner.contactAdmin"),
+  };
+
+  return (
+    <Card
+      className="overflow-hidden cursor-pointer hover:shadow-md transition-all duration-150"
+      onClick={() => navigate(`/learn/module/${module._id}`)}
+    >
+      <div className="h-32 bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center relative">
+        <BookOpen size={40} className="text-primary opacity-40" />
+        <div className="absolute bottom-0 left-0 right-0">
+          <ProgressBar
+            value={pct}
+            color={displayStatus === "completed" ? "success" : "primary"}
+            size="xs"
+          />
+        </div>
+      </div>
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <h3 className="text-base font-semibold text-text-primary leading-snug flex-1">
+            {module.title}
+          </h3>
+          <StatusBadge status={displayStatus} />
+        </div>
+        <p className="text-sm text-text-secondary line-clamp-2 mb-3">
+          {module.description}
+        </p>
+        <div className="flex flex-wrap items-center gap-3 text-xs text-text-secondary mb-3">
+          <span>
+            {t("learner.lessonsDone", { done: completedCount, total })}
+          </span>
+          {examSummary?.bestScore != null && (
+            <span>{t("trainings.moduleBestScore", { score: examSummary.bestScore })}</span>
+          )}
+        </div>
+        <Button
+          size="sm"
+          variant={displayStatus === "ready_for_exam" ? "secondary" : "primary"}
+          fullWidth
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/learn/module/${module._id}`);
+          }}
+        >
+          {displayStatus === "in_progress" ? <Play size={14} /> : null}
+          {displayStatus === "ready_for_exam" ? <RotateCcw size={14} /> : null}
+          {ctaLabel[displayStatus] ?? ctaLabel.in_progress}
+          <ChevronRight size={14} className="ml-auto" />
+        </Button>
+      </div>
+    </Card>
+  );
+}
