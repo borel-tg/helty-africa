@@ -16,23 +16,27 @@ import { ProgressBar } from "../../components/ui/Progress";
 import { LeaderboardCard } from "../../components/leaderboard/LeaderboardCard";
 import { ProgramModuleCard } from "../../components/learner/ProgramModuleCard";
 import { useProgramEvaluation } from "../../hooks/useProgramEvaluation";
-import { getModuleLessonProgress } from "../../lib/moduleProgress";
+import { useConvexSession } from "../../hooks/useConvexSession";
 import { cn } from "../../lib/utils";
-
-const MOCK_PROGRAM_ROUTE = "prog1";
 
 export default function ProgramHubPage() {
   const { t } = useTranslation();
-  const { programId: routeProgramId } = useParams();
+  const { programId } = useParams();
   const navigate = useNavigate();
-  const programId = routeProgramId || MOCK_PROGRAM_ROUTE;
+  const { convexUser } = useConvexSession();
   const { evaluation, isLoading, sessionBlocked, handleEnroll } =
     useProgramEvaluation(programId);
-  const isMock = programId.startsWith("prog");
 
   const convexDetail = useQuery(
     api.trainingPrograms.getById,
-    !isMock && programId ? { programId } : "skip"
+    programId ? { programId } : "skip"
+  );
+
+  const allProgress = useQuery(
+    api.progress.getAllProgressForUser,
+    convexUser?._id && convexUser?.organizationId
+      ? { userId: convexUser._id, organizationId: convexUser.organizationId }
+      : "skip"
   );
 
   const [policyOpen, setPolicyOpen] = useState(false);
@@ -68,8 +72,12 @@ export default function ProgramHubPage() {
   let modulesComplete = 0;
   let modulesWithLessonsDone = 0;
   for (const mod of displayModules) {
-    const { allComplete } = getModuleLessonProgress(mod._id);
-    if (allComplete) modulesWithLessonsDone++;
+    const modProgress = (allProgress ?? []).filter((p) => p.moduleId === mod._id);
+    const completedLessons = modProgress.filter((p) => p.completed).length;
+    const lessonCount = mod.lessonCount ?? 0;
+    if (lessonCount > 0 && completedLessons >= lessonCount) {
+      modulesWithLessonsDone++;
+    }
     const summary = moduleSummaries?.find((s) => s.moduleId === mod._id);
     if (summary?.hasSubmittedAttempt) modulesComplete++;
   }
@@ -161,7 +169,7 @@ export default function ProgramHubPage() {
           </Card>
 
           <section>
-            <LeaderboardCard mode="learner" />
+            <LeaderboardCard mode="learner" programId={programId} />
           </section>
 
           <section>
@@ -181,6 +189,7 @@ export default function ProgramHubPage() {
                       key={mod._id}
                       module={mod}
                       examSummary={examSummary}
+                      userId={convexUser?._id}
                     />
                   );
                 })}

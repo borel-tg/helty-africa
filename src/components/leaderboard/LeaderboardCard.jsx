@@ -102,19 +102,27 @@ function LeaderboardList({ entries, viewerId, t, className }) {
  *   - staff: full top 5 on admin statistics
  *   - lead: full top 5 on lead statistics (team context subtitle)
  */
-export function LeaderboardCard({ mode = "learner" }) {
+export function LeaderboardCard({
+  mode = "learner",
+  programId,
+  learnerCategoryKey,
+}) {
   const { t } = useTranslation();
   const isLearnerView = mode === "learner";
   const subtitleKey =
     mode === "lead"
       ? "leaderboard.subtitleLead"
-      : isLearnerView
-        ? "leaderboard.subtitleLearner"
-        : "leaderboard.subtitleStaff";
+      : programId
+        ? "leaderboard.subtitleLearnerProgram"
+        : isLearnerView
+          ? "leaderboard.subtitleLearner"
+          : "leaderboard.subtitleStaff";
   const expandPanelId = useId();
   const [expanded, setExpanded] = useState(false);
   const { period, setPeriod, data } = useOrgLeaderboard({
     highlightViewer: isLearnerView,
+    programId,
+    learnerCategoryKey: mode === "staff" ? learnerCategoryKey : undefined,
   });
 
   // Collapse when switching week / today

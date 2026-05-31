@@ -2,6 +2,13 @@ import { query } from "./_generated/server";
 import type { QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
+import { learnerCategoryKeyValidator } from "./lib/learnerCategories";
+import {
+  getEnrolledActiveLearners,
+  getProgramPublishedModules,
+  matchesCategoryFilter,
+  type LearnerCategoryFilter,
+} from "./lib/programStatsHelpers";
 
 /** Points awarded per lesson completed within the leaderboard period. */
 const POINTS_PER_LESSON = 1;
@@ -45,7 +52,8 @@ async function scoreLearnerInPeriod(
   ctx: QueryCtx,
   learner: Doc<"users">,
   organizationId: Id<"organizations">,
-  since: number
+  since: number,
+  programModuleIds?: Set<string>
 ): Promise<LearnerScore> {
   let points = 0;
   let lessonsCount = 0;
@@ -64,6 +72,12 @@ async function scoreLearnerInPeriod(
     .collect();
 
   for (const row of lessonRows) {
+    if (
+      programModuleIds &&
+      !programModuleIds.has(row.moduleId as string)
+    ) {
+      continue;
+    }
     const completedAt = row.completedAt ?? row.lastAccessedAt ?? 0;
     if (completedAt >= since) {
       points += POINTS_PER_LESSON;
@@ -79,6 +93,12 @@ async function scoreLearnerInPeriod(
 
   const passedModules = new Set<string>();
   for (const attempt of attempts) {
+    if (
+      programModuleIds &&
+      !programModuleIds.has(attempt.moduleId as string)
+    ) {
+      continue;
+    }
     if (
       attempt.passed &&
       attempt.submittedAt &&
@@ -120,25 +140,64 @@ function assignRanks(sorted: LearnerScore[]) {
  * Organization leaderboard for learners — top N for the current week or today.
  * Scoped by organizationId; callers must verify the viewer belongs to that org.
  */
+const learnerCategoryFilterValidator = v.optional(
+  v.union(learnerCategoryKeyValidator, v.literal("uncategorized"))
+);
+
 export const getOrgLeaderboard = query({
   args: {
     organizationId: v.id("organizations"),
     viewerUserId: v.id("users"),
     period: v.union(v.literal("week"), v.literal("today")),
     limit: v.optional(v.number()),
+    /** When set, only enrolled learners in this program; points scoped to program modules. */
+    programId: v.optional(v.id("trainingPrograms")),
+    learnerCategoryKey: learnerCategoryFilterValidator,
   },
   handler: async (ctx, args) => {
     const since = getPeriodStart(args.period);
     const limit = args.limit ?? 5;
+    const categoryFilter = args.learnerCategoryKey as
+      | LearnerCategoryFilter
+      | undefined;
 
-    const orgUsers = await ctx.db
-      .query("users")
-      .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
-      .collect();
+    let learners: Doc<"users">[];
+    let programModuleIds: Set<string> | undefined;
 
-    const learners = orgUsers.filter(
-      (u) => u.role === "learner" && u.status === "active"
-    );
+    if (args.programId) {
+      const program = await ctx.db.get(args.programId);
+      if (!program || program.organizationId !== args.organizationId) {
+        throw new Error("Program not found");
+      }
+      const modules = await getProgramPublishedModules(
+        ctx,
+        args.programId,
+        args.organizationId
+      );
+      programModuleIds = new Set(modules.map((m) => m._id as string));
+      learners = await getEnrolledActiveLearners(
+        ctx,
+        args.programId,
+        args.organizationId
+      );
+      learners = learners.filter((l) =>
+        matchesCategoryFilter(l, categoryFilter)
+      );
+    } else {
+      const orgUsers = await ctx.db
+        .query("users")
+        .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
+        .collect();
+
+      learners = orgUsers.filter(
+        (u) => u.role === "learner" && u.status === "active"
+      );
+      if (categoryFilter) {
+        learners = learners.filter((l) =>
+          matchesCategoryFilter(l, categoryFilter)
+        );
+      }
+    }
 
     if (learners.length < MIN_LEARNERS_TO_SHOW) {
       return {
@@ -155,7 +214,13 @@ export const getOrgLeaderboard = query({
     const scored: LearnerScore[] = [];
     for (const learner of learners) {
       scored.push(
-        await scoreLearnerInPeriod(ctx, learner, args.organizationId, since)
+        await scoreLearnerInPeriod(
+          ctx,
+          learner,
+          args.organizationId,
+          since,
+          programModuleIds
+        )
       );
     }
 
