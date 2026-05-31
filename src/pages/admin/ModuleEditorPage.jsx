@@ -1,16 +1,31 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useQuery, useMutation } from "convex/react";
 import {
   ArrowLeft, Plus, BookOpen, Video, FileText, Edit, Trash2,
-  GripVertical, Settings, HelpCircle, Eye, ChevronRight, Link2, Download, ExternalLink
+  GripVertical, HelpCircle, Eye, Link2, Download, ExternalLink
 } from "lucide-react";
+import { api } from "../../../convex/_generated/api";
 import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
 import { Modal, ConfirmModal } from "../../components/ui/Modal";
 import { Input, Textarea, Select } from "../../components/ui/Input";
 import { FileUpload } from "../../components/ui/FileUpload";
 import { useToast } from "../../components/ui/Toast";
-import { MOCK_MODULES, MOCK_LESSONS, MOCK_EXAM_QUESTIONS, MOCK_MODULE_RESOURCES } from "../../lib/mockData";
+import { useConvexSession } from "../../hooks/useConvexSession";
+
+function extractYoutubeId(url) {
+  if (!url) return undefined;
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes("youtube.com")) return u.searchParams.get("v") ?? undefined;
+    if (u.hostname.includes("youtu.be")) return u.pathname.slice(1) || undefined;
+  } catch {
+    /* ignore */
+  }
+  return undefined;
+}
 
 const TYPE_ICONS = { text: BookOpen, video: Video, document: FileText };
 
@@ -390,13 +405,38 @@ function AddResourceModal({ open, onClose, onAdd }) {
 }
 
 export default function ModuleEditorPage() {
+  const { t } = useTranslation();
   const { moduleId } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
-  const module = MOCK_MODULES.find((m) => m._id === moduleId) || MOCK_MODULES[0];
-  const [lessons, setLessons] = useState(MOCK_LESSONS[moduleId] || []);
-  const [questions, setQuestions] = useState(MOCK_EXAM_QUESTIONS[moduleId] || []);
-  const [resources, setResources] = useState(MOCK_MODULE_RESOURCES[moduleId] || []);
+  const { convexUser, isLoading: sessionLoading, convexUserMissing } = useConvexSession();
+
+  const module = useQuery(
+    api.modules.getById,
+    moduleId ? { moduleId } : "skip"
+  );
+  const lessons = useQuery(
+    api.lessons.listByModule,
+    moduleId ? { moduleId } : "skip"
+  );
+  const questions = useQuery(
+    api.exams.listQuestions,
+    moduleId ? { moduleId } : "skip"
+  );
+  const resources = useQuery(
+    api.moduleResources.listByModule,
+    moduleId ? { moduleId } : "skip"
+  );
+
+  const createLesson = useMutation(api.lessons.create);
+  const removeLessonMutation = useMutation(api.lessons.remove);
+  const createQuestion = useMutation(api.exams.createQuestion);
+  const updateQuestionMutation = useMutation(api.exams.updateQuestion);
+  const deleteQuestionMutation = useMutation(api.exams.deleteQuestion);
+  const createResource = useMutation(api.moduleResources.create);
+  const removeResourceMutation = useMutation(api.moduleResources.remove);
+  const updateModule = useMutation(api.modules.update);
+
   const [activeTab, setActiveTab] = useState("lessons");
   const [showAddLesson, setShowAddLesson] = useState(false);
   const [showAddQuestion, setShowAddQuestion] = useState(false);
@@ -405,62 +445,200 @@ export default function ModuleEditorPage() {
   const [deleteResource, setDeleteResource] = useState(null);
   const [deleteQuestion, setDeleteQuestion] = useState(null);
   const [editingQuestion, setEditingQuestion] = useState(null);
+  const [settings, setSettings] = useState({
+    title: "",
+    description: "",
+    passingScore: 70,
+    maxRetakes: 3,
+  });
+  const [savingSettings, setSavingSettings] = useState(false);
 
-  const addLesson = (data) => {
-    const newLesson = { _id: `les_${Date.now()}`, moduleId, ...data, order: lessons.length, createdAt: Date.now(), updatedAt: Date.now() };
-    setLessons((prev) => [...prev, newLesson]);
-    toast.success("Lesson added!");
+  useEffect(() => {
+    if (!module) return;
+    setSettings({
+      title: module.title,
+      description: module.description,
+      passingScore: module.passingScore,
+      maxRetakes: module.maxRetakes,
+    });
+  }, [module?._id]);
+
+  const addLesson = async (data) => {
+    if (!convexUser?.organizationId) return;
+    try {
+      await createLesson({
+        moduleId,
+        organizationId: convexUser.organizationId,
+        title: data.title,
+        description: data.description || undefined,
+        type: data.type,
+        videoUrl: data.videoUrl || undefined,
+        videoId: extractYoutubeId(data.videoUrl),
+        fileUrl: data.fileUrl || undefined,
+        fileType: data.fileType || undefined,
+        fileName: data.fileName || undefined,
+      });
+      toast.success(t("admin.lessonAdded"));
+    } catch (err) {
+      toast.error(err.message ?? t("common.error"));
+    }
   };
 
-  const addQuestion = (data) => {
-    const newQ = { _id: `q_${Date.now()}`, moduleId, ...data, order: questions.length, createdAt: Date.now() };
-    setQuestions((prev) => [...prev, newQ]);
-    toast.success("Question added!");
+  const addQuestion = async (data) => {
+    if (!convexUser?.organizationId) return;
+    try {
+      await createQuestion({
+        moduleId,
+        organizationId: convexUser.organizationId,
+        questionText: data.questionText,
+        options: data.options,
+        correctOptionId: data.correctOptionId,
+      });
+      toast.success(t("admin.questionAdded"));
+    } catch (err) {
+      toast.error(err.message ?? t("common.error"));
+    }
   };
 
-  const updateQuestion = (data) => {
+  const updateQuestion = async (data) => {
     if (!editingQuestion) return;
-    setQuestions((prev) =>
-      prev.map((q) => (q._id === editingQuestion._id ? { ...q, ...data } : q))
+    try {
+      await updateQuestionMutation({
+        questionId: editingQuestion._id,
+        questionText: data.questionText,
+        options: data.options,
+        correctOptionId: data.correctOptionId,
+      });
+      toast.success(t("admin.questionUpdated"));
+      setEditingQuestion(null);
+      setShowAddQuestion(false);
+    } catch (err) {
+      toast.error(err.message ?? t("common.error"));
+    }
+  };
+
+  const removeLesson = async () => {
+    if (!deleteLesson) return;
+    try {
+      await removeLessonMutation({ lessonId: deleteLesson._id });
+      toast.success(t("admin.lessonDeleted"));
+      setDeleteLesson(null);
+    } catch (err) {
+      toast.error(err.message ?? t("common.error"));
+    }
+  };
+
+  const removeQuestion = async () => {
+    if (!deleteQuestion) return;
+    try {
+      await deleteQuestionMutation({ questionId: deleteQuestion._id });
+      toast.success(t("admin.questionDeleted"));
+      setDeleteQuestion(null);
+    } catch (err) {
+      toast.error(err.message ?? t("common.error"));
+    }
+  };
+
+  const addResource = async (data) => {
+    if (!convexUser?.organizationId) return;
+    try {
+      await createResource({
+        moduleId,
+        organizationId: convexUser.organizationId,
+        title: data.title,
+        description: data.description || undefined,
+        type: data.type,
+        url: data.url,
+        fileName: data.fileName,
+        downloadable: data.downloadable,
+      });
+      toast.success(t("admin.resourceAdded"));
+    } catch (err) {
+      toast.error(err.message ?? t("common.error"));
+    }
+  };
+
+  const removeResource = async () => {
+    if (!deleteResource) return;
+    try {
+      await removeResourceMutation({ resourceId: deleteResource._id });
+      toast.success(t("admin.resourceDeleted"));
+      setDeleteResource(null);
+    } catch (err) {
+      toast.error(err.message ?? t("common.error"));
+    }
+  };
+
+  const togglePublish = async () => {
+    if (!module) return;
+    const nextStatus = module.status === "published" ? "draft" : "published";
+    try {
+      await updateModule({ moduleId, status: nextStatus });
+      toast.success(
+        nextStatus === "published"
+          ? t("admin.modulePublished", { title: module.title })
+          : t("admin.moduleUnpublished", { title: module.title })
+      );
+    } catch (err) {
+      toast.error(err.message ?? t("common.error"));
+    }
+  };
+
+  const saveSettings = async () => {
+    setSavingSettings(true);
+    try {
+      await updateModule({
+        moduleId,
+        title: settings.title,
+        description: settings.description,
+        passingScore: Number(settings.passingScore),
+        maxRetakes:
+          settings.maxRetakes === "unlimited"
+            ? "unlimited"
+            : Number(settings.maxRetakes),
+      });
+      toast.success(t("admin.settingsSaved"));
+    } catch (err) {
+      toast.error(err.message ?? t("common.error"));
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
+  if (sessionLoading || module === undefined || lessons === undefined || questions === undefined || resources === undefined) {
+    return (
+      <div className="p-4 md:p-6 text-sm text-text-secondary">{t("common.loading")}</div>
     );
-    toast.success("Question updated!");
-    setEditingQuestion(null);
-    setShowAddQuestion(false);
-  };
+  }
 
-  const removeLesson = () => {
-    setLessons((prev) => prev.filter((l) => l._id !== deleteLesson._id));
-    toast.success("Lesson deleted");
-    setDeleteLesson(null);
-  };
+  if (convexUserMissing) {
+    return (
+      <div className="p-4 md:p-6">
+        <p className="text-sm text-amber-600">{t("evaluation.convexRequired")}</p>
+      </div>
+    );
+  }
 
-  const removeQuestion = () => {
-    setQuestions((prev) => prev.filter((q) => q._id !== deleteQuestion._id));
-    toast.success("Question deleted");
-    setDeleteQuestion(null);
-  };
+  if (module === null) {
+    return (
+      <div className="p-4 md:p-6">
+        <p className="text-sm text-text-secondary">{t("learner.moduleNotFound")}</p>
+        <Button className="mt-4" variant="outline" onClick={() => navigate("/admin/modules")}>
+          {t("common.back")}
+        </Button>
+      </div>
+    );
+  }
 
-  const addResource = (data) => {
-    const newResource = {
-      _id: `res_${Date.now()}`,
-      moduleId,
-      ...data,
-    };
-    setResources((prev) => [...prev, newResource]);
-    toast.success("Resource added!");
-  };
-
-  const removeResource = () => {
-    setResources((prev) => prev.filter((r) => r._id !== deleteResource._id));
-    toast.success("Resource deleted");
-    setDeleteResource(null);
-  };
+  const lessonList = lessons ?? [];
+  const questionList = questions ?? [];
+  const resourceList = resources ?? [];
 
   const tabs = [
-    { id: "lessons", label: `Lessons (${lessons.length})` },
-    { id: "exam", label: `Exam (${questions.length} Qs)` },
-    { id: "resources", label: `Resources (${resources.length})` },
-    { id: "settings", label: "Settings" },
+    { id: "lessons", label: `${t("admin.lessonsTab")} (${lessonList.length})` },
+    { id: "exam", label: `${t("admin.examTab")} (${questionList.length})` },
+    { id: "resources", label: `${t("admin.resourcesTab")} (${resourceList.length})` },
+    { id: "settings", label: t("common.settings") },
   ];
 
   return (
@@ -481,7 +659,9 @@ export default function ModuleEditorPage() {
           </div>
           <div className="flex gap-2 shrink-0">
             <Button variant="outline" size="sm"><Eye size={14} /> Preview</Button>
-            <Button size="sm">{module.status === "published" ? "Unpublish" : "Publish"}</Button>
+            <Button size="sm" onClick={togglePublish}>
+              {module.status === "published" ? t("common.unpublish") : t("common.publish")}
+            </Button>
           </div>
         </div>
       </div>
@@ -506,13 +686,13 @@ export default function ModuleEditorPage() {
               <Plus size={14} /> Add Lesson
             </Button>
           </div>
-          {lessons.length === 0 ? (
+          {lessonList.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-card shadow-card">
               <BookOpen size={40} className="text-gray-300 mx-auto mb-3" />
               <p className="text-text-secondary">No lessons yet. Add your first lesson.</p>
             </div>
           ) : (
-            lessons.map((lesson, idx) => {
+            lessonList.map((lesson, idx) => {
               const Icon = TYPE_ICONS[lesson.type] || BookOpen;
               return (
                 <div key={lesson._id} className="bg-white rounded-card shadow-card p-4 flex items-center gap-3">
@@ -549,13 +729,13 @@ export default function ModuleEditorPage() {
               <Plus size={14} /> Add Question
             </Button>
           </div>
-          {questions.length === 0 ? (
+          {questionList.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-card shadow-card">
               <HelpCircle size={40} className="text-gray-300 mx-auto mb-3" />
               <p className="text-text-secondary">No questions yet. Add exam questions.</p>
             </div>
           ) : (
-            questions.map((q, idx) => (
+            questionList.map((q, idx) => (
               <div key={q._id} className="bg-white rounded-card shadow-card p-4">
                 <div className="flex items-start justify-between gap-3">
                   <p className="text-sm font-medium text-text-primary flex-1">
@@ -603,13 +783,13 @@ export default function ModuleEditorPage() {
               <Plus size={14} /> Add Resource
             </Button>
           </div>
-          {resources.length === 0 ? (
+          {resourceList.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-card shadow-card">
               <Link2 size={40} className="text-gray-300 mx-auto mb-3" />
               <p className="text-text-secondary">No resources yet. Add module resources.</p>
             </div>
           ) : (
-            resources.map((resource) => (
+            resourceList.map((resource) => (
               <div key={resource._id} className="bg-white rounded-card shadow-card p-4 flex items-center gap-3">
                 <div className="w-8 h-8 rounded bg-primary-50 flex items-center justify-center shrink-0">
                   {resource.downloadable ? (
@@ -653,19 +833,37 @@ export default function ModuleEditorPage() {
       {activeTab === "settings" && (
         <div className="bg-white rounded-card shadow-card p-5 space-y-4">
           <h3 className="text-base font-semibold text-text-primary">Module Settings</h3>
-          <Input label="Module Title" defaultValue={module.title} />
-          <Textarea label="Description" defaultValue={module.description} />
+          <Input
+            label={t("admin.moduleTitle")}
+            value={settings.title}
+            onChange={(e) => setSettings((s) => ({ ...s, title: e.target.value }))}
+          />
+          <Textarea
+            label={t("admin.description")}
+            value={settings.description}
+            onChange={(e) => setSettings((s) => ({ ...s, description: e.target.value }))}
+          />
           <div className="grid grid-cols-2 gap-4">
-            <Select label="Passing Score (%)" defaultValue={module.passingScore}>
+            <Select
+              label={t("admin.passingScore")}
+              value={String(settings.passingScore)}
+              onChange={(e) => setSettings((s) => ({ ...s, passingScore: e.target.value }))}
+            >
               {[50,60,70,75,80,85,90].map(v => <option key={v} value={v}>{v}%</option>)}
             </Select>
-            <Select label="Max Retakes" defaultValue={module.maxRetakes}>
+            <Select
+              label={t("admin.maxRetakes")}
+              value={String(settings.maxRetakes)}
+              onChange={(e) => setSettings((s) => ({ ...s, maxRetakes: e.target.value }))}
+            >
               {[1,2,3,5,10].map(v => <option key={v} value={v}>{v}</option>)}
-              <option value="unlimited">Unlimited</option>
+              <option value="unlimited">{t("common.unlimited")}</option>
             </Select>
           </div>
           <div className="flex justify-end pt-2">
-            <Button onClick={() => toast.success("Settings saved!")}>Save Settings</Button>
+            <Button loading={savingSettings} onClick={saveSettings}>
+              {t("common.saveChanges")}
+            </Button>
           </div>
         </div>
       )}
