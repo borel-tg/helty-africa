@@ -4,10 +4,34 @@ import { v } from "convex/values";
 export const list = query({
   args: { organizationId: v.id("organizations") },
   handler: async (ctx, { organizationId }) => {
-    return ctx.db
+    const modules = await ctx.db
       .query("modules")
       .withIndex("by_org_order", (q) => q.eq("organizationId", organizationId))
       .collect();
+
+    return Promise.all(
+      modules.map(async (mod) => {
+        const lessons = await ctx.db
+          .query("lessons")
+          .withIndex("by_module", (q) => q.eq("moduleId", mod._id))
+          .collect();
+        const programLink = await ctx.db
+          .query("trainingProgramModules")
+          .withIndex("by_module", (q) => q.eq("moduleId", mod._id))
+          .unique();
+        let assignedProgramTitle: string | null = null;
+        if (programLink) {
+          const program = await ctx.db.get(programLink.programId);
+          assignedProgramTitle = program?.title ?? null;
+        }
+        return {
+          ...mod,
+          lessonCount: lessons.length,
+          assignedProgramId: programLink?.programId ?? null,
+          assignedProgramTitle,
+        };
+      })
+    );
   },
 });
 
@@ -73,6 +97,49 @@ export const update = mutation({
 export const remove = mutation({
   args: { moduleId: v.id("modules") },
   handler: async (ctx, { moduleId }) => {
+    const mod = await ctx.db.get(moduleId);
+    if (!mod) throw new Error("Module not found");
+
+    const programLinks = await ctx.db
+      .query("trainingProgramModules")
+      .withIndex("by_module", (q) => q.eq("moduleId", moduleId))
+      .collect();
+    for (const link of programLinks) {
+      await ctx.db.delete(link._id);
+    }
+
+    const lessons = await ctx.db
+      .query("lessons")
+      .withIndex("by_module", (q) => q.eq("moduleId", moduleId))
+      .collect();
+    for (const lesson of lessons) {
+      await ctx.db.delete(lesson._id);
+    }
+
+    const resources = await ctx.db
+      .query("moduleResources")
+      .withIndex("by_module", (q) => q.eq("moduleId", moduleId))
+      .collect();
+    for (const resource of resources) {
+      await ctx.db.delete(resource._id);
+    }
+
+    const questions = await ctx.db
+      .query("examQuestions")
+      .withIndex("by_module", (q) => q.eq("moduleId", moduleId))
+      .collect();
+    for (const question of questions) {
+      await ctx.db.delete(question._id);
+    }
+
+    const examSettings = await ctx.db
+      .query("examSettings")
+      .withIndex("by_module", (q) => q.eq("moduleId", moduleId))
+      .unique();
+    if (examSettings) {
+      await ctx.db.delete(examSettings._id);
+    }
+
     await ctx.db.delete(moduleId);
   },
 });

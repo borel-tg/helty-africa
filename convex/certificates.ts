@@ -7,15 +7,16 @@ function generateCertificateNumber() {
   return `EVT-${year}-${suffix}`;
 }
 
-export const getForUserModule = query({
-  args: { userId: v.id("users"), moduleId: v.id("modules") },
-  handler: async (ctx, { userId, moduleId }) => {
-    return ctx.db
+export const getForUserProgram = query({
+  args: { userId: v.id("users"), programId: v.id("trainingPrograms") },
+  handler: async (ctx, { userId, programId }) => {
+    const cert = await ctx.db
       .query("certificates")
-      .withIndex("by_user_module", (q) =>
-        q.eq("userId", userId).eq("moduleId", moduleId)
+      .withIndex("by_user_program", (q) =>
+        q.eq("userId", userId).eq("programId", programId)
       )
       .unique();
+    return cert?.programId ? cert : null;
   },
 });
 
@@ -25,9 +26,10 @@ export const getById = query({
     const cert = await ctx.db.get(certificateId);
     if (!cert) return null;
 
-    const [user, module, template, organization] = await Promise.all([
+    const [user, program, legacyModule, template, organization] = await Promise.all([
       ctx.db.get(cert.userId),
-      ctx.db.get(cert.moduleId),
+      cert.programId ? ctx.db.get(cert.programId) : null,
+      cert.moduleId ? ctx.db.get(cert.moduleId) : null,
       ctx.db
         .query("certificateTemplates")
         .withIndex("by_org", (q) => q.eq("organizationId", cert.organizationId))
@@ -38,7 +40,8 @@ export const getById = query({
     return {
       certificate: cert,
       learnerName: user?.name ?? "—",
-      moduleTitle: module?.title ?? "—",
+      programTitle: program?.title ?? legacyModule?.title ?? "—",
+      moduleTitle: program?.title ?? legacyModule?.title ?? "—",
       organizationName:
         template?.organizationName ?? organization?.name ?? "—",
       template,
@@ -57,9 +60,10 @@ export const getByNumber = query({
       .unique();
     if (!cert) return null;
 
-    const [user, module, template, organization] = await Promise.all([
+    const [user, program, legacyModule, template, organization] = await Promise.all([
       ctx.db.get(cert.userId),
-      ctx.db.get(cert.moduleId),
+      cert.programId ? ctx.db.get(cert.programId) : null,
+      cert.moduleId ? ctx.db.get(cert.moduleId) : null,
       ctx.db
         .query("certificateTemplates")
         .withIndex("by_org", (q) => q.eq("organizationId", cert.organizationId))
@@ -70,7 +74,8 @@ export const getByNumber = query({
     return {
       certificate: cert,
       learnerName: user?.name ?? "—",
-      moduleTitle: module?.title ?? "—",
+      programTitle: program?.title ?? legacyModule?.title ?? "—",
+      moduleTitle: program?.title ?? legacyModule?.title ?? "—",
       organizationName:
         template?.organizationName ?? organization?.name ?? "—",
       template,
@@ -87,13 +92,18 @@ export const listForUser = query({
       .collect();
 
     return Promise.all(
-      certs.map(async (cert) => {
-        const module = await ctx.db.get(cert.moduleId);
-        return {
-          ...cert,
-          moduleTitle: module?.title ?? "Training module",
-        };
-      })
+      certs
+        .filter((cert) => cert.programId != null)
+        .map(async (cert) => {
+          const program = cert.programId
+            ? await ctx.db.get(cert.programId)
+            : null;
+          return {
+            ...cert,
+            programTitle: program?.title ?? "Training program",
+            moduleTitle: program?.title ?? "Training program",
+          };
+        })
     );
   },
 });
@@ -101,25 +111,25 @@ export const listForUser = query({
 export const issue = mutation({
   args: {
     userId: v.id("users"),
-    moduleId: v.id("modules"),
+    programId: v.id("trainingPrograms"),
     organizationId: v.id("organizations"),
-    examAttemptId: v.optional(v.id("examAttempts")),
+    generalExamAttemptId: v.optional(v.id("generalExamAttempts")),
     score: v.number(),
   },
   handler: async (ctx, args) => {
     const existing = await ctx.db
       .query("certificates")
-      .withIndex("by_user_module", (q) =>
-        q.eq("userId", args.userId).eq("moduleId", args.moduleId)
+      .withIndex("by_user_program", (q) =>
+        q.eq("userId", args.userId).eq("programId", args.programId)
       )
       .unique();
     if (existing) return existing._id;
 
     return ctx.db.insert("certificates", {
       userId: args.userId,
-      moduleId: args.moduleId,
+      programId: args.programId,
       organizationId: args.organizationId,
-      examAttemptId: args.examAttemptId,
+      generalExamAttemptId: args.generalExamAttemptId,
       score: args.score,
       issuedAt: Date.now(),
       certificateNumber: generateCertificateNumber(),

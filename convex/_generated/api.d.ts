@@ -10,15 +10,20 @@
 
 import type * as certificates from "../certificates.js";
 import type * as exams from "../exams.js";
+import type * as generalExams from "../generalExams.js";
 import type * as invitations from "../invitations.js";
 import type * as leaderboard from "../leaderboard.js";
 import type * as lessons from "../lessons.js";
+import type * as lib_evaluation from "../lib/evaluation.js";
+import type * as migrations from "../migrations.js";
 import type * as moduleResources from "../moduleResources.js";
 import type * as modules from "../modules.js";
 import type * as notifications from "../notifications.js";
 import type * as progress from "../progress.js";
+import type * as recentModules from "../recentModules.js";
 import type * as seed from "../seed.js";
 import type * as storage from "../storage.js";
+import type * as trainingPrograms from "../trainingPrograms.js";
 import type * as users from "../users.js";
 
 import type {
@@ -30,15 +35,20 @@ import type {
 declare const fullApi: ApiFromModules<{
   certificates: typeof certificates;
   exams: typeof exams;
+  generalExams: typeof generalExams;
   invitations: typeof invitations;
   leaderboard: typeof leaderboard;
   lessons: typeof lessons;
+  "lib/evaluation": typeof lib_evaluation;
+  migrations: typeof migrations;
   moduleResources: typeof moduleResources;
   modules: typeof modules;
   notifications: typeof notifications;
   progress: typeof progress;
+  recentModules: typeof recentModules;
   seed: typeof seed;
   storage: typeof storage;
+  trainingPrograms: typeof trainingPrograms;
   users: typeof users;
 }>;
 
