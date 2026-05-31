@@ -15,6 +15,12 @@ export const seedDemo = mutation({
       "moduleNotificationSettings",
       "notifications",
       "certificates",
+      "generalExamAttempts",
+      "generalExamSettings",
+      "generalExamQuestions",
+      "programEnrollments",
+      "trainingProgramModules",
+      "trainingPrograms",
       "lessonProgress",
       "examAttempts",
       "examSettings",
@@ -134,15 +140,15 @@ export const seedDemo = mutation({
       createdAt: now - 15 * 86400000,
       updatedAt: now - 86400000,
     });
-    await ctx.db.insert("modules", {
+    const module3Id = await ctx.db.insert("modules", {
       organizationId: orgId,
       title: "Safety & Emergency Protocols",
       description:
         "Handling adverse events following immunization (AEFI) and emergency procedures during field campaigns.",
-      status: "draft",
+      status: "published",
       order: 2,
-      passingScore: 80,
-      maxRetakes: 2,
+      passingScore: 70,
+      maxRetakes: 3,
       createdBy: adminId,
       createdAt: now - 5 * 86400000,
       updatedAt: now - 86400000,
@@ -447,9 +453,178 @@ export const seedDemo = mutation({
       timeSpentSeconds: 120,
     });
 
-    // Exam attempt + certificate
-    const attemptId = await ctx.db.insert("examAttempts", {
+    // Module 2 & 3 exam questions (minimal)
+    const m2q1 = await ctx.db.insert("examQuestions", {
+      moduleId: module2Id,
+      organizationId: orgId,
+      questionText: "What is vaccine hesitancy?",
+      options: [
+        { id: "a", text: "Delay or refusal of vaccination despite availability" },
+        { id: "b", text: "Allergic reaction to vaccines" },
+        { id: "c", text: "Mandatory vaccination policy" },
+        { id: "d", text: "Cold chain failure" },
+      ],
+      correctOptionId: "a",
+      order: 0,
+      createdAt: now,
+    });
+    await ctx.db.insert("examQuestions", {
+      moduleId: module3Id,
+      organizationId: orgId,
+      questionText: "What does AEFI stand for?",
+      options: [
+        { id: "a", text: "Adverse Events Following Immunization" },
+        { id: "b", text: "Advanced Emergency Field Intervention" },
+        { id: "c", text: "Approved Equipment for Immunization" },
+        { id: "d", text: "Annual Evaluation of Field Indicators" },
+      ],
+      correctOptionId: "a",
+      order: 0,
+      createdAt: now,
+    });
+
+    // ── Training program ─────────────────────────────────────────────
+    const programId = await ctx.db.insert("trainingPrograms", {
+      organizationId: orgId,
+      title: "Polio Field Worker Certification",
+      description:
+        "Complete all module tests and the final evaluation to earn your program certificate.",
+      status: "published",
+      accessMode: "open",
+      evaluationPolicy: {
+        programPassThreshold: 80,
+        moduleExamWeight: 70,
+        generalExamWeight: 30,
+        generalExamEnabled: true,
+        generalExamMaxRetakes: 3,
+        unlockGeneralExamMode: "all_module_attempts",
+      },
+      createdBy: adminId,
+      createdAt: now - 10 * 86400000,
+      updatedAt: now,
+    });
+
+    for (const [order, moduleId] of [
+      [0, module1Id],
+      [1, module2Id],
+      [2, module3Id],
+    ] as const) {
+      await ctx.db.insert("trainingProgramModules", {
+        programId,
+        moduleId,
+        organizationId: orgId,
+        order,
+      });
+    }
+
+    const genQ1 = await ctx.db.insert("generalExamQuestions", {
+      programId,
+      organizationId: orgId,
+      questionText:
+        "At what temperature should oral polio vaccine (OPV) be stored?",
+      options: [
+        { id: "a", text: "Between 2°C and 8°C" },
+        { id: "b", text: "Between -15°C and -25°C" },
+        { id: "c", text: "At room temperature (20-25°C)" },
+        { id: "d", text: "Between 10°C and 15°C" },
+      ],
+      correctOptionId: "a",
+      sourceModuleQuestionId: q1Id,
+      order: 0,
+      createdAt: now,
+    });
+    await ctx.db.insert("generalExamQuestions", {
+      programId,
+      organizationId: orgId,
+      questionText: "What is vaccine hesitancy?",
+      options: [
+        { id: "a", text: "Delay or refusal of vaccination despite availability" },
+        { id: "b", text: "Allergic reaction to vaccines" },
+        { id: "c", text: "Mandatory vaccination policy" },
+        { id: "d", text: "Cold chain failure" },
+      ],
+      correctOptionId: "a",
+      sourceModuleQuestionId: m2q1,
+      order: 1,
+      createdAt: now,
+    });
+
+    await ctx.db.insert("generalExamSettings", {
+      programId,
+      organizationId: orgId,
+      timeLimitMinutes: 45,
+      showCorrectAnswers: true,
+      allowReview: true,
+      randomizeQuestions: false,
+    });
+
+    // Enrollments
+    await ctx.db.insert("programEnrollments", {
+      userId: learner1Id,
+      programId,
+      organizationId: orgId,
+      enrolledAt: now - 20 * 86400000,
+    });
+    await ctx.db.insert("programEnrollments", {
       userId: learner2Id,
+      programId,
+      organizationId: orgId,
+      enrolledAt: now - 15 * 86400000,
+      finalScore: 81.5,
+      passed: true,
+      completedAt: now - 7000000,
+    });
+
+    // Exam attempts — learner2 (John-style: 80, 70, 90 module + 85 general → 81.5)
+    const submitModuleAttempt = async (
+      userId: typeof learner2Id,
+      moduleId: typeof module1Id,
+      score: number,
+      attemptNumber: number,
+      offset: number
+    ) => {
+      const mod = await ctx.db.get(moduleId);
+      return ctx.db.insert("examAttempts", {
+        userId,
+        moduleId,
+        organizationId: orgId,
+        attemptNumber,
+        answers: [],
+        score,
+        passed: mod ? score >= mod.passingScore : false,
+        startedAt: now - offset,
+        submittedAt: now - offset + 60000,
+      });
+    };
+
+    await submitModuleAttempt(learner2Id, module1Id, 80, 1, 8000000);
+    await submitModuleAttempt(learner2Id, module2Id, 70, 1, 7500000);
+    await submitModuleAttempt(learner2Id, module3Id, 90, 1, 7200000);
+
+    const generalAttemptId = await ctx.db.insert("generalExamAttempts", {
+      userId: learner2Id,
+      programId,
+      organizationId: orgId,
+      attemptNumber: 1,
+      answers: [{ questionId: genQ1, selectedOptionId: "a" }],
+      score: 85,
+      startedAt: now - 7100000,
+      submittedAt: now - 7000000,
+    });
+
+    await ctx.db.insert("certificates", {
+      userId: learner2Id,
+      programId,
+      organizationId: orgId,
+      generalExamAttemptId: generalAttemptId,
+      score: 81.5,
+      issuedAt: now - 7000000,
+      certificateNumber: "EVT-2026-DEMO01",
+    });
+
+    // learner1 partial progress on module 1
+    await ctx.db.insert("examAttempts", {
+      userId: learner1Id,
       moduleId: module1Id,
       organizationId: orgId,
       attemptNumber: 1,
@@ -457,29 +632,10 @@ export const seedDemo = mutation({
         { questionId: q1Id, selectedOptionId: "a" },
         { questionId: q2Id, selectedOptionId: "b" },
       ],
-      score: 85,
+      score: 75,
       passed: true,
-      startedAt: now - 7200000,
-      submittedAt: now - 7100000,
-    });
-    await ctx.db.insert("certificates", {
-      userId: learner2Id,
-      moduleId: module1Id,
-      organizationId: orgId,
-      examAttemptId: attemptId,
-      score: 85,
-      issuedAt: now - 7000000,
-      certificateNumber: "EVT-2026-DEMO01",
-    });
-
-    await ctx.db.insert("certificates", {
-      userId: learner1Id,
-      moduleId: module1Id,
-      organizationId: orgId,
-      examAttemptId: attemptId,
-      score: 85,
-      issuedAt: now - 3600000,
-      certificateNumber: "EVT-2026-DEMO02",
+      startedAt: now - 3600000,
+      submittedAt: now - 3500000,
     });
 
     // Notifications
@@ -547,12 +703,14 @@ export const seedDemo = mutation({
     return {
       success: true,
       orgId,
+      programId,
       superAdminId,
       adminId,
       leadId,
       learner1Id,
       module1Id,
       module2Id,
+      module3Id,
     };
   },
 });
