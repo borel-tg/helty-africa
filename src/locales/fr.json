@@ -1,8 +1,8 @@
 {
   "app": {
     "name": "{{brandName}}",
-    "subtitle": "Plateforme de formation santé",
-    "title": "{{brandName}} – Plateforme de formation santé"
+    "subtitle": "Formation à la vaccination Polio",
+    "title": "{{brandName}} – Formation à la vaccination Polio"
   },
   "common": {
     "cancel": "Annuler",

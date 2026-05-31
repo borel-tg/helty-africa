@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "convex:dev": "convex dev",
     "seed": "convex run seed:seedDemo",
-    "check:i18n": "node scripts/check-i18n.mjs"
+    "check:i18n": "node scripts/check-i18n.mjs",
+    "icons": "node scripts/generate-icons.mjs"
   },
   "dependencies": {
     "@tiptap/react": "^2.4.0",

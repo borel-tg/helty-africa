@@ -1,13 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="COUP DRC icon">
   <defs>
     <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
-      <stop offset="0%" stop-color="#0ea5e9" />
-      <stop offset="100%" stop-color="#0369a1" />
+      <stop offset="0%" stop-color="#2E7D64" />
+      <stop offset="100%" stop-color="#1D5342" />
     </linearGradient>
   </defs>
   <rect x="0" y="0" width="512" height="512" rx="112" fill="url(#bg)" />
   <path
-    d="M168 138h56v90h64v-90h56v236h-56v-98h-64v98h-56V138z"
+    d="M168 138h112v56H224v76h56v56H168V138z"
     fill="#ffffff"
   />
 </svg>

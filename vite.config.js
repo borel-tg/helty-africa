@@ -4,6 +4,7 @@ import { VitePWA } from "vite-plugin-pwa";
 import {
   APP_BRAND_NAME,
   APP_BRAND_SHORT_NAME,
+  APP_PAGE_SUBTITLE,
   getAppPageTitle,
 } from "./src/lib/brand.js";
 
@@ -31,7 +32,7 @@ export default defineConfig({
       manifest: {
         name: APP_BRAND_NAME,
         short_name: APP_BRAND_SHORT_NAME,
-        description: `Plateforme de formation santé ${APP_BRAND_NAME}`,
+        description: `${APP_BRAND_NAME} – ${APP_PAGE_SUBTITLE}`,
         start_url: "/",
         scope: "/",
         display: "standalone",
