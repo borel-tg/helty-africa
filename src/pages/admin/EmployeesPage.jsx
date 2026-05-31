@@ -1,32 +1,41 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useQuery, useMutation } from "convex/react";
 import {
-  Search, UserPlus, Filter, MoreVertical, ChevronRight,
-  Mail, Phone, Shield, UserX, UserCheck, Trash2, KeyRound,
+  Search, UserPlus, MoreVertical, ChevronRight,
+  Mail, Phone, UserX, UserCheck, Trash2, KeyRound,
 } from "lucide-react";
+import { api } from "../../../convex/_generated/api";
 import { Button } from "../../components/ui/Button";
 import { Input, Select } from "../../components/ui/Input";
 import { RoleBadge } from "../../components/ui/Badge";
 import { Modal, ConfirmModal } from "../../components/ui/Modal";
 import { useToast } from "../../components/ui/Toast";
-import { MOCK_EMPLOYEES, MOCK_INVITATIONS, MOCK_USERS } from "../../lib/mockData";
+import { useConvexSession } from "../../hooks/useConvexSession";
 import { formatTimeAgo } from "../../lib/utils";
-function InviteModal({ open, onClose }) {
+import { LEARNER_CATEGORIES } from "../../lib/learnerCategories";
+function InviteModal({ open, onClose, organizationId, invitedBy }) {
   const { t } = useTranslation();
   const toast = useToast();
+  const createInvite = useMutation(api.invitations.create);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("learner");
   const [loading, setLoading] = useState(false);
 
   const handleInvite = async () => {
-    if (!email.trim()) return;
+    if (!email.trim() || !organizationId || !invitedBy) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setLoading(false);
-    toast.success(t("admin.invitationSentTo", { email }));
-    setEmail("");
-    onClose();
+    try {
+      await createInvite({ organizationId, email: email.trim(), role, invitedBy });
+      toast.success(t("admin.invitationSentTo", { email }));
+      setEmail("");
+      onClose();
+    } catch {
+      toast.error(t("common.error"));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -53,20 +62,42 @@ function InviteModal({ open, onClose }) {
   );
 }
 
-function CreateManualModal({ open, onClose }) {
+function CreateManualModal({ open, onClose, organizationId }) {
   const { t } = useTranslation();
   const toast = useToast();
-  const [form, setForm] = useState({ name: "", email: "", phone: "", role: "learner", tempPassword: "" });
+  const createUser = useMutation(api.users.create);
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    role: "learner",
+    learnerCategoryKey: "zonal",
+    tempPassword: "",
+  });
   const [loading, setLoading] = useState(false);
   const update = (f) => (e) => setForm((p) => ({ ...p, [f]: e.target.value }));
 
   const handleCreate = async () => {
-    if (!form.name.trim()) return;
+    if (!form.name.trim() || !organizationId) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setLoading(false);
-    toast.success(t("admin.accountCreatedFor", { name: form.name }));
-    onClose();
+    try {
+      await createUser({
+        organizationId,
+        name: form.name.trim(),
+        email: form.email.trim() || undefined,
+        phone: form.phone.trim() || undefined,
+        role: form.role,
+        learnerCategoryKey:
+          form.role === "learner" ? form.learnerCategoryKey || undefined : undefined,
+        password: form.tempPassword || "demo1234",
+      });
+      toast.success(t("admin.accountCreatedFor", { name: form.name }));
+      onClose();
+    } catch {
+      toast.error(t("common.error"));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -87,6 +118,19 @@ function CreateManualModal({ open, onClose }) {
           <option value="lead">{t("roles.lead")}</option>
           <option value="admin">{t("roles.admin")}</option>
         </Select>
+        {form.role === "learner" && (
+          <Select
+            label={t("auth.learnerCategory")}
+            value={form.learnerCategoryKey}
+            onChange={update("learnerCategoryKey")}
+          >
+            {LEARNER_CATEGORIES.map((c) => (
+              <option key={c.key} value={c.key}>
+                {c.labelFr}
+              </option>
+            ))}
+          </Select>
+        )}
         <Input label={`${t("admin.tempPassword")} *`} type="password" placeholder={t("admin.tempPasswordPlaceholder")} value={form.tempPassword} onChange={update("tempPassword")} />
         <p className="text-xs text-text-secondary">{t("admin.changePasswordHint")}</p>
       </div>
@@ -94,11 +138,77 @@ function CreateManualModal({ open, onClose }) {
   );
 }
 
+function InvitationRow({ inv, onResend, resending }) {
+  const { t } = useTranslation();
+  return (
+    <div className="px-5 py-3 flex items-center gap-3">
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-text-primary truncate">{inv.email}</p>
+        <p className="text-xs text-text-secondary">
+          Invited {formatTimeAgo(inv.invitedAt)}
+        </p>
+      </div>
+      <span
+        className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+          inv.status === "signed_up"
+            ? "bg-green-100 text-green-700"
+            : inv.status === "pending"
+              ? "bg-amber-100 text-amber-700"
+              : "bg-gray-100 text-gray-500"
+        }`}
+      >
+        {t(`status.${inv.status}`)}
+      </span>
+      {inv.status === "pending" && (
+        <Button
+          variant="ghost"
+          size="xs"
+          loading={resending}
+          onClick={() => onResend(inv._id)}
+        >
+          {t("admin.resendInvitation")}
+        </Button>
+      )}
+    </div>
+  );
+}
+
 export default function EmployeesPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const toast = useToast();
-  const [employees, setEmployees] = useState(MOCK_EMPLOYEES);
+  const { convexUser } = useConvexSession();
+  const deactivate = useMutation(api.users.deactivate);
+  const reactivate = useMutation(api.users.reactivate);
+  const resendInviteEmail = useMutation(api.invitations.resendEmail);
+  const [resendingId, setResendingId] = useState(null);
+
+  const handleResendInvitation = async (invitationId) => {
+    setResendingId(invitationId);
+    try {
+      await resendInviteEmail({ invitationId });
+      toast.success(t("admin.invitationResent"));
+    } catch (err) {
+      toast.error(err.message || t("common.error"));
+    } finally {
+      setResendingId(null);
+    }
+  };
+
+  const employees = useQuery(
+    api.users.listByOrg,
+    convexUser?.organizationId
+      ? { organizationId: convexUser.organizationId }
+      : "skip"
+  );
+
+  const invitations = useQuery(
+    api.invitations.listByOrg,
+    convexUser?.organizationId
+      ? { organizationId: convexUser.organizationId }
+      : "skip"
+  );
+
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -106,15 +216,18 @@ export default function EmployeesPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [deactivateTarget, setDeactivateTarget] = useState(null);
   const [openMenu, setOpenMenu] = useState(null);
-  const invitations = MOCK_INVITATIONS;
 
-  const pendingInvites = invitations.filter((inv) => inv.status === "pending").length;
-  const signedUpInvites = invitations.filter((inv) => inv.status === "signed_up").length;
-  const expiredInvites = invitations.filter((inv) => inv.status === "expired").length;
+  const employeeList = employees ?? [];
+  const invitationList = invitations ?? [];
+
+  const pendingInvites = invitationList.filter((inv) => inv.status === "pending").length;
+  const signedUpInvites = invitationList.filter((inv) => inv.status === "signed_up").length;
   const activationRate =
-    invitations.length > 0 ? Math.round((signedUpInvites / invitations.length) * 100) : 0;
+    invitationList.length > 0
+      ? Math.round((signedUpInvites / invitationList.length) * 100)
+      : 0;
 
-  const filtered = employees.filter((e) => {
+  const filtered = employeeList.filter((e) => {
     const matchSearch =
       !search ||
       e.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -125,28 +238,33 @@ export default function EmployeesPage() {
     return matchSearch && matchRole && matchStatus;
   });
 
-  const toggleStatus = (emp) => {
-    setEmployees((prev) =>
-      prev.map((e) =>
-        e._id === emp._id
-          ? { ...e, status: e.status === "active" ? "inactive" : "active" }
-          : e
-      )
-    );
-    toast.success(
-      emp.status === "active"
-        ? t("admin.deactivated", { name: emp.name })
-        : t("admin.reactivated", { name: emp.name })
-    );
+  const toggleStatus = async (emp) => {
+    try {
+      if (emp.status === "active") {
+        await deactivate({ userId: emp._id });
+        toast.success(t("admin.deactivated", { name: emp.name }));
+      } else {
+        await reactivate({ userId: emp._id });
+        toast.success(t("admin.reactivated", { name: emp.name }));
+      }
+    } catch {
+      toast.error(t("common.error"));
+    }
     setDeactivateTarget(null);
     setOpenMenu(null);
   };
 
   const leadName = (emp) => {
     if (!emp.leadId) return "—";
-    const lead = employees.find((e) => e._id === emp.leadId);
+    const lead = employeeList.find((e) => e._id === emp.leadId);
     return lead?.name || "—";
   };
+
+  if (!employees) {
+    return (
+      <div className="p-6 text-center text-text-secondary">{t("common.loading")}</div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-6 w-full">
@@ -156,7 +274,7 @@ export default function EmployeesPage() {
           <h2 className="text-xl font-semibold text-text-primary">{t("admin.learnersTitle")}</h2>
           <p className="text-sm text-text-secondary mt-0.5">
             {t("admin.activeLearnersCount", {
-              count: employees.filter((e) => e.status === "active").length,
+              count: employeeList.filter((e) => e.status === "active" && e.role === "learner").length,
             })}
           </p>
         </div>
@@ -183,7 +301,7 @@ export default function EmployeesPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
         <div className="bg-white rounded-card shadow-card p-4">
           <p className="text-xs text-text-secondary">{t("admin.totalLearners")}</p>
-          <p className="text-2xl font-bold text-text-primary">{employees.length}</p>
+          <p className="text-2xl font-bold text-text-primary">{employeeList.filter((e) => e.role === "learner").length}</p>
         </div>
         <div className="bg-white rounded-card shadow-card p-4">
           <p className="text-xs text-text-secondary">{t("admin.pendingInvites")}</p>
@@ -324,37 +442,28 @@ export default function EmployeesPage() {
           <h3 className="text-base font-semibold text-text-primary">Invitations</h3>
         </div>
         <div className="divide-y divide-gray-50">
-          {invitations.map((inv) => (
-            <div key={inv._id} className="px-5 py-3 flex items-center gap-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-text-primary truncate">{inv.email}</p>
-                <p className="text-xs text-text-secondary">
-                  Invited {formatTimeAgo(inv.invitedAt)}
-                </p>
-              </div>
-              <span
-                className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                  inv.status === "signed_up"
-                    ? "bg-green-100 text-green-700"
-                    : inv.status === "pending"
-                    ? "bg-amber-100 text-amber-700"
-                    : "bg-gray-100 text-gray-500"
-                }`}
-              >
-                {inv.status === "signed_up"
-                  ? "Signed Up"
-                  : inv.status === "pending"
-                  ? "Pending"
-                  : "Expired"}
-              </span>
-              <Button variant="ghost" size="xs">Resend</Button>
-            </div>
+          {invitationList.map((inv) => (
+            <InvitationRow
+              key={inv._id}
+              inv={inv}
+              resending={resendingId === inv._id}
+              onResend={handleResendInvitation}
+            />
           ))}
         </div>
       </div>
 
-      <InviteModal open={showInvite} onClose={() => setShowInvite(false)} />
-      <CreateManualModal open={showCreate} onClose={() => setShowCreate(false)} />
+      <InviteModal
+        open={showInvite}
+        onClose={() => setShowInvite(false)}
+        organizationId={convexUser?.organizationId}
+        invitedBy={convexUser?._id}
+      />
+      <CreateManualModal
+        open={showCreate}
+        onClose={() => setShowCreate(false)}
+        organizationId={convexUser?.organizationId}
+      />
       <ConfirmModal
         open={!!deactivateTarget}
         onClose={() => setDeactivateTarget(null)}

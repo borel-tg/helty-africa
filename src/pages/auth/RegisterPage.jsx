@@ -1,43 +1,79 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useQuery, useMutation } from "convex/react";
 import { Eye, EyeOff, CheckCircle } from "lucide-react";
+import { api } from "../../../convex/_generated/api";
 import { Button } from "../../components/ui/Button";
-import { Input } from "../../components/ui/Input";
+import { Input, Select } from "../../components/ui/Input";
 import { useAuth } from "../../hooks/useAuth";
 import { AuthLayout } from "../../components/auth/AuthLayout";
+import { LEARNER_CATEGORIES } from "../../lib/learnerCategories";
+import {
+  DRC_COUNTRY_CODE,
+  formatDrcPhoneInput,
+  isValidDrcPhone,
+  normalizeDrcPhone,
+} from "../../lib/phoneDrc";
 
 export default function RegisterPage() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
-  const token = searchParams.get("token");
-  const [step, setStep] = useState(token ? "register" : "invalid");
+  const token = searchParams.get("token") ?? "";
+  const invitation = useQuery(
+    api.invitations.getPublicByToken,
+    token ? { token } : "skip"
+  );
+  const completeRegistration = useMutation(api.invitations.completeRegistration);
+
   const [form, setForm] = useState({
-    name: "",
-    phone: "",
+    firstName: "",
+    lastName: "",
+    phone: DRC_COUNTRY_CODE + " ",
+    learnerCategoryKey: "",
     password: "",
     confirmPassword: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState(null);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!token) {
+      setStep("invalid");
+      return;
+    }
+    if (invitation === undefined) return;
+    if (invitation.status === "valid") setStep("register");
+    else setStep("invalid");
+  }, [token, invitation]);
 
   const update = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
+  const handlePhoneChange = (e) => {
+    setForm((prev) => ({
+      ...prev,
+      phone: formatDrcPhoneInput(e.target.value),
+    }));
+  };
+
   const validate = () => {
     const errs = {};
-    if (!form.name.trim()) errs.name = t("auth.fullNameRequired");
-    if (!form.phone.trim()) errs.phone = t("auth.phoneRequired");
-    else if (!/^[+\d\s().-]{8,15}$/.test(form.phone))
-      errs.phone = t("auth.phoneInvalid");
+    if (!form.firstName.trim()) errs.firstName = t("auth.firstNameRequired");
+    if (!form.lastName.trim()) errs.lastName = t("auth.lastNameRequired");
+    if (!isValidDrcPhone(form.phone)) errs.phone = t("auth.phoneInvalidDrc");
+    if (invitation?.role === "learner" && !form.learnerCategoryKey) {
+      errs.learnerCategoryKey = t("auth.categoryRequired");
+    }
     if (!form.password) errs.password = t("auth.passwordRequired");
-    else if (form.password.length < 8)
-      errs.password = t("auth.passwordMin");
-    if (form.password !== form.confirmPassword)
+    else if (form.password.length < 8) errs.password = t("auth.passwordMin");
+    if (form.password !== form.confirmPassword) {
       errs.confirmPassword = t("auth.passwordsMismatch");
+    }
     return errs;
   };
 
@@ -50,20 +86,56 @@ export default function RegisterPage() {
     }
     setErrors({});
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setLoading(false);
-    setStep("success");
-    setTimeout(async () => {
-      await login("learner@helty.africa", "demo1234");
-      navigate("/learn");
-    }, 1500);
+    try {
+      const phone = normalizeDrcPhone(form.phone);
+      const result = await completeRegistration({
+        token,
+        firstName: form.firstName.trim(),
+        lastName: form.lastName.trim(),
+        phone: phone ?? form.phone.trim(),
+        password: form.password,
+        learnerCategoryKey:
+          invitation?.role === "learner"
+            ? form.learnerCategoryKey
+            : undefined,
+      });
+
+      setStep("success");
+      const email = result.user.email;
+      setTimeout(async () => {
+        const loginResult = await login(email, form.password);
+        if (loginResult.success) {
+          if (result.user.role === "learner") navigate("/learn");
+          else if (result.user.role === "lead") navigate("/lead/learners");
+          else navigate("/admin");
+        }
+      }, 1200);
+    } catch (err) {
+      setErrors({ form: err.message ?? t("common.error") });
+    } finally {
+      setLoading(false);
+    }
   };
 
+  if (!token || invitation === undefined || step === null) {
+    return (
+      <AuthLayout title={t("common.loading")} showFooter={false}>
+        <p className="text-center text-sm text-text-secondary">{t("common.loading")}</p>
+      </AuthLayout>
+    );
+  }
+
   if (step === "invalid") {
+    const subtitle =
+      invitation?.status === "used"
+        ? t("auth.invitationUsed")
+        : invitation?.status === "expired"
+          ? t("auth.invitationExpired")
+          : t("auth.invalidInvitationDesc");
     return (
       <AuthLayout
         title={t("auth.invalidInvitation")}
-        subtitle={t("auth.invalidInvitationDesc")}
+        subtitle={subtitle}
         showFooter={false}
       >
         <div className="text-center py-2">
@@ -97,34 +169,75 @@ export default function RegisterPage() {
     );
   }
 
+  const isLearner = invitation?.role === "learner";
+
   return (
     <AuthLayout
       title={t("auth.completeAccount")}
-      subtitle={t("auth.invitedSubtitle")}
+      subtitle={
+        invitation.organizationName
+          ? t("auth.invitedToOrg", { org: invitation.organizationName })
+          : t("auth.invitedSubtitle")
+      }
     >
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         <Input
-          label={t("auth.fullName")}
-          type="text"
-          placeholder={t("auth.fullNamePlaceholder")}
-          value={form.name}
-          onChange={update("name")}
-          error={errors.name}
-          autoComplete="name"
-          className="rounded-xl"
+          label={t("auth.email")}
+          type="email"
+          value={invitation.email}
+          readOnly
+          disabled
+          className="rounded-xl bg-gray-50"
         />
 
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Input
+            label={`${t("auth.firstName")} *`}
+            value={form.firstName}
+            onChange={update("firstName")}
+            error={errors.firstName}
+            autoComplete="given-name"
+            className="rounded-xl"
+          />
+          <Input
+            label={`${t("auth.lastName")} *`}
+            value={form.lastName}
+            onChange={update("lastName")}
+            error={errors.lastName}
+            autoComplete="family-name"
+            className="rounded-xl"
+          />
+        </div>
+
         <Input
-          label={t("auth.phone")}
+          label={`${t("auth.phone")} *`}
           type="tel"
-          placeholder={t("admin.phonePlaceholder")}
           value={form.phone}
-          onChange={update("phone")}
+          onChange={handlePhoneChange}
           error={errors.phone}
-          helperText={t("auth.phoneHelper")}
+          helperText={t("auth.phoneHelperDrc")}
           autoComplete="tel"
           className="rounded-xl"
         />
+
+        {isLearner && (
+          <Select
+            label={`${t("auth.learnerCategory")} *`}
+            value={form.learnerCategoryKey}
+            onChange={update("learnerCategoryKey")}
+            error={errors.learnerCategoryKey}
+            required
+          >
+            <option value="" disabled>
+              {t("auth.selectCategory")}
+            </option>
+            {LEARNER_CATEGORIES.map((c) => (
+              <option key={c.key} value={c.key}>
+                {c.labelFr}
+              </option>
+            ))}
+          </Select>
+        )}
 
         <Input
           label={t("auth.password")}
@@ -149,13 +262,16 @@ export default function RegisterPage() {
         <Input
           label={t("auth.confirmPassword")}
           type={showPassword ? "text" : "password"}
-          placeholder={t("auth.confirmPasswordPlaceholder")}
           value={form.confirmPassword}
           onChange={update("confirmPassword")}
           error={errors.confirmPassword}
           autoComplete="new-password"
           className="rounded-xl"
         />
+
+        {errors.form && (
+          <p className="text-sm text-red-600 text-center">{errors.form}</p>
+        )}
 
         <Button
           type="submit"
