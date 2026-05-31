@@ -10,13 +10,15 @@ import {
   ChevronRight,
   Info,
   XCircle,
-  ClipboardList,
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { Select } from "../../components/ui/Input";
 import { ProgressBar } from "../../components/ui/Progress";
-import { useProgramEvaluation, useAvailablePrograms } from "../../hooks/useProgramEvaluation";
+import {
+  useProgramEvaluation,
+  useAvailablePrograms,
+} from "../../hooks/useProgramEvaluation";
 import { average, roundScore1 } from "../../lib/evaluation";
 import { cn } from "../../lib/utils";
 
@@ -25,10 +27,12 @@ function OverviewStat({ label, value, highlight }) {
     <div
       className={cn(
         "rounded-lg p-3 text-center",
-        highlight ? "bg-primary-50 border border-primary-100" : "bg-gray-50"
+        highlight ? "bg-primary-50 border border-primary-100" : "bg-gray-50",
       )}
     >
-      <p className="text-lg font-bold text-text-primary tabular-nums">{value}</p>
+      <p className="text-lg font-bold text-text-primary tabular-nums">
+        {value}
+      </p>
       <p className="text-[10px] sm:text-xs text-text-secondary mt-0.5 leading-tight">
         {label}
       </p>
@@ -41,8 +45,13 @@ export default function ProgramEvaluationPage() {
   const { programId } = useParams();
   const navigate = useNavigate();
   const { programs } = useAvailablePrograms();
-  const { evaluation, isLoading, sessionBlocked, handleEnroll, handleFinalize } =
-    useProgramEvaluation(programId);
+  const {
+    evaluation,
+    isLoading,
+    sessionBlocked,
+    handleEnroll,
+    handleFinalize,
+  } = useProgramEvaluation(programId);
 
   const [finalizing, setFinalizing] = useState(false);
   const [rulesOpen, setRulesOpen] = useState(false);
@@ -51,7 +60,9 @@ export default function ProgramEvaluationPage() {
 
   if (isLoading) {
     return (
-      <p className="p-6 text-center text-text-secondary">{t("common.loading")}</p>
+      <p className="p-6 text-center text-text-secondary">
+        {t("common.loading")}
+      </p>
     );
   }
 
@@ -87,7 +98,8 @@ export default function ProgramEvaluationPage() {
     submittedGeneralCount = 0,
   } = evaluation;
 
-  const requireModulePass = policy.unlockGeneralExamMode === "all_module_passes";
+  const requireModulePass =
+    policy.unlockGeneralExamMode === "all_module_passes";
   const maxFinalRetakes = policy.generalExamMaxRetakes ?? 3;
   const finalRetakesLeft =
     maxFinalRetakes === "unlimited"
@@ -97,9 +109,13 @@ export default function ProgramEvaluationPage() {
     generalExamEnabled && generalUnlocked && finalRetakesLeft > 0;
 
   const pendingModuleCount = moduleSummaries.filter((m) =>
-    requireModulePass ? !m.passed || !m.hasSubmittedAttempt : !m.hasSubmittedAttempt
+    requireModulePass
+      ? !m.passed || !m.hasSubmittedAttempt
+      : !m.hasSubmittedAttempt,
   ).length;
-  const modulesSubmitted = moduleSummaries.filter((m) => m.hasSubmittedAttempt).length;
+  const modulesSubmitted = moduleSummaries.filter(
+    (m) => m.hasSubmittedAttempt,
+  ).length;
   const modulesPassed = moduleSummaries.filter((m) => m.passed).length;
 
   const moduleBestScores = moduleSummaries
@@ -139,28 +155,24 @@ export default function ProgramEvaluationPage() {
   const canConfirmResult =
     !programCompleted &&
     enrolled &&
-    ((!generalExamEnabled && moduleSummaries.every((m) => m.hasSubmittedAttempt)) ||
+    ((!generalExamEnabled &&
+      moduleSummaries.every((m) => m.hasSubmittedAttempt)) ||
       (generalExamEnabled && generalUnlocked && bestGeneralScore != null));
 
   return (
     <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-6">
       <div>
-        <button
-          type="button"
-          onClick={() => navigate(`/learn/program/${programId}`)}
-          className="text-sm text-text-secondary hover:text-primary mb-3"
-        >
-          ← {t("trainings.backToProgram")}
-        </button>
-
-        {enrolledPrograms.length > 1 && (
+        <h2 className="text-xl font-semibold text-text-primary mb-10">
+          {t("routes.evaluation")}
+        </h2>
+        {enrolledPrograms.length > 1 ? (
           <Select
             label={t("evaluation.selectProgram")}
             value={programId}
             onChange={(e) =>
               navigate(`/learn/program/${e.target.value}/evaluation`)
             }
-            className="mb-4"
+            className="mt-4 mb-6"
           >
             {enrolledPrograms.map((p) => (
               <option key={p._id} value={p._id}>
@@ -168,23 +180,16 @@ export default function ProgramEvaluationPage() {
               </option>
             ))}
           </Select>
+        ) : (
+          <p className="text-sm text-text-secondary mb-6">{program.title}</p>
         )}
-
-        <div className="flex items-start gap-3">
-          <ClipboardList size={22} className="text-primary shrink-0 mt-1" />
-          <div>
-            <p className="text-xs font-medium text-text-secondary uppercase tracking-wide">
-              {t("evaluation.programLabel")}
-            </p>
-            <h1 className="text-xl font-semibold text-text-primary">{program.title}</h1>
-            <p className="text-sm text-text-secondary mt-1">{program.description}</p>
-          </div>
-        </div>
       </div>
 
       {!enrolled && program.accessMode === "open" && (
         <Card className="p-4 bg-primary-50 border border-primary-100">
-          <p className="text-sm text-primary-800 mb-3">{t("evaluation.joinPrompt")}</p>
+          <p className="text-sm text-primary-800 mb-3">
+            {t("evaluation.joinPrompt")}
+          </p>
           <Button size="sm" onClick={onJoin}>
             {t("evaluation.joinProgram")}
           </Button>
@@ -224,9 +229,7 @@ export default function ProgramEvaluationPage() {
               )}
               <OverviewStat
                 label={t("trainings.statFinalScore")}
-                value={
-                  moduleBestScores.length > 0 ? `${finalScore}%` : "—"
-                }
+                value={moduleBestScores.length > 0 ? `${finalScore}%` : "—"}
                 highlight={passed && moduleBestScores.length > 0}
               />
             </div>
@@ -239,7 +242,7 @@ export default function ProgramEvaluationPage() {
                   100,
                   moduleBestScores.length > 0
                     ? (finalScore / policy.programPassThreshold) * 100
-                    : 0
+                    : 0,
                 )}
                 className="flex-1"
                 size="md"
@@ -263,7 +266,7 @@ export default function ProgramEvaluationPage() {
                   "text-4xl font-bold tabular-nums",
                   passed && moduleBestScores.length > 0
                     ? "text-green-600"
-                    : "text-text-primary"
+                    : "text-text-primary",
                 )}
               >
                 {moduleBestScores.length > 0 ? `${finalScore}%` : "—"}
@@ -294,11 +297,15 @@ export default function ProgramEvaluationPage() {
                   <span>
                     {t("evaluation.moduleAvgContribution", {
                       avg: moduleAvg,
-                      weight: generalExamEnabled ? policy.moduleExamWeight : 100,
+                      weight: generalExamEnabled
+                        ? policy.moduleExamWeight
+                        : 100,
                     })}
                   </span>
                   <span className="font-medium text-text-primary tabular-nums">
-                    {generalExamEnabled ? `${moduleContribution}%` : `${moduleAvg}%`}
+                    {generalExamEnabled
+                      ? `${moduleContribution}%`
+                      : `${moduleAvg}%`}
                   </span>
                 </div>
                 {generalExamEnabled && (
@@ -310,7 +317,9 @@ export default function ProgramEvaluationPage() {
                       })}
                     </span>
                     <span className="font-medium text-text-primary tabular-nums">
-                      {finalContribution != null ? `${finalContribution}%` : "—"}
+                      {finalContribution != null
+                        ? `${finalContribution}%`
+                        : "—"}
                     </span>
                   </div>
                 )}
@@ -359,7 +368,7 @@ export default function ProgramEvaluationPage() {
                 size={18}
                 className={cn(
                   "text-text-secondary transition-transform",
-                  rulesOpen && "rotate-90"
+                  rulesOpen && "rotate-90",
                 )}
               />
             </button>
@@ -409,9 +418,9 @@ export default function ProgramEvaluationPage() {
             </h2>
             <div className="space-y-3">
               {modules.map((mod) => {
-                const summary = mod.examSummary ?? moduleSummaries.find(
-                  (s) => s.moduleId === mod._id
-                );
+                const summary =
+                  mod.examSummary ??
+                  moduleSummaries.find((s) => s.moduleId === mod._id);
                 const done = summary?.hasSubmittedAttempt;
                 const modPassed = summary?.passed;
                 return (
@@ -422,9 +431,15 @@ export default function ProgramEvaluationPage() {
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       {done ? (
                         modPassed ? (
-                          <CheckCircle size={18} className="text-green-500 shrink-0" />
+                          <CheckCircle
+                            size={18}
+                            className="text-green-500 shrink-0"
+                          />
                         ) : (
-                          <XCircle size={18} className="text-amber-500 shrink-0" />
+                          <XCircle
+                            size={18}
+                            className="text-amber-500 shrink-0"
+                          />
                         )
                       ) : (
                         <Circle size={18} className="text-gray-300 shrink-0" />
@@ -456,7 +471,9 @@ export default function ProgramEvaluationPage() {
                               <span
                                 className={cn(
                                   "font-medium",
-                                  modPassed ? "text-green-600" : "text-amber-600"
+                                  modPassed
+                                    ? "text-green-600"
+                                    : "text-amber-600",
                                 )}
                               >
                                 {modPassed
@@ -476,7 +493,9 @@ export default function ProgramEvaluationPage() {
                       className="shrink-0"
                       onClick={() => navigate(`/learn/module/${mod._id}`)}
                     >
-                      {done ? t("evaluation.retakeModule") : t("evaluation.goToModule")}
+                      {done
+                        ? t("evaluation.retakeModule")
+                        : t("evaluation.goToModule")}
                       <ChevronRight size={14} />
                     </Button>
                   </div>
@@ -496,12 +515,15 @@ export default function ProgramEvaluationPage() {
                   "rounded-xl border p-4",
                   canTakeFinalExam
                     ? "border-primary-200 bg-primary-50/60"
-                    : "border-gray-200 bg-gray-50"
+                    : "border-gray-200 bg-gray-50",
                 )}
               >
                 {!generalUnlocked ? (
                   <div className="flex items-start gap-3 text-sm">
-                    <Lock size={18} className="text-text-secondary shrink-0 mt-0.5" />
+                    <Lock
+                      size={18}
+                      className="text-text-secondary shrink-0 mt-0.5"
+                    />
                     <p className="text-text-secondary">
                       {requireModulePass
                         ? t("evaluation.finalPendingPasses", {
@@ -546,7 +568,9 @@ export default function ProgramEvaluationPage() {
                     )}
                     {bestGeneralScore != null && (
                       <p className="text-sm font-medium text-text-primary">
-                        {t("evaluation.bestGeneral", { score: bestGeneralScore })}
+                        {t("evaluation.bestGeneral", {
+                          score: bestGeneralScore,
+                        })}
                       </p>
                     )}
                     {canTakeFinalExam && (

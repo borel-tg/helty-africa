@@ -54,18 +54,18 @@ export function AuthBrandPanel({ compact = false }) {
 
       <div className="relative z-10 flex flex-col flex-1 gap-6 lg:gap-8">
         <div>
-          <h2
+          <h1
             className={cn(
               "font-semibold leading-tight tracking-tight",
               compact
                 ? "text-lg sm:text-xl"
-                : "text-4xl sm:text-3xl lg:text-[2rem]",
+                : "text-4xl sm:text-4xl lg:text-[2rem]",
             )}
           >
             {t("auth.brandHeadline")}
-          </h2>
+          </h1>
           {!compact && (
-            <p className="mt-3 text-sm sm:text-base text-white/85 max-w-md leading-relaxed">
+            <p className="mt-5 text-sm sm:text-base text-white/85 max-w-lg leading-relaxed">
               {t("auth.brandSubtitle")}
             </p>
           )}
