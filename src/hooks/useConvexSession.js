@@ -52,7 +52,9 @@ export function useConvexSession() {
     return () => {
       cancelled = true;
     };
-  }, [email, convex]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-run on email;
+    // including `convex` resets userLookup to "loading" before getByEmail completes.
+  }, [email]);
 
   const publishedModules = useQuery(
     api.modules.listPublished,
@@ -78,6 +80,7 @@ export function useConvexSession() {
 
   return {
     convexUser,
+    userLookup,
     publishedModules: publishedModules ?? [],
     template: template ?? null,
     isLoading: Boolean(isLoading),
