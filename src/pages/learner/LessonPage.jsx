@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useParams, useNavigate } from "react-router-dom";
@@ -7,147 +7,13 @@ import {
   ArrowLeft,
   ArrowRight,
   CheckCircle,
-  AlertTriangle,
   ExternalLink,
   Download,
-  Video,
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { useToast } from "../../components/ui/Toast";
-import {
-  PdfDocumentViewer,
-  PptDocumentViewer,
-} from "../../components/learner/DocumentViewer";
+import { LessonContentBody } from "../../components/learner/LessonContent";
 import { useLearnerModule } from "../../hooks/useLearnerModule";
-
-// ── Text Lesson ─────────────────────────────────────────────────────────────
-function TextLesson({ lesson, onComplete, completed }) {
-  const { t } = useTranslation();
-  return (
-    <div>
-      <div
-        className="prose prose-sm max-w-none text-text-primary leading-relaxed"
-        dangerouslySetInnerHTML={{ __html: lesson.content }}
-      />
-      {!completed && (
-        <Button onClick={onComplete} className="mt-8" size="lg">
-          <CheckCircle size={18} />
-          {t("learner.markComplete")}
-        </Button>
-      )}
-    </div>
-  );
-}
-
-// ── Video Lesson ─────────────────────────────────────────────────────────────
-function VideoLesson({ lesson, onComplete, completed }) {
-  const { t } = useTranslation();
-  const videoId = lesson.videoId;
-  const embedUrl = `https://www.youtube.com/embed/${videoId}?controls=1&modestbranding=1&rel=0&fs=0`;
-
-  return (
-    <div>
-      {videoId ? (
-        <div
-          className="document-viewer-wrapper rounded-lg overflow-hidden bg-black aspect-video"
-          onContextMenu={(e) => e.preventDefault()}
-        >
-          <iframe
-            src={embedUrl}
-            title={lesson.title}
-            className="w-full h-full"
-            allowFullScreen={false}
-            allow="autoplay; encrypted-media"
-            referrerPolicy="strict-origin-when-cross-origin"
-          />
-        </div>
-      ) : (
-        <div className="flex items-center gap-3 p-4 bg-amber-50 rounded-lg border border-amber-200">
-          <AlertTriangle size={20} className="text-amber-500 shrink-0" />
-          <p className="text-sm text-amber-700">
-            {t("learner.videoUnavailable")}
-          </p>
-        </div>
-      )}
-
-      <div className="mt-4 p-3 bg-primary-50 rounded-lg text-sm text-primary-700">
-        <Video size={14} className="inline mr-1.5" />
-        {t("learner.watchVideoHint")}
-      </div>
-
-      {!completed && (
-        <Button onClick={onComplete} className="mt-4" size="lg">
-          <CheckCircle size={18} />
-          {t("learner.markComplete")}
-        </Button>
-      )}
-    </div>
-  );
-}
-
-// ── Document Lesson ──────────────────────────────────────────────────────────
-function DocumentLesson({ lesson, onComplete, completed }) {
-  const { t } = useTranslation();
-  const viewerRef = useRef(null);
-  const isPpt =
-    lesson.fileType === "ppt" ||
-    lesson.fileName?.toLowerCase().endsWith(".ppt") ||
-    lesson.fileName?.toLowerCase().endsWith(".pptx");
-
-  const blockShortcuts = (e) => {
-    if (
-      (e.ctrlKey || e.metaKey) &&
-      ["s", "p", "c", "a"].includes(e.key.toLowerCase())
-    ) {
-      e.preventDefault();
-    }
-  };
-
-  if (!lesson.fileUrl) {
-    return (
-      <div className="flex items-center gap-3 p-4 bg-amber-50 rounded-lg border border-amber-200">
-        <AlertTriangle size={20} className="text-amber-500 shrink-0" />
-        <p className="text-sm text-amber-700">
-          {t("learner.noDocumentAttached")}
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div>
-      <div
-        ref={viewerRef}
-        tabIndex={0}
-        className="document-viewer-wrapper border border-gray-100 rounded-lg overflow-hidden outline-none"
-        onContextMenu={(e) => e.preventDefault()}
-        onKeyDown={blockShortcuts}
-      >
-        {isPpt ? (
-          <PptDocumentViewer lesson={lesson} />
-        ) : (
-          <PdfDocumentViewer
-            fileUrl={lesson.fileUrl}
-            fileName={lesson.fileName}
-          />
-        )}
-
-        <div className="bg-red-50 border-t border-red-100 px-4 py-2 text-center">
-          <p className="text-xs text-red-500">
-            {t("learner.documentProtection")}
-          </p>
-        </div>
-      </div>
-
-      {!completed && (
-        <Button onClick={onComplete} className="mt-4" size="lg">
-          <CheckCircle size={18} />
-          {t("learner.markComplete")}
-        </Button>
-      )}
-    </div>
-  );
-}
 
 // ── Main LessonPage ──────────────────────────────────────────────────────────
 export default function LessonPage() {
@@ -164,7 +30,6 @@ export default function LessonPage() {
     isLessonCompleted,
     isLoading,
     notFound,
-    isConvex,
     convexUser,
   } = useLearnerModule(moduleId);
 
@@ -184,7 +49,7 @@ export default function LessonPage() {
 
   const handleComplete = async () => {
     setCompleted(true);
-    if (isConvex && convexUser?._id && module && lesson) {
+    if (convexUser?._id && module && lesson) {
       try {
         await markCompleted({
           userId: convexUser._id,
@@ -312,27 +177,11 @@ export default function LessonPage() {
         {/* Lesson content */}
         <div className="flex-1 min-w-0">
           <div className="bg-white rounded-card shadow-card p-5 md:p-6">
-            {lesson.type === "text" && (
-              <TextLesson
-                lesson={lesson}
-                onComplete={handleComplete}
-                completed={completed}
-              />
-            )}
-            {lesson.type === "video" && (
-              <VideoLesson
-                lesson={lesson}
-                onComplete={handleComplete}
-                completed={completed}
-              />
-            )}
-            {lesson.type === "document" && (
-              <DocumentLesson
-                lesson={lesson}
-                onComplete={handleComplete}
-                completed={completed}
-              />
-            )}
+            <LessonContentBody
+              lesson={lesson}
+              onComplete={handleComplete}
+              completed={completed}
+            />
 
             {completed && (
               <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200 flex items-center gap-2">

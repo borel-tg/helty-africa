@@ -146,7 +146,7 @@ export default function ModulePage() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-base font-semibold text-text-primary mb-1">
-              {t("learner.finalExam")}
+              {t("learner.moduleEvaluation")}
             </h3>
             <p className="text-sm text-text-secondary">
               {allComplete

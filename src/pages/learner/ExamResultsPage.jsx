@@ -1,13 +1,12 @@
-import { useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useMutation } from "convex/react";
+import { useQuery } from "convex/react";
 import { CheckCircle, XCircle, Award, RotateCcw, BookOpen } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
 import { Button } from "../../components/ui/Button";
 import { CircularProgress } from "../../components/ui/Progress";
-import { MOCK_MODULES } from "../../lib/mockData";
 import { cn } from "../../lib/utils";
+import { useLearnerModule } from "../../hooks/useLearnerModule";
 import { useConvexSession } from "../../hooks/useConvexSession";
 
 export default function ExamResultsPage() {
@@ -15,39 +14,37 @@ export default function ExamResultsPage() {
   const { moduleId } = useParams();
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { convexUser, resolveModuleId } = useConvexSession();
-  const issueCertificate = useMutation(api.certificates.issue);
-  const module = MOCK_MODULES.find((m) => m._id === moduleId);
+  const { convexUser } = useConvexSession();
+  const { module } = useLearnerModule(moduleId);
 
-  const score = state?.score ?? 75;
-  const passed = state?.passed ?? true;
+  const attempts = useQuery(
+    api.exams.getAttempts,
+    convexUser?._id && moduleId
+      ? { userId: convexUser._id, moduleId }
+      : "skip"
+  );
+
+  const enrolledCtx = useQuery(
+    api.recentModules.findEnrolledProgramForModule,
+    convexUser?._id && moduleId
+      ? { userId: convexUser._id, moduleId }
+      : "skip"
+  );
+
+  const programId = enrolledCtx?.program?._id;
+
+  const score = state?.score ?? 0;
+  const passed = state?.passed ?? false;
   const answers = state?.answers ?? {};
   const questions = state?.questions ?? [];
-  const retakesUsed = 1;
-  const maxRetakes = module?.maxRetakes ?? 3;
+
+  const submittedAttempts = (attempts ?? []).filter((a) => a.submittedAt != null);
+  const retakesUsed = submittedAttempts.length;
+  const maxRetakes = module?.maxRetakes ?? 2;
   const retakesLeft =
     maxRetakes === "unlimited"
       ? "unlimited"
       : Math.max(0, (typeof maxRetakes === "number" ? maxRetakes : 3) - retakesUsed);
-
-  useEffect(() => {
-    if (!passed || !convexUser?._id || !convexUser.organizationId) return;
-    const convexModuleId = resolveModuleId(moduleId);
-    if (!convexModuleId || String(convexModuleId).startsWith("mod")) return;
-    issueCertificate({
-      userId: convexUser._id,
-      moduleId: convexModuleId,
-      organizationId: convexUser.organizationId,
-      score,
-    }).catch(() => {});
-  }, [
-    passed,
-    score,
-    convexUser,
-    moduleId,
-    resolveModuleId,
-    issueCertificate,
-  ]);
 
   return (
     <div className="p-4 md:p-6 max-w-2xl mx-auto">
@@ -76,14 +73,24 @@ export default function ExamResultsPage() {
           <div className="relative">
             <CircularProgress value={score} size={80} />
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className={cn("text-xl font-bold", passed ? "text-primary" : "text-red-500")}>
+              <span
+                className={cn(
+                  "text-xl font-bold",
+                  passed ? "text-primary" : "text-red-500"
+                )}
+              >
                 {score}%
               </span>
             </div>
           </div>
           <div className="text-left">
             <p className="text-sm text-text-secondary">{t("learner.yourScoreLabel")}</p>
-            <p className={cn("text-2xl font-bold", passed ? "text-primary" : "text-red-500")}>
+            <p
+              className={cn(
+                "text-2xl font-bold",
+                passed ? "text-primary" : "text-red-500"
+              )}
+            >
               {score}%
             </p>
             <p className="text-sm text-text-secondary">
@@ -124,8 +131,8 @@ export default function ExamResultsPage() {
                           opt.id === correct
                             ? "bg-green-50 text-green-700 font-medium"
                             : opt.id === selected && !isCorrect
-                            ? "bg-red-50 text-red-600 line-through"
-                            : "text-text-secondary"
+                              ? "bg-red-50 text-red-600 line-through"
+                              : "text-text-secondary"
                         )}
                       >
                         {opt.id === correct ? "✓ " : opt.id === selected ? "✗ " : "  "}
@@ -141,24 +148,24 @@ export default function ExamResultsPage() {
       )}
 
       <div className="space-y-3">
-        {passed ? (
+        {passed && programId ? (
           <>
             <Button
               fullWidth
               size="lg"
-              onClick={() => navigate(`/learn/program/prog1/evaluation`)}
+              onClick={() => navigate(`/learn/program/${programId}/evaluation`)}
             >
               <Award size={18} />
-              {t("learner.downloadCertificate")}
+              {t("learner.viewProgramEvaluation")}
             </Button>
-            <Button
-              fullWidth
-              variant="outline"
-              onClick={() => navigate("/learn")}
-            >
+            <Button fullWidth variant="outline" onClick={() => navigate("/learn")}>
               {t("learner.backToDashboard")}
             </Button>
           </>
+        ) : passed ? (
+          <Button fullWidth variant="outline" onClick={() => navigate("/learn")}>
+            {t("learner.backToDashboard")}
+          </Button>
         ) : (
           <>
             {retakesLeft !== 0 ? (

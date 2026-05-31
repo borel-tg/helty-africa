@@ -20,7 +20,7 @@ function CreateModuleModal({ open, onClose, convexUser, onCreated }) {
     title: "",
     description: "",
     passingScore: "70",
-    maxRetakes: "3",
+    maxRetakes: "2",
   });
   const [loading, setLoading] = useState(false);
   const [thumbnail, setThumbnail] = useState(null);
@@ -41,7 +41,7 @@ function CreateModuleModal({ open, onClose, convexUser, onCreated }) {
         createdBy: convexUser._id,
       });
       toast.success(t("admin.moduleCreated"));
-      setForm({ title: "", description: "", passingScore: "70", maxRetakes: "3" });
+      setForm({ title: "", description: "", passingScore: "70", maxRetakes: "2" });
       setThumbnail(null);
       onClose();
       onCreated(id);

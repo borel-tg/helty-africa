@@ -13,32 +13,215 @@ import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import { cn } from "../../lib/utils";
+import {
+  detectDocumentMedia,
+  getGoogleDriveFileId,
+  getGoogleDrivePreviewUrl,
+} from "../../lib/documentMedia";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
-/** Stable public paths (also in /public/demo) for Office Online embed. */
 export const PUBLIC_DEMO_PDF = "/demo/sample-pdf.pdf";
 export const PUBLIC_DEMO_PPT = "/demo/sample-ppt.ppt";
 
-function useAbsolutePublicUrl(lesson) {
-  return useMemo(() => {
-    if (lesson.fileUrl?.startsWith("http")) return lesson.fileUrl;
-    if (lesson.fileUrl?.startsWith("/")) {
-      return `${window.location.origin}${lesson.fileUrl}`;
-    }
-    if (lesson.fileType === "ppt") {
-      return `${window.location.origin}${PUBLIC_DEMO_PPT}`;
-    }
-    return `${window.location.origin}${PUBLIC_DEMO_PDF}`;
-  }, [lesson.fileType, lesson.fileUrl]);
+const PDF_LOAD_ERROR = "Failed to load PDF.";
+
+/** Single entry: picks embed / pdf.js / image from URL + metadata. */
+export function DocumentViewer({ fileUrl, fileName, fileType }) {
+  const media = useMemo(
+    () => detectDocumentMedia(fileUrl, fileName, fileType),
+    [fileUrl, fileName, fileType]
+  );
+
+  if (media.kind === "none") return null;
+  if (media.kind === "image") {
+    return (
+      <ImageDocumentFrame src={media.imageSrc} fileName={fileName} />
+    );
+  }
+  if (media.kind === "embed") {
+    return (
+      <EmbeddedDocumentFrame
+        src={media.embedSrc}
+        fileName={fileName}
+        title={fileName || "Document"}
+        supportsSlideNav={media.supportsSlideNav}
+      />
+    );
+  }
+  return (
+    <PdfDocumentViewer
+      fileUrl={fileUrl}
+      fileName={fileName}
+      pdfSrc={media.pdfSrc}
+    />
+  );
 }
 
-export function PdfDocumentViewer({ fileUrl, fileName }) {
-  const containerRef = useRef(null);
-  const normalizedFileUrl = useMemo(
-    () => normalizeExternalDocumentUrl(fileUrl, "pdf"),
-    [fileUrl]
+/** @deprecated Use DocumentViewer — kept for imports that pass a lesson object */
+export function PptDocumentViewer({ lesson }) {
+  return (
+    <DocumentViewer
+      fileUrl={lesson.fileUrl}
+      fileName={lesson.fileName}
+      fileType={lesson.fileType}
+    />
   );
+}
+
+function ImageDocumentFrame({ src, fileName }) {
+  const containerRef = useRef(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const onFullScreenChange = () =>
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener("fullscreenchange", onFullScreenChange);
+    return () =>
+      document.removeEventListener("fullscreenchange", onFullScreenChange);
+  }, []);
+
+  const toggleReaderMode = async () => {
+    if (!containerRef.current) return;
+    if (!document.fullscreenElement) {
+      await containerRef.current.requestFullscreen?.();
+      return;
+    }
+    await document.exitFullscreen?.();
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      className={cn("bg-white", isFullscreen && "h-[100dvh] flex flex-col")}
+    >
+      <DocumentToolbar
+        fileName={fileName}
+        isFullscreen={isFullscreen}
+        onToggleReaderMode={toggleReaderMode}
+      />
+      <div
+        className={cn(
+          "bg-gray-100 min-h-[420px] flex items-center justify-center p-4",
+          isFullscreen && "flex-1 min-h-0 overflow-auto"
+        )}
+      >
+        <img
+          src={src}
+          alt={fileName || "Lesson image"}
+          className="max-w-full max-h-[78dvh] object-contain shadow-md rounded"
+          draggable={false}
+          onContextMenu={(e) => e.preventDefault()}
+        />
+      </div>
+      <DocumentBottomNav
+        isFullscreen={isFullscreen}
+        onToggleReaderMode={toggleReaderMode}
+      />
+    </div>
+  );
+}
+
+function EmbeddedDocumentFrame({
+  src,
+  fileName,
+  title = "Document",
+  supportsSlideNav = false,
+}) {
+  const containerRef = useRef(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [slideIndex, setSlideIndex] = useState(1);
+
+  useEffect(() => {
+    const onFullScreenChange = () =>
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener("fullscreenchange", onFullScreenChange);
+    return () =>
+      document.removeEventListener("fullscreenchange", onFullScreenChange);
+  }, []);
+
+  const toggleReaderMode = async () => {
+    if (!containerRef.current) return;
+    if (!document.fullscreenElement) {
+      await containerRef.current.requestFullscreen?.();
+      return;
+    }
+    await document.exitFullscreen?.();
+  };
+
+  const iframeSrc =
+    supportsSlideNav && src.includes("docs.google.com/presentation")
+      ? `${src.split("#")[0]}#slide=id.p${Math.max(1, slideIndex)}`
+      : src;
+
+  return (
+    <div
+      ref={containerRef}
+      className={cn("bg-white", isFullscreen && "h-[100dvh] flex flex-col")}
+    >
+      <DocumentToolbar
+        fileName={fileName}
+        isFullscreen={isFullscreen}
+        onToggleReaderMode={toggleReaderMode}
+      />
+      <iframe
+        title={title}
+        src={iframeSrc}
+        className={cn(
+          "w-full h-[78dvh] min-h-[420px] bg-white border-0",
+          isFullscreen && "flex-1 min-h-0 h-auto"
+        )}
+        allow="autoplay; fullscreen"
+        referrerPolicy="no-referrer-when-downgrade"
+      />
+      <DocumentBottomNav
+        page={slideIndex}
+        numPages={supportsSlideNav ? Number.MAX_SAFE_INTEGER : 0}
+        isFullscreen={isFullscreen}
+        onToggleReaderMode={toggleReaderMode}
+        onPrev={
+          supportsSlideNav ? () => setSlideIndex((s) => Math.max(1, s - 1)) : undefined
+        }
+        onNext={supportsSlideNav ? () => setSlideIndex((s) => s + 1) : undefined}
+      />
+    </div>
+  );
+}
+
+export function PdfDocumentViewer({ fileUrl, fileName, pdfSrc }) {
+  const media = useMemo(
+    () => detectDocumentMedia(fileUrl, fileName, "pdf"),
+    [fileUrl, fileName]
+  );
+
+  if (media.kind === "embed") {
+    return (
+      <EmbeddedDocumentFrame
+        src={media.embedSrc}
+        fileName={fileName}
+        title={fileName || "Document"}
+        supportsSlideNav={media.supportsSlideNav}
+      />
+    );
+  }
+
+  if (media.kind === "image") {
+    return <ImageDocumentFrame src={media.imageSrc} fileName={fileName} />;
+  }
+
+  const resolvedPdfSrc = pdfSrc || media.pdfSrc || fileUrl;
+
+  return (
+    <PdfJsDocumentViewer
+      fileUrl={fileUrl}
+      fileName={fileName}
+      normalizedFileUrl={resolvedPdfSrc}
+    />
+  );
+}
+
+function PdfJsDocumentViewer({ fileUrl, fileName, normalizedFileUrl }) {
+  const containerRef = useRef(null);
   const [numPages, setNumPages] = useState(0);
   const [page, setPage] = useState(1);
   const [scale, setScale] = useState(1);
@@ -46,6 +229,7 @@ export function PdfDocumentViewer({ fileUrl, fileName }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [embedFallback, setEmbedFallback] = useState(null);
 
   useEffect(() => {
     const node = containerRef.current;
@@ -66,6 +250,12 @@ export function PdfDocumentViewer({ fileUrl, fileName }) {
       document.removeEventListener("fullscreenchange", onFullScreenChange);
   }, []);
 
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    setEmbedFallback(null);
+  }, [normalizedFileUrl]);
+
   const toggleReaderMode = async () => {
     if (!containerRef.current) return;
     if (!document.fullscreenElement) {
@@ -74,6 +264,16 @@ export function PdfDocumentViewer({ fileUrl, fileName }) {
     }
     await document.exitFullscreen?.();
   };
+
+  if (embedFallback) {
+    return (
+      <EmbeddedDocumentFrame
+        src={embedFallback}
+        fileName={fileName}
+        title={fileName || "Document"}
+      />
+    );
+  }
 
   return (
     <div
@@ -119,9 +319,19 @@ export function PdfDocumentViewer({ fileUrl, fileName }) {
             setLoading(false);
             setError(null);
           }}
-          onLoadError={(err) => {
+          onLoadError={() => {
             setLoading(false);
-            setError(err?.message || "Failed to load PDF");
+            const driveId = getGoogleDriveFileId(fileUrl);
+            if (driveId) {
+              setEmbedFallback(getGoogleDrivePreviewUrl(driveId));
+              return;
+            }
+            const fallback = detectDocumentMedia(fileUrl, fileName, null);
+            if (fallback.kind === "embed") {
+              setEmbedFallback(fallback.embedSrc);
+              return;
+            }
+            setError(PDF_LOAD_ERROR);
           }}
           loading={null}
           className={cn(loading && "hidden")}
@@ -146,63 +356,6 @@ export function PdfDocumentViewer({ fileUrl, fileName }) {
           onNext={() => setPage((p) => Math.min(numPages, p + 1))}
         />
       </div>
-    </div>
-  );
-}
-
-export function PptDocumentViewer({ lesson }) {
-  const absoluteUrl = useAbsolutePublicUrl(lesson);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [slideIndex, setSlideIndex] = useState(1);
-  const embedInfo = useMemo(
-    () => getPresentationEmbedInfo(absoluteUrl, slideIndex),
-    [absoluteUrl, slideIndex]
-  );
-  const containerRef = useRef(null);
-
-  useEffect(() => {
-    const onFullScreenChange = () =>
-      setIsFullscreen(Boolean(document.fullscreenElement));
-    document.addEventListener("fullscreenchange", onFullScreenChange);
-    return () =>
-      document.removeEventListener("fullscreenchange", onFullScreenChange);
-  }, []);
-
-  const toggleReaderMode = async () => {
-    if (!containerRef.current) return;
-    if (!document.fullscreenElement) {
-      await containerRef.current.requestFullscreen?.();
-      return;
-    }
-    await document.exitFullscreen?.();
-  };
-
-  return (
-    <div
-      ref={containerRef}
-      className={cn("bg-white", isFullscreen && "h-[100dvh] flex flex-col")}
-    >
-      <DocumentToolbar
-        fileName={lesson.fileName}
-        isFullscreen={isFullscreen}
-        onToggleReaderMode={toggleReaderMode}
-      />
-      <iframe
-        title={lesson.fileName || "Presentation"}
-        src={embedInfo.src}
-        className={cn(
-          "w-full h-[78dvh] min-h-[420px] bg-white border-0",
-          isFullscreen && "flex-1 min-h-0 h-auto"
-        )}
-      />
-      <DocumentBottomNav
-        page={slideIndex}
-        numPages={embedInfo.supportsSlideNav ? Number.MAX_SAFE_INTEGER : 0}
-        isFullscreen={isFullscreen}
-        onToggleReaderMode={toggleReaderMode}
-        onPrev={() => setSlideIndex((s) => Math.max(1, s - 1))}
-        onNext={() => setSlideIndex((s) => s + 1)}
-      />
     </div>
   );
 }
@@ -305,7 +458,7 @@ function DocumentBottomNav({
         <button
           type="button"
           onClick={onPrev}
-          disabled={numPages > 0 ? page <= 1 : false}
+          disabled={numPages > 0 ? page <= 1 : !onPrev}
           className="p-2 rounded hover:bg-gray-200 disabled:opacity-40 min-h-[44px] min-w-[44px] flex items-center justify-center"
           aria-label="Previous page"
           title="Previous"
@@ -326,7 +479,7 @@ function DocumentBottomNav({
         <button
           type="button"
           onClick={onNext}
-          disabled={numPages > 0 ? page >= numPages : false}
+          disabled={numPages > 0 ? page >= numPages : !onNext}
           className="p-2 rounded hover:bg-gray-200 disabled:opacity-40 min-h-[44px] min-w-[44px] flex items-center justify-center"
           aria-label="Next page"
           title="Next"
@@ -336,85 +489,4 @@ function DocumentBottomNav({
       </div>
     </div>
   );
-}
-
-function normalizeExternalDocumentUrl(url, fileType) {
-  if (!url) {
-    return `${window.location.origin}${
-      fileType === "ppt" ? PUBLIC_DEMO_PPT : PUBLIC_DEMO_PDF
-    }`;
-  }
-  try {
-    const parsed = new URL(url);
-    if (parsed.hostname.includes("docs.google.com")) {
-      const path = parsed.pathname;
-      const idMatch = path.match(/\/d\/([^/]+)/);
-      const fileId = idMatch?.[1];
-      if (fileType === "pdf" && path.includes("/document/") && fileId) {
-        return `https://docs.google.com/document/d/${fileId}/export?format=pdf`;
-      }
-      if (fileType === "pdf" && path.includes("/presentation/") && fileId) {
-        return `https://docs.google.com/presentation/d/${fileId}/export/pdf`;
-      }
-      return parsed.toString();
-    }
-    if (parsed.hostname.includes("drive.google.com")) {
-      const idMatch = parsed.pathname.match(/\/d\/([^/]+)/);
-      const fileId = idMatch?.[1] || parsed.searchParams.get("id");
-      if (fileId) {
-        if (fileType === "pdf") {
-          return `https://drive.google.com/uc?export=download&id=${fileId}`;
-        }
-        return `https://drive.google.com/file/d/${fileId}/preview`;
-      }
-    }
-    return parsed.toString();
-  } catch {
-    return url;
-  }
-}
-
-function getPresentationEmbedInfo(url, slideIndex = 1) {
-  const fallback = {
-    src: `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(
-      url
-    )}`,
-    supportsSlideNav: false,
-  };
-  try {
-    const parsed = new URL(url);
-    const isLocalHost =
-      parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1";
-
-    if (parsed.hostname.includes("docs.google.com")) {
-      const idMatch = parsed.pathname.match(/\/d\/([^/]+)/);
-      const fileId = idMatch?.[1];
-      if (parsed.pathname.includes("/presentation/") && fileId) {
-        return {
-          src: `https://docs.google.com/presentation/d/${fileId}/embed?rm=minimal#slide=id.p${Math.max(
-            1,
-            slideIndex
-          )}`,
-          supportsSlideNav: true,
-        };
-      }
-    }
-
-    if (isLocalHost) {
-      return {
-        src: parsed.toString(),
-        supportsSlideNav: false,
-      };
-    }
-
-    const normalized = normalizeExternalDocumentUrl(url, "ppt");
-    return {
-      src: `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(
-        normalized
-      )}`,
-      supportsSlideNav: false,
-    };
-  } catch {
-    return fallback;
-  }
 }

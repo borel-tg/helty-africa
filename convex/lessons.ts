@@ -56,6 +56,7 @@ export const update = mutation({
     videoUrl: v.optional(v.string()),
     videoId: v.optional(v.string()),
     fileUrl: v.optional(v.string()),
+    fileType: v.optional(v.union(v.literal("pdf"), v.literal("ppt"))),
     fileName: v.optional(v.string()),
   },
   handler: async (ctx, { lessonId, ...updates }) => {

@@ -12,8 +12,11 @@ import { Badge } from "../../components/ui/Badge";
 import { Modal, ConfirmModal } from "../../components/ui/Modal";
 import { Input, Textarea, Select } from "../../components/ui/Input";
 import { FileUpload } from "../../components/ui/FileUpload";
+import { RichTextEditor } from "../../components/ui/RichTextEditor";
 import { useToast } from "../../components/ui/Toast";
 import { useConvexSession } from "../../hooks/useConvexSession";
+import { inferStoredFileType } from "../../lib/documentMedia";
+import { LessonPreviewModal } from "../../components/admin/LessonPreviewModal";
 
 function extractYoutubeId(url) {
   if (!url) return undefined;
@@ -38,6 +41,8 @@ function AddLessonModal({ open, onClose, onAdd }) {
   const [document, setDocument] = useState(null);
   const [documentSource, setDocumentSource] = useState("upload");
   const [documentUrl, setDocumentUrl] = useState("");
+  const [documentFormat, setDocumentFormat] = useState("pdf");
+  const [content, setContent] = useState("");
 
   const handleAdd = () => {
     if (!title.trim()) return;
@@ -59,15 +64,15 @@ function AddLessonModal({ open, onClose, onAdd }) {
     const resolvedFileName =
       documentSource === "upload" ? document?.fileName : getFileNameFromUrl(documentUrl);
     const resolvedFileType =
-      resolvedFileName?.toLowerCase().endsWith(".ppt") ||
-      resolvedFileName?.toLowerCase().endsWith(".pptx")
-        ? "ppt"
-        : "pdf";
+      documentSource === "upload"
+        ? inferFileTypeFromName(resolvedFileName)
+        : inferStoredFileType(resolvedUrl, resolvedFileName, documentFormat);
 
     onAdd({
       type,
       title,
       description,
+      content: type === "text" ? content : undefined,
       videoUrl,
       fileUrl: resolvedUrl,
       fileName: resolvedFileName,
@@ -75,10 +80,12 @@ function AddLessonModal({ open, onClose, onAdd }) {
     });
     setTitle("");
     setDescription("");
+    setContent("");
     setVideoUrl("");
     setDocument(null);
     setDocumentSource("upload");
     setDocumentUrl("");
+    setDocumentFormat("pdf");
     setType("text");
     onClose();
   };
@@ -148,20 +155,212 @@ function AddLessonModal({ open, onClose, onAdd }) {
                 onUploaded={setDocument}
               />
             ) : (
-              <Input
-                label="Document URL"
-                placeholder="https://drive.google.com/... or direct PDF/PPT link"
-                value={documentUrl}
-                onChange={(e) => setDocumentUrl(e.target.value)}
-                helperText="Supports public online files (PDF, PPT, PPTX)."
-              />
+              <>
+                <Input
+                  label="Document URL"
+                  placeholder="https://example.com/files/lesson.pdf"
+                  value={documentUrl}
+                  onChange={(e) => setDocumentUrl(e.target.value)}
+                  helperText="Any public link (Google Drive, PDF, PowerPoint, image). Format is detected automatically when possible."
+                />
+                <Select
+                  label="Document format"
+                  value={documentFormat}
+                  onChange={(e) => setDocumentFormat(e.target.value)}
+                >
+                  <option value="pdf">PDF</option>
+                  <option value="ppt">PowerPoint (PPT / PPTX)</option>
+                </Select>
+              </>
             )}
           </div>
         )}
         {type === "text" && (
-          <div className="border border-gray-200 rounded-lg p-4 text-center text-sm text-text-secondary">
-            Rich text editor loads here (TipTap)
-          </div>
+          <RichTextEditor
+            label="Lesson Content"
+            value={content}
+            onChange={setContent}
+          />
+        )}
+      </div>
+    </Modal>
+  );
+}
+
+function EditLessonModal({ open, onClose, onUpdate, initialLesson }) {
+  const toast = useToast();
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [content, setContent] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [documentSource, setDocumentSource] = useState("url");
+  const [documentUrl, setDocumentUrl] = useState("");
+  const [document, setDocument] = useState(null);
+  const [documentFormat, setDocumentFormat] = useState("pdf");
+
+  useEffect(() => {
+    if (!open || !initialLesson) return;
+    setTitle(initialLesson.title ?? "");
+    setDescription(initialLesson.description ?? "");
+    setContent(initialLesson.content ?? "");
+    setVideoUrl(initialLesson.videoUrl ?? "");
+    setDocumentUrl(initialLesson.fileUrl ?? "");
+    setDocumentFormat(initialLesson.fileType === "ppt" ? "ppt" : "pdf");
+    setDocument(
+      initialLesson.fileUrl
+        ? { url: initialLesson.fileUrl, fileName: initialLesson.fileName }
+        : null
+    );
+    setDocumentSource(initialLesson.fileUrl?.startsWith("http") ? "url" : "upload");
+  }, [open, initialLesson?._id]);
+
+  const handleSave = () => {
+    if (!title.trim()) {
+      toast.error("Lesson title is required.");
+      return;
+    }
+    if (initialLesson?.type === "document") {
+      if (documentSource === "upload" && !document?.url && !documentUrl) {
+        toast.error("Please upload a file or provide a document URL.");
+        return;
+      }
+      if (documentSource === "url" && !documentUrl.trim()) {
+        toast.error("Please add a valid document URL.");
+        return;
+      }
+    }
+
+    const resolvedUrl =
+      initialLesson?.type === "document"
+        ? documentSource === "upload"
+          ? document?.url
+          : documentUrl.trim()
+        : undefined;
+    const resolvedFileName =
+      initialLesson?.type === "document"
+        ? documentSource === "upload"
+          ? document?.fileName
+          : getFileNameFromUrl(documentUrl)
+        : undefined;
+    const resolvedFileType =
+      initialLesson?.type === "document"
+        ? documentSource === "upload"
+          ? inferFileTypeFromName(resolvedFileName)
+          : inferStoredFileType(resolvedUrl, resolvedFileName, documentFormat)
+        : undefined;
+
+    onUpdate({
+      title: title.trim(),
+      description: description.trim() || undefined,
+      content: initialLesson?.type === "text" ? content : undefined,
+      videoUrl: initialLesson?.type === "video" ? videoUrl.trim() || undefined : undefined,
+      videoId:
+        initialLesson?.type === "video"
+          ? extractYoutubeId(videoUrl.trim())
+          : undefined,
+      fileUrl: resolvedUrl,
+      fileName: resolvedFileName,
+      fileType: initialLesson?.type === "document" ? resolvedFileType : undefined,
+    });
+  };
+
+  if (!initialLesson) return null;
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Edit Lesson"
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button onClick={handleSave}>Save Changes</Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <p className="text-xs text-text-secondary capitalize">
+          Type: {initialLesson.type}
+        </p>
+        <Input
+          label="Title *"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <Textarea
+          label="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={2}
+        />
+        {initialLesson.type === "text" && (
+          <RichTextEditor
+            label="Lesson Content"
+            value={content}
+            onChange={setContent}
+          />
+        )}
+        {initialLesson.type === "video" && (
+          <Input
+            label="Video URL"
+            placeholder="https://www.youtube.com/watch?v=..."
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
+          />
+        )}
+        {initialLesson.type === "document" && (
+          <>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setDocumentSource("url")}
+                className={`px-3 py-2 rounded-md text-sm min-h-[44px] ${
+                  documentSource === "url"
+                    ? "bg-primary text-white"
+                    : "bg-gray-100 text-text-secondary"
+                }`}
+              >
+                Online URL
+              </button>
+              <button
+                type="button"
+                onClick={() => setDocumentSource("upload")}
+                className={`px-3 py-2 rounded-md text-sm min-h-[44px] ${
+                  documentSource === "upload"
+                    ? "bg-primary text-white"
+                    : "bg-gray-100 text-text-secondary"
+                }`}
+              >
+                Upload file
+              </button>
+            </div>
+            {documentSource === "url" ? (
+              <>
+                <Input
+                  label="Document URL"
+                  placeholder="https://example.com/files/lesson.pdf"
+                  value={documentUrl}
+                  onChange={(e) => setDocumentUrl(e.target.value)}
+                  helperText="Any public link (Google Drive, PDF, PowerPoint, image). Format is detected automatically when possible."
+                />
+                <Select
+                  label="Document format"
+                  value={documentFormat}
+                  onChange={(e) => setDocumentFormat(e.target.value)}
+                >
+                  <option value="pdf">PDF</option>
+                  <option value="ppt">PowerPoint (PPT / PPTX)</option>
+                </Select>
+              </>
+            ) : (
+              <FileUpload
+                preset="document"
+                label="Replace document file"
+                value={document?.url}
+                onUploaded={setDocument}
+              />
+            )}
+          </>
         )}
       </div>
     </Modal>
@@ -180,11 +379,27 @@ function isValidUrl(value) {
 function getFileNameFromUrl(value) {
   try {
     const parsed = new URL(value);
-    const name = parsed.pathname.split("/").pop();
-    return name || "online-document.pdf";
+    const fromQuery =
+      parsed.searchParams.get("filename") ||
+      parsed.searchParams.get("name") ||
+      parsed.searchParams.get("file");
+    if (fromQuery) return decodeURIComponent(fromQuery);
+
+    const segment = decodeURIComponent(
+      parsed.pathname.split("/").filter(Boolean).pop() || ""
+    );
+    if (segment && /\.\w{2,5}$/i.test(segment)) return segment;
+
+    return "document";
   } catch {
-    return "online-document.pdf";
+    return "document";
   }
+}
+
+function inferFileTypeFromName(name) {
+  const lower = (name || "").toLowerCase();
+  if (lower.endsWith(".ppt") || lower.endsWith(".pptx")) return "ppt";
+  return "pdf";
 }
 
 function AddQuestionModal({ open, onClose, onAdd, onUpdate, initialQuestion }) {
@@ -429,6 +644,7 @@ export default function ModuleEditorPage() {
   );
 
   const createLesson = useMutation(api.lessons.create);
+  const updateLessonMutation = useMutation(api.lessons.update);
   const removeLessonMutation = useMutation(api.lessons.remove);
   const createQuestion = useMutation(api.exams.createQuestion);
   const updateQuestionMutation = useMutation(api.exams.updateQuestion);
@@ -442,14 +658,16 @@ export default function ModuleEditorPage() {
   const [showAddQuestion, setShowAddQuestion] = useState(false);
   const [showAddResource, setShowAddResource] = useState(false);
   const [deleteLesson, setDeleteLesson] = useState(null);
+  const [editingLesson, setEditingLesson] = useState(null);
   const [deleteResource, setDeleteResource] = useState(null);
   const [deleteQuestion, setDeleteQuestion] = useState(null);
   const [editingQuestion, setEditingQuestion] = useState(null);
+  const [previewLesson, setPreviewLesson] = useState(null);
   const [settings, setSettings] = useState({
     title: "",
     description: "",
     passingScore: 70,
-    maxRetakes: 3,
+    maxRetakes: 2,
   });
   const [savingSettings, setSavingSettings] = useState(false);
 
@@ -472,6 +690,7 @@ export default function ModuleEditorPage() {
         title: data.title,
         description: data.description || undefined,
         type: data.type,
+        content: data.content || undefined,
         videoUrl: data.videoUrl || undefined,
         videoId: extractYoutubeId(data.videoUrl),
         fileUrl: data.fileUrl || undefined,
@@ -482,6 +701,23 @@ export default function ModuleEditorPage() {
     } catch (err) {
       toast.error(err.message ?? t("common.error"));
     }
+  };
+
+  const openLessonPreview = (lesson) => {
+    if (!lesson) {
+      toast.error(t("admin.noLessonsToPreview", { defaultValue: "Add a lesson before previewing." }));
+      return;
+    }
+    setPreviewLesson(lesson);
+  };
+
+  const previewModule = () => {
+    const list = lessons ?? [];
+    if (list.length === 0) {
+      toast.error(t("admin.noLessonsToPreview", { defaultValue: "Add a lesson before previewing." }));
+      return;
+    }
+    setPreviewLesson(list[0]);
   };
 
   const addQuestion = async (data) => {
@@ -512,6 +748,27 @@ export default function ModuleEditorPage() {
       toast.success(t("admin.questionUpdated"));
       setEditingQuestion(null);
       setShowAddQuestion(false);
+    } catch (err) {
+      toast.error(err.message ?? t("common.error"));
+    }
+  };
+
+  const updateLesson = async (data) => {
+    if (!editingLesson) return;
+    try {
+      await updateLessonMutation({
+        lessonId: editingLesson._id,
+        title: data.title,
+        description: data.description,
+        content: data.content,
+        videoUrl: data.videoUrl,
+        videoId: data.videoId,
+        fileUrl: data.fileUrl,
+        fileName: data.fileName,
+        fileType: data.fileType,
+      });
+      toast.success(t("admin.lessonUpdated", { defaultValue: "Lesson updated!" }));
+      setEditingLesson(null);
     } catch (err) {
       toast.error(err.message ?? t("common.error"));
     }
@@ -658,7 +915,9 @@ export default function ModuleEditorPage() {
             <p className="text-sm text-text-secondary">{module.description}</p>
           </div>
           <div className="flex gap-2 shrink-0">
-            <Button variant="outline" size="sm"><Eye size={14} /> Preview</Button>
+            <Button variant="outline" size="sm" onClick={previewModule}>
+              <Eye size={14} /> {t("admin.preview", { defaultValue: "Preview" })}
+            </Button>
             <Button size="sm" onClick={togglePublish}>
               {module.status === "published" ? t("common.unpublish") : t("common.publish")}
             </Button>
@@ -705,7 +964,14 @@ export default function ModuleEditorPage() {
                     <p className="text-xs text-text-secondary capitalize">{lesson.type}</p>
                   </div>
                   <div className="flex gap-1">
-                    <button onClick={() => navigate(`/admin/modules/${moduleId}/lesson/${lesson._id}`)}
+                    <button
+                      onClick={() => openLessonPreview(lesson)}
+                      title={t("admin.lessonPreview", { defaultValue: "Preview lesson" })}
+                      className="p-2 text-gray-400 hover:text-primary min-h-[44px] min-w-[44px] flex items-center justify-center"
+                    >
+                      <Eye size={15} />
+                    </button>
+                    <button onClick={() => setEditingLesson(lesson)}
                       className="p-2 text-gray-400 hover:text-primary min-h-[44px] min-w-[44px] flex items-center justify-center">
                       <Edit size={15} />
                     </button>
@@ -868,7 +1134,18 @@ export default function ModuleEditorPage() {
         </div>
       )}
 
+      <LessonPreviewModal
+        open={Boolean(previewLesson)}
+        onClose={() => setPreviewLesson(null)}
+        lesson={previewLesson}
+      />
       <AddLessonModal open={showAddLesson} onClose={() => setShowAddLesson(false)} onAdd={addLesson} />
+      <EditLessonModal
+        open={Boolean(editingLesson)}
+        onClose={() => setEditingLesson(null)}
+        onUpdate={updateLesson}
+        initialLesson={editingLesson}
+      />
       <AddQuestionModal
         open={showAddQuestion}
         onClose={() => {
