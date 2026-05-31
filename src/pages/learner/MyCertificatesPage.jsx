@@ -7,7 +7,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useConvexSession } from "../../hooks/useConvexSession";
 import { Button } from "../../components/ui/Button";
 import { formatDate } from "../../lib/utils";
-import { MOCK_MODULES } from "../../lib/mockData";
+import { MOCK_PROGRAM_CERTIFICATES } from "../../lib/mockData";
 
 export default function MyCertificatesPage() {
   const { t } = useTranslation();
@@ -25,27 +25,29 @@ export default function MyCertificatesPage() {
   const displayCerts =
     certs && certs.length > 0
       ? certs.map((c) => {
-          const mod = publishedModules.find((m) => m._id === c.moduleId);
-          const mockIdx = publishedModules.findIndex((m) => m._id === c.moduleId);
-          const mockId = mockIdx >= 0 ? `mod${mockIdx + 1}` : c.moduleId;
           return {
-            routeModuleId: mockId,
-            moduleTitle: c.moduleTitle ?? mod?.title ?? "Module",
+            routeProgramId: c.programId?.startsWith?.("prog")
+              ? c.programId
+              : "prog1",
+            moduleTitle: c.programTitle ?? c.moduleTitle ?? "Programme",
             score: c.score,
             issuedAt: c.issuedAt,
             certificateNumber: c.certificateNumber,
           };
         })
       : !convexUser && !isLoading
-        ? [
-            {
-              routeModuleId: "mod1",
-              moduleTitle: MOCK_MODULES[0]?.title ?? "Module",
-              score: 85,
-              issuedAt: Date.now() - 2 * 86400000,
-              certificateNumber: null,
-            },
-          ]
+        ? currentUser?._id && MOCK_PROGRAM_CERTIFICATES[currentUser._id]
+          ? [
+              {
+                routeProgramId: "prog1",
+                moduleTitle: "Polio Field Worker Certification",
+                score: MOCK_PROGRAM_CERTIFICATES[currentUser._id].score,
+                issuedAt: MOCK_PROGRAM_CERTIFICATES[currentUser._id].issuedAt,
+                certificateNumber:
+                  MOCK_PROGRAM_CERTIFICATES[currentUser._id].certificateNumber,
+              },
+            ]
+          : []
         : [];
 
   const showEmpty = !isLoading && displayCerts.length === 0;
@@ -73,7 +75,7 @@ export default function MyCertificatesPage() {
         <div className="space-y-4">
           {displayCerts.map((cert) => (
             <div
-              key={cert.routeModuleId + cert.issuedAt}
+              key={(cert.routeProgramId ?? "cert") + cert.issuedAt}
               className="bg-white rounded-card shadow-card p-5 flex items-center gap-4"
             >
               <div className="w-14 h-14 rounded-full bg-primary-50 flex items-center justify-center shrink-0">
@@ -97,7 +99,9 @@ export default function MyCertificatesPage() {
                 size="sm"
                 variant="outline"
                 onClick={() =>
-                  navigate(`/learn/module/${cert.routeModuleId}/certificate`)
+                  navigate(
+                    `/learn/program/${cert.routeProgramId ?? "prog1"}/certificate`
+                  )
                 }
               >
                 <Download size={14} />

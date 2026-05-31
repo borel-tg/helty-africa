@@ -4,7 +4,7 @@ import { ArrowLeft, CheckCircle, Circle, BookOpen, Video, FileText, ChevronRight
 import { Button } from "../../components/ui/Button";
 import { StatusBadge } from "../../components/ui/Badge";
 import { ProgressBar } from "../../components/ui/Progress";
-import { MOCK_MODULES, MOCK_LESSONS, MOCK_LEARNER_PROGRESS, MOCK_MODULE_RESOURCES } from "../../lib/mockData";
+import { useLearnerModule } from "../../hooks/useLearnerModule";
 
 const TYPE_ICONS = {
   text: BookOpen,
@@ -16,16 +16,26 @@ export default function ModulePage() {
   const { t } = useTranslation();
   const { moduleId } = useParams();
   const navigate = useNavigate();
-  const module = MOCK_MODULES.find((m) => m._id === moduleId);
-  const lessons = MOCK_LESSONS[moduleId] || [];
-  const resources = MOCK_MODULE_RESOURCES[moduleId] || [];
+  const {
+    module,
+    lessons,
+    resources,
+    program,
+    progress,
+    isLessonCompleted,
+    isLoading,
+    notFound,
+  } = useLearnerModule(moduleId);
 
-  const isCompleted = (lessonId) => MOCK_LEARNER_PROGRESS[lessonId]?.completed;
-  const completedCount = lessons.filter((l) => isCompleted(l._id)).length;
-  const pct = lessons.length > 0 ? Math.round((completedCount / lessons.length) * 100) : 0;
-  const allComplete = completedCount === lessons.length && lessons.length > 0;
+  const { completedCount, total, pct, allComplete, status } = progress;
 
-  if (!module) {
+  if (isLoading) {
+    return (
+      <div className="p-6 text-center text-text-secondary">{t("common.loading")}</div>
+    );
+  }
+
+  if (notFound || !module) {
     return (
       <div className="p-6 text-center text-text-secondary">{t("learner.moduleNotFound")}</div>
     );
@@ -33,20 +43,20 @@ export default function ModulePage() {
 
   return (
     <div className="p-4 md:p-6 w-full">
-      {/* Back */}
       <button
-        onClick={() => navigate("/learn")}
+        onClick={() =>
+          navigate(program ? `/learn/program/${program._id}` : "/learn")
+        }
         className="flex items-center gap-2 text-sm text-text-secondary hover:text-primary mb-4 transition-colors"
       >
         <ArrowLeft size={16} />
-        {t("learner.backToDashboard")}
+        {program ? t("trainings.backToProgram") : t("trainings.backToTrainings")}
       </button>
 
-      {/* Module header */}
       <div className="bg-white rounded-card shadow-card p-5 mb-4">
         <div className="flex items-start justify-between gap-3 mb-3">
           <h1 className="text-xl font-semibold text-text-primary">{module.title}</h1>
-          <StatusBadge status={allComplete ? "ready_for_exam" : completedCount > 0 ? "in_progress" : "not_started"} />
+          <StatusBadge status={status} />
         </div>
         <p className="text-text-secondary text-sm mb-4">{module.description}</p>
 
@@ -66,7 +76,6 @@ export default function ModulePage() {
         </div>
       </div>
 
-      {/* Lessons list */}
       <div className="bg-white rounded-card shadow-card overflow-hidden mb-4">
         <div className="px-5 py-3 border-b border-gray-100">
           <h2 className="text-base font-semibold text-text-primary">{t("common.lessons")}</h2>
@@ -76,15 +85,19 @@ export default function ModulePage() {
         ) : (
           <div className="divide-y divide-gray-50">
             {lessons.map((lesson, idx) => {
-              const completed = isCompleted(lesson._id);
+              const completed = isLessonCompleted(lesson._id);
               const Icon = TYPE_ICONS[lesson.type] || BookOpen;
-              // Unlock rule: first lesson always unlocked, subsequent require previous to be complete
-              const unlocked = idx === 0 || isCompleted(lessons[idx - 1]._id);
+              const unlocked =
+                idx === 0 || isLessonCompleted(lessons[idx - 1]._id);
 
               return (
                 <button
                   key={lesson._id}
-                  onClick={() => unlocked && navigate(`/learn/module/${moduleId}/lesson/${lesson._id}`)}
+                  type="button"
+                  onClick={() =>
+                    unlocked &&
+                    navigate(`/learn/module/${moduleId}/lesson/${lesson._id}`)
+                  }
                   disabled={!unlocked}
                   className={`w-full flex items-center gap-4 px-5 py-4 text-left transition-colors ${
                     unlocked
@@ -92,7 +105,6 @@ export default function ModulePage() {
                       : "opacity-50 cursor-not-allowed"
                   }`}
                 >
-                  {/* Status icon */}
                   <div className="shrink-0">
                     {completed ? (
                       <CheckCircle size={22} className="text-green-500" />
@@ -103,14 +115,14 @@ export default function ModulePage() {
                     )}
                   </div>
 
-                  {/* Type icon */}
                   <div className="w-8 h-8 rounded-lg bg-primary-50 flex items-center justify-center shrink-0">
                     <Icon size={16} className="text-primary" />
                   </div>
 
-                  {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium ${completed ? "text-text-secondary" : "text-text-primary"}`}>
+                    <p
+                      className={`text-sm font-medium ${completed ? "text-text-secondary" : "text-text-primary"}`}
+                    >
                       {idx + 1}. {lesson.title}
                     </p>
                     {lesson.description && (
@@ -128,11 +140,14 @@ export default function ModulePage() {
         )}
       </div>
 
-      {/* Final Exam CTA */}
-      <div className={`bg-white rounded-card shadow-card p-5 border-2 ${allComplete ? "border-secondary" : "border-gray-100"}`}>
+      <div
+        className={`bg-white rounded-card shadow-card p-5 border-2 ${allComplete ? "border-secondary" : "border-gray-100"}`}
+      >
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-base font-semibold text-text-primary mb-1">{t("learner.finalExam")}</h3>
+            <h3 className="text-base font-semibold text-text-primary mb-1">
+              {t("learner.finalExam")}
+            </h3>
             <p className="text-sm text-text-secondary">
               {allComplete
                 ? t("learner.examReady")
@@ -147,18 +162,21 @@ export default function ModulePage() {
           disabled={!allComplete}
           onClick={() => navigate(`/learn/module/${moduleId}/exam`)}
         >
-          {allComplete ? t("learner.takeFinalExam") : t("learner.lessonsComplete", { done: completedCount, total: lessons.length })}
+          {allComplete
+            ? t("learner.takeFinalExam")
+            : t("learner.lessonsComplete", { done: completedCount, total })}
           <ChevronRight size={16} className="ml-auto" />
         </Button>
       </div>
 
-      {/* Resources */}
       <div className="bg-white rounded-card shadow-card overflow-hidden mt-4">
         <div className="px-5 py-3 border-b border-gray-100">
           <h2 className="text-base font-semibold text-text-primary">{t("common.resources")}</h2>
         </div>
         {resources.length === 0 ? (
-          <div className="p-6 text-center text-text-secondary">{t("learner.noResourcesAdded")}</div>
+          <div className="p-6 text-center text-text-secondary">
+            {t("learner.noResourcesAdded")}
+          </div>
         ) : (
           <div className="divide-y divide-gray-50">
             {resources.map((resource) => (

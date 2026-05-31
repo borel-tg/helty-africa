@@ -146,7 +146,7 @@ export default function ExamResultsPage() {
             <Button
               fullWidth
               size="lg"
-              onClick={() => navigate(`/learn/module/${moduleId}/certificate`)}
+              onClick={() => navigate(`/learn/program/prog1/evaluation`)}
             >
               <Award size={18} />
               {t("learner.downloadCertificate")}

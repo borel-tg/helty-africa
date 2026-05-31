@@ -1,4 +1,6 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useMutation } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -16,11 +18,7 @@ import {
   PdfDocumentViewer,
   PptDocumentViewer,
 } from "../../components/learner/DocumentViewer";
-import {
-  MOCK_LESSONS,
-  MOCK_MODULE_RESOURCES,
-  MOCK_EXAM_QUESTIONS,
-} from "../../lib/mockData";
+import { useLearnerModule } from "../../hooks/useLearnerModule";
 
 // ── Text Lesson ─────────────────────────────────────────────────────────────
 function TextLesson({ lesson, onComplete, completed }) {
@@ -157,9 +155,19 @@ export default function LessonPage() {
   const { moduleId, lessonId } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
-  const lessons = MOCK_LESSONS[moduleId] || [];
-  const resources = MOCK_MODULE_RESOURCES[moduleId] || [];
-  const examQuestions = MOCK_EXAM_QUESTIONS[moduleId] || [];
+  const markCompleted = useMutation(api.progress.markCompleted);
+  const {
+    module,
+    lessons,
+    resources,
+    examQuestions,
+    isLessonCompleted,
+    isLoading,
+    notFound,
+    isConvex,
+    convexUser,
+  } = useLearnerModule(moduleId);
+
   const lesson = lessons.find((l) => l._id === lessonId);
   const lessonIndex = lessons.findIndex((l) => l._id === lessonId);
   const prevLesson = lessons[lessonIndex - 1];
@@ -168,10 +176,40 @@ export default function LessonPage() {
 
   const [completed, setCompleted] = useState(false);
 
-  const handleComplete = () => {
+  useEffect(() => {
+    if (lessonId) {
+      setCompleted(isLessonCompleted(lessonId));
+    }
+  }, [lessonId, isLessonCompleted]);
+
+  const handleComplete = async () => {
     setCompleted(true);
+    if (isConvex && convexUser?._id && module && lesson) {
+      try {
+        await markCompleted({
+          userId: convexUser._id,
+          lessonId: lesson._id,
+          moduleId,
+          organizationId: convexUser.organizationId,
+        });
+      } catch {
+        /* progress sync failed */
+      }
+    }
     toast.success(t("learner.lessonComplete"));
   };
+
+  if (isLoading) {
+    return (
+      <div className="p-6 text-center text-text-secondary">{t("common.loading")}</div>
+    );
+  }
+
+  if (notFound || !module) {
+    return (
+      <div className="p-6 text-center text-text-secondary">{t("learner.moduleNotFound")}</div>
+    );
+  }
 
   if (!lesson) {
     return (
