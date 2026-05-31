@@ -2,9 +2,9 @@
  * Application brand — change values here to rebrand the UI.
  * Keep `convex/lib/brand.ts` in sync for invitation emails (Convex backend).
  */
-export const APP_BRAND_NAME = "Helty Africa";
-export const APP_BRAND_SHORT_NAME = "Helty";
-export const APP_BRAND_INITIAL = APP_BRAND_SHORT_NAME.charAt(0).toUpperCase();
+export const APP_BRAND_NAME = "COUP DRC";
+export const APP_BRAND_SHORT_NAME = "COUP DRC";
+export const APP_BRAND_INITIAL = "C";
 
 export const APP_CONTACT_EMAIL = "contact@helty.africa";
 export const APP_SUPPORT_EMAIL = "support@helty.africa";

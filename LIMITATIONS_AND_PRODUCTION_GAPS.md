@@ -1,6 +1,6 @@
-# Helty Africa — Current Limitations & Production Requirements
+# COUP DRC — Current Limitations & Production Requirements
 
-**Project:** Helty Africa (health training platform for francophone Africa)  
+**Project:** COUP DRC (health training platform for francophone Africa)  
 **Repository:** https://github.com/Borel-TG/helty-africa  
 **App location:** project root (`evtp-app/` folder locally — rename optional)  
 **Last updated:** May 2026  

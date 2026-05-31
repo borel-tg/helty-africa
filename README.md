@@ -1,6 +1,6 @@
-# Helty Africa
+# COUP DRC
 
-**Helty Africa** is a mobile-first health training platform for francophone Africa — built for NGOs and health programs (e.g. vaccination campaigns, community health worker training).
+**COUP DRC** is a mobile-first health training platform for francophone Africa — built for NGOs and health programs (e.g. vaccination campaigns, community health worker training).
 
 - **UI language:** French (`fr-FR`)
 - **Stack:** React + Vite + Tailwind CSS + Convex
@@ -23,4 +23,4 @@ Demo login: `learner@helty.africa` / `demo1234` (see [SETUP.md](./SETUP.md) for 
 
 ## License
 
-Private — Polio-Africa / Helty Africa project.
+Private — Polio-Africa / COUP DRC project.

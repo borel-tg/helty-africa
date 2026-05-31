@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { cn } from "../../lib/utils";
+import { APP_BRAND_NAME } from "../../lib/brand";
 import congoMap from "../../assets/congo-logo.png";
 import { PartnerLogos } from "./PartnerLogos";
 
@@ -56,18 +57,26 @@ export function AuthBrandPanel({ compact = false }) {
         <div>
           <h1
             className={cn(
-              "font-semibold leading-tight tracking-tight",
+              "font-brand font-extrabold text-green-400 leading-tight tracking-tight",
               compact
-                ? "text-lg sm:text-xl"
-                : "text-4xl sm:text-4xl lg:text-[2rem]",
+                ? "text-3xl sm:text-4xl"
+                : "text-3xl sm:text-4xl lg:text-[2.25rem]",
+            )}
+          >
+            {APP_BRAND_NAME}
+          </h1>
+          <h2
+            className={cn(
+              "font-semibold leading-snug tracking-tight text-white/95",
+              compact ? "mt-2 text-base sm:text-lg" : "mt-4 text-xl",
             )}
           >
             {t("auth.brandHeadline")}
-          </h1>
+          </h2>
           {!compact && (
-            <p className="mt-5 text-sm sm:text-base text-white/85 max-w-lg leading-relaxed">
+            <h3 className="mt-0 text-sm sm:text-base font-normal text-white/85 max-w-lg leading-relaxed">
               {t("auth.brandSubtitle")}
-            </p>
+            </h3>
           )}
         </div>
 
@@ -80,7 +89,7 @@ export function AuthBrandPanel({ compact = false }) {
             />
 
             <div className="flex-1 flex flex-col justify-center max-w-lg">
-              <p className="text-sm font-medium text-white/70 mb-3">
+              <p className="text-sm font-medium text-green-400 mb-3">
                 {t("auth.testimonialTitle")}
               </p>
               <blockquote className="text-base sm:text-lg leading-relaxed text-white/95">

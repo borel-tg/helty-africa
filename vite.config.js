@@ -19,10 +19,10 @@ export default defineConfig({
             `<title>${getAppPageTitle()}</title>`
           )
           .replace(
-            /content="Helty"/g,
+            /content="COUP DRC"/g,
             `content="${APP_BRAND_SHORT_NAME}"`
           )
-          .replace(/aria-label="Helty Africa icon"/g, `aria-label="${APP_BRAND_NAME} icon"`);
+          .replace(/aria-label="COUP DRC icon"/g, `aria-label="${APP_BRAND_NAME} icon"`);
       },
     },
     VitePWA({

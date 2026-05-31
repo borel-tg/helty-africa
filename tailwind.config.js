@@ -37,6 +37,7 @@ export default {
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
+        brand: ['"Archivo Black"', "sans-serif"],
       },
       borderRadius: {
         card: "12px",

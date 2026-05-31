@@ -4,12 +4,7 @@ import { APP_BRAND_INITIAL, APP_BRAND_NAME } from "../../lib/brand";
 import { AuthBrandPanel } from "./AuthBrandPanel";
 import { AuthFooter } from "./AuthFooter";
 
-export function AuthLayout({
-  title,
-  subtitle,
-  children,
-  showFooter = true,
-}) {
+export function AuthLayout({ title, subtitle, children, showFooter = true }) {
   return (
     <div className="min-h-screen flex flex-col bg-background lg:grid lg:grid-cols-2 lg:grid-rows-[1fr_auto]">
       {/* Brand panel — first on mobile, left on desktop */}

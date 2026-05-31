@@ -1,4 +1,4 @@
-# Helty Africa – Health Training Platform
+# COUP DRC – Health Training Platform
 
 **Rebrand:** change `APP_BRAND_NAME` (and related constants) in `src/lib/brand.js` and `convex/lib/brand.ts`.
 
