@@ -1,0 +1,25 @@
+{
+  "leaderboard": {
+    "title": "Learner rankings",
+    "subtitleLearner": "Most active learners",
+    "subtitleStaff": "Learner activity in your organization",
+    "subtitleLead": "Learner rankings (your team)",
+    "periodLabel": "Ranking period",
+    "periodWeek": "This week",
+    "periodToday": "Today",
+    "legendLesson": "1 pt per lesson completed",
+    "legendModule": "5 pts per module passed",
+    "pointsLabel": "{{count}} pts",
+    "lessonsShort": "{{count}} lessons",
+    "modulesShort": "{{count}} modules",
+    "noActivityYet": "No activity yet",
+    "you": "you",
+    "yourRankFooter": "You are #{{rank}} of {{total}} active learners",
+    "viewAll": "View full rankings",
+    "viewAllCount": "View {{count}} more",
+    "showLess": "Show less",
+    "staffFooter": "Rankings based on {{total}} active learners",
+    "tooFewLearners": "Rankings will appear when there are at least 3 active learners in your organization.",
+    "notEnoughActivity": "Not enough activity this period yet. Complete lessons or pass an exam to appear on the rankings!"
+  }
+}
