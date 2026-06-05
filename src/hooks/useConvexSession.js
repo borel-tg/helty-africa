@@ -6,7 +6,7 @@ import { useAuth } from "./useAuth";
  * Org-scoped Convex data for the logged-in user (modules, certificate template).
  */
 export function useConvexSession() {
-  const { currentUser } = useAuth();
+  const { currentUser, isInitializing } = useAuth();
 
   const publishedModules = useQuery(
     api.modules.listPublished,
@@ -31,5 +31,7 @@ export function useConvexSession() {
     publishedModules: publishedModules ?? [],
     template: template ?? null,
     isLoading: Boolean(isLoading),
+    convexUserMissing: !isInitializing && !currentUser,
+    convexSyncError: false,
   };
 }

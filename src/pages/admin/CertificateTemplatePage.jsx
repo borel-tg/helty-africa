@@ -14,6 +14,8 @@ import {
 import {
   mergeTemplate,
   DEFAULT_CERTIFICATE_TEMPLATE,
+  CERTIFICATE_LAYOUTS,
+  DEFAULT_LAYOUT_ID,
 } from "../../lib/certificate/defaults";
 
 export default function CertificateTemplatePage() {
@@ -30,30 +32,50 @@ export default function CertificateTemplatePage() {
   const previewSample = getCertificatePreviewSample(t);
 
   const [form, setForm] = useState({
+    layoutId: DEFAULT_LAYOUT_ID,
     organizationName: DEFAULT_CERTIFICATE_TEMPLATE.organizationName,
     programSubtitle: DEFAULT_CERTIFICATE_TEMPLATE.programSubtitle,
     signatureLine: DEFAULT_CERTIFICATE_TEMPLATE.signatureLine,
+    signature2Line: "",
     borderColor: DEFAULT_CERTIFICATE_TEMPLATE.borderColor,
     accentColor: DEFAULT_CERTIFICATE_TEMPLATE.accentColor,
     footerText: DEFAULT_CERTIFICATE_TEMPLATE.footerText,
     logoUrl: null,
+    logoStorageId: null,
+    secondLogoUrl: null,
+    secondLogoStorageId: null,
     signatureImageUrl: null,
+    signatureImageStorageId: null,
+    signature2ImageUrl: null,
+    signature2ImageStorageId: null,
     backgroundImageUrl: null,
+    backgroundImageStorageId: null,
   });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (savedTemplate) {
       setForm({
+        layoutId: savedTemplate.layoutId ?? DEFAULT_LAYOUT_ID,
         organizationName: savedTemplate.organizationName,
         programSubtitle: savedTemplate.programSubtitle ?? "",
         signatureLine: savedTemplate.signatureLine ?? "",
+        signature2Line: savedTemplate.signature2Line ?? "",
         borderColor: savedTemplate.borderColor,
         accentColor: savedTemplate.accentColor ?? savedTemplate.borderColor,
         footerText: savedTemplate.footerText ?? "",
         logoUrl: savedTemplate.logoUrl ?? null,
+        logoStorageId: savedTemplate.logoStorageId ?? null,
+        secondLogoUrl: savedTemplate.secondLogoUrl ?? null,
+        secondLogoStorageId: savedTemplate.secondLogoStorageId ?? null,
         signatureImageUrl: savedTemplate.signatureImageUrl ?? null,
+        signatureImageStorageId: savedTemplate.signatureImageStorageId ?? null,
+        signature2ImageUrl: savedTemplate.signature2ImageUrl ?? null,
+        signature2ImageStorageId:
+          savedTemplate.signature2ImageStorageId ?? null,
         backgroundImageUrl: savedTemplate.backgroundImageUrl ?? null,
+        backgroundImageStorageId:
+          savedTemplate.backgroundImageStorageId ?? null,
       });
     }
   }, [savedTemplate]);
@@ -62,29 +84,41 @@ export default function CertificateTemplatePage() {
     setForm((p) => ({ ...p, [field]: e.target.value }));
 
   const handleSave = async () => {
-    if (!convexUser?.organizationId) {
+    if (!convexUser?._id || !convexUser?.organizationId) {
       toast.error(
-        "Connectez Convex et exécutez le seed pour enregistrer le modèle.",
+        "Connectez-vous avec un compte admin et exécutez le seed Convex.",
       );
       return;
     }
     setSaving(true);
     try {
       await upsertTemplate({
+        userId: convexUser._id,
         organizationId: convexUser.organizationId,
+        layoutId: form.layoutId,
         organizationName: form.organizationName.trim(),
         programSubtitle: form.programSubtitle.trim() || undefined,
         signatureLine: form.signatureLine.trim() || undefined,
+        signature2Line: form.signature2Line.trim() || undefined,
         borderColor: form.borderColor,
         accentColor: form.accentColor || form.borderColor,
         footerText: form.footerText.trim() || undefined,
         logoUrl: form.logoUrl ?? undefined,
+        logoStorageId: form.logoStorageId ?? undefined,
+        secondLogoUrl: form.secondLogoUrl ?? undefined,
+        secondLogoStorageId: form.secondLogoStorageId ?? undefined,
         signatureImageUrl: form.signatureImageUrl ?? undefined,
+        signatureImageStorageId: form.signatureImageStorageId ?? undefined,
+        signature2ImageUrl: form.signature2ImageUrl ?? undefined,
+        signature2ImageStorageId: form.signature2ImageStorageId ?? undefined,
         backgroundImageUrl: form.backgroundImageUrl ?? undefined,
+        backgroundImageStorageId: form.backgroundImageStorageId ?? undefined,
       });
       toast.success(t("certificate.templateSaved"));
-    } catch {
-      toast.error("Enregistrement impossible");
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Enregistrement impossible",
+      );
     } finally {
       setSaving(false);
     }
@@ -118,103 +152,215 @@ export default function CertificateTemplatePage() {
       )}
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-        <div className="bg-white rounded-card shadow-card p-5 space-y-4">
+        <div className="bg-white rounded-card shadow-card p-5 space-y-6">
           <h3 className="text-base font-semibold text-text-primary">
             {t("certificate.templateSettings")}
           </h3>
 
-          <Input
-            label={t("admin.orgName")}
-            value={form.organizationName}
-            onChange={update("organizationName")}
-          />
-          <Input
-            label={t("certificate.programSubtitle")}
-            value={form.programSubtitle}
-            onChange={update("programSubtitle")}
-            placeholder="Employee Training Programme"
-          />
-          <Input
-            label={t("certificate.signatureLine")}
-            value={form.signatureLine}
-            onChange={update("signatureLine")}
-            placeholder="Dr. Jane Smith, Training Director"
-          />
+          {/* ── Layout ── */}
+          <div className="space-y-2">
+            <p className="text-sm font-semibold text-text-primary border-b pb-1">
+              {t("certificate.layoutId")}
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {[
+                {
+                  id: CERTIFICATE_LAYOUTS.classic,
+                  label: t("certificate.layoutClassic"),
+                },
+                {
+                  id: CERTIFICATE_LAYOUTS.premium,
+                  label: t("certificate.layoutPremium"),
+                },
+              ].map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() =>
+                    setForm((p) => ({ ...p, layoutId: option.id }))
+                  }
+                  className={`rounded-lg border px-3 py-2.5 text-left text-sm transition-colors ${
+                    form.layoutId === option.id
+                      ? "border-primary bg-primary/5 text-primary font-medium"
+                      : "border-gray-200 hover:border-gray-300 text-text-primary"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-text-primary">
-              {t("certificate.borderColor")}
-            </label>
-            <div className="flex items-center gap-3">
-              <input
-                type="color"
-                value={form.borderColor}
-                onChange={update("borderColor")}
-                className="w-10 h-10 rounded cursor-pointer border border-gray-200"
-              />
+          {/* ── Organisation ── */}
+          <div className="space-y-4">
+            <Input
+              label={t("admin.orgName")}
+              value={form.organizationName}
+              onChange={update("organizationName")}
+            />
+            <Input
+              label={t("certificate.programSubtitle")}
+              value={form.programSubtitle}
+              onChange={update("programSubtitle")}
+              placeholder="Employee Training Programme"
+            />
+          </div>
+
+          {/* ── Header logos ── */}
+          <div className="space-y-3">
+            <p className="text-sm font-semibold text-text-primary border-b pb-1">
+              {t("certificate.headerLogos", "Header Logos")}
+            </p>
+            <FileUpload
+              preset="logo"
+              label={t("admin.orgLogo") + " (left)"}
+              value={form.logoUrl}
+              onUploaded={(result) =>
+                setForm((p) => ({
+                  ...p,
+                  logoUrl: result?.url ?? null,
+                  logoStorageId: result?.storageId ?? null,
+                }))
+              }
+            />
+            <FileUpload
+              preset="logo"
+              label={t("certificate.secondLogo", "Second logo (right)")}
+              value={form.secondLogoUrl}
+              onUploaded={(result) =>
+                setForm((p) => ({
+                  ...p,
+                  secondLogoUrl: result?.url ?? null,
+                  secondLogoStorageId: result?.storageId ?? null,
+                }))
+              }
+            />
+          </div>
+
+          {/* ── Signatures ── */}
+          <div className="space-y-4">
+            <p className="text-sm font-semibold text-text-primary border-b pb-1">
+              {t("certificate.signatures", "Signatures")}
+            </p>
+
+            {/* Signature 1 */}
+            <div className="space-y-3 p-3 rounded-lg bg-gray-50 border border-gray-100">
+              <p className="text-xs font-medium text-text-secondary uppercase tracking-wide">
+                {t("certificate.signature1", "Signature 1")}
+              </p>
               <Input
-                value={form.borderColor}
-                onChange={update("borderColor")}
-                className="flex-1"
+                label={t("certificate.signatureLine")}
+                value={form.signatureLine}
+                onChange={update("signatureLine")}
+                placeholder="Dr. Jane Smith, Training Director"
+              />
+              <FileUpload
+                preset="logo"
+                label={t("certificate.signatureImage", "Signature image")}
+                value={form.signatureImageUrl}
+                onUploaded={(result) =>
+                  setForm((p) => ({
+                    ...p,
+                    signatureImageUrl: result?.url ?? null,
+                    signatureImageStorageId: result?.storageId ?? null,
+                  }))
+                }
+              />
+            </div>
+
+            {/* Signature 2 (optional) */}
+            <div className="space-y-3 p-3 rounded-lg bg-gray-50 border border-gray-100">
+              <p className="text-xs font-medium text-text-secondary uppercase tracking-wide">
+                {t("certificate.signature2", "Signature 2")}{" "}
+                <span className="normal-case font-normal text-text-secondary">
+                  ({t("common.optional", "optional")})
+                </span>
+              </p>
+              <Input
+                label={t("certificate.signatureLine")}
+                value={form.signature2Line}
+                onChange={update("signature2Line")}
+                placeholder="Dr. John Doe, Medical Director"
+              />
+              <FileUpload
+                preset="logo"
+                label={t("certificate.signatureImage", "Signature image")}
+                value={form.signature2ImageUrl}
+                onUploaded={(result) =>
+                  setForm((p) => ({
+                    ...p,
+                    signature2ImageUrl: result?.url ?? null,
+                    signature2ImageStorageId: result?.storageId ?? null,
+                  }))
+                }
               />
             </div>
           </div>
 
-          <Textarea
-            label={t("certificate.footerText")}
-            value={form.footerText}
-            onChange={update("footerText")}
-            rows={3}
-          />
-
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-text-primary">
-              {t("certificate.accentColor")}
-            </label>
-            <div className="flex items-center gap-3">
-              <input
-                type="color"
-                value={form.accentColor}
-                onChange={update("accentColor")}
-                className="w-10 h-10 rounded cursor-pointer border border-gray-200"
-              />
-              <Input
-                value={form.accentColor}
-                onChange={update("accentColor")}
-                className="flex-1"
-              />
+          {/* ── Colours ── */}
+          <div className="space-y-4">
+            <p className="text-sm font-semibold text-text-primary border-b pb-1">
+              {t("certificate.colours", "Colours")}
+            </p>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium text-text-primary">
+                {t("certificate.borderColor")}
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  value={form.borderColor}
+                  onChange={update("borderColor")}
+                  className="w-10 h-10 rounded cursor-pointer border border-gray-200"
+                />
+                <Input
+                  value={form.borderColor}
+                  onChange={update("borderColor")}
+                  className="flex-1"
+                />
+              </div>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-medium text-text-primary">
+                {t("certificate.accentColor")}
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  value={form.accentColor}
+                  onChange={update("accentColor")}
+                  className="w-10 h-10 rounded cursor-pointer border border-gray-200"
+                />
+                <Input
+                  value={form.accentColor}
+                  onChange={update("accentColor")}
+                  className="flex-1"
+                />
+              </div>
             </div>
           </div>
 
-          <FileUpload
-            preset="logo"
-            label={t("admin.orgLogo")}
-            value={form.logoUrl}
-            onUploaded={(result) =>
-              setForm((p) => ({ ...p, logoUrl: result?.url ?? null }))
-            }
-          />
-
-          <FileUpload
-            preset="logo"
-            label={t("certificate.signatureImage")}
-            value={form.signatureImageUrl}
-            onUploaded={(result) =>
-              setForm((p) => ({ ...p, signatureImageUrl: result?.url ?? null }))
-            }
-          />
-
-          <FileUpload
-            preset="certificateBackground"
-            label={t("certificate.backgroundWatermark")}
-            value={form.backgroundImageUrl}
-            onUploaded={(result) =>
-              setForm((p) => ({
-                ...p,
-                backgroundImageUrl: result?.url ?? null,
-              }))
-            }
-          />
+          {/* ── Other ── */}
+          <div className="space-y-4">
+            <Textarea
+              label={t("certificate.footerText")}
+              value={form.footerText}
+              onChange={update("footerText")}
+              rows={3}
+            />
+            <FileUpload
+              preset="certificateBackground"
+              label={t("certificate.backgroundWatermark")}
+              value={form.backgroundImageUrl}
+              onUploaded={(result) =>
+                setForm((p) => ({
+                  ...p,
+                  backgroundImageUrl: result?.url ?? null,
+                  backgroundImageStorageId: result?.storageId ?? null,
+                }))
+              }
+            />
+          </div>
 
           <Button
             fullWidth
