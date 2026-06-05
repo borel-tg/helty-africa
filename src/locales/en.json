@@ -21,5 +21,8 @@
     "staffFooter": "Rankings based on {{total}} active learners",
     "tooFewLearners": "Rankings will appear when there are at least 3 active learners in your organization.",
     "notEnoughActivity": "Not enough activity this period yet. Complete lessons or pass an exam to appear on the rankings!"
+  },
+  "learner": {
+    "viewProgramEvaluation": "View program evaluation"
   }
 }
