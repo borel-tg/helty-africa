@@ -133,7 +133,7 @@ export default function CertificatePage() {
             ref={certRef}
             template={template}
             learnerName={learnerName}
-            programTitle={programTitle}
+            moduleTitle={programTitle}
             score={score}
             issuedAt={issuedAt}
             certificateNumber={certificateNumber}
