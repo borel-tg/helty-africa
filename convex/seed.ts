@@ -798,6 +798,7 @@ export const seedDemo = mutation({
 
     await ctx.db.insert("certificateTemplates", {
       organizationId: orgId,
+      layoutId: "classic",
       organizationName: "PolioFree Africa NGO",
       programSubtitle: "Employee Training Programme",
       signatureLine: "Dr. Amara Diallo, Training Director",

@@ -315,14 +315,25 @@ export default defineSchema({
   // ── Certificate Templates ──────────────────────────────────────
   certificateTemplates: defineTable({
     organizationId: v.id("organizations"),
+    layoutId: v.optional(
+      v.union(v.literal("classic"), v.literal("premium"))
+    ),
     organizationName: v.string(),
     programSubtitle: v.optional(v.string()),
     logoUrl: v.optional(v.string()),
+    logoStorageId: v.optional(v.id("_storage")),
+    secondLogoUrl: v.optional(v.string()),
+    secondLogoStorageId: v.optional(v.id("_storage")),
     signatureLine: v.optional(v.string()),
+    signature2Line: v.optional(v.string()),
     signatureImageUrl: v.optional(v.string()),
+    signatureImageStorageId: v.optional(v.id("_storage")),
+    signature2ImageUrl: v.optional(v.string()),
+    signature2ImageStorageId: v.optional(v.id("_storage")),
     borderColor: v.string(), // hex
     accentColor: v.optional(v.string()),
     backgroundImageUrl: v.optional(v.string()),
+    backgroundImageStorageId: v.optional(v.id("_storage")),
     footerText: v.optional(v.string()),
     updatedAt: v.number(),
   }).index("by_org", ["organizationId"]),

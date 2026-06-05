@@ -17,6 +17,7 @@ import type * as invitations from "../invitations.js";
 import type * as leaderboard from "../leaderboard.js";
 import type * as lessons from "../lessons.js";
 import type * as lib_brand from "../lib/brand.js";
+import type * as lib_certificateTemplate from "../lib/certificateTemplate.js";
 import type * as lib_evaluation from "../lib/evaluation.js";
 import type * as lib_learnerCategories from "../lib/learnerCategories.js";
 import type * as lib_password from "../lib/password.js";
@@ -50,6 +51,7 @@ declare const fullApi: ApiFromModules<{
   leaderboard: typeof leaderboard;
   lessons: typeof lessons;
   "lib/brand": typeof lib_brand;
+  "lib/certificateTemplate": typeof lib_certificateTemplate;
   "lib/evaluation": typeof lib_evaluation;
   "lib/learnerCategories": typeof lib_learnerCategories;
   "lib/password": typeof lib_password;
