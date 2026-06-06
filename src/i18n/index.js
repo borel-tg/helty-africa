@@ -5,7 +5,7 @@ import en from "../locales/en.json";
 import {
   APP_BRAND_NAME,
   APP_BRAND_SHORT_NAME,
-  APP_CONTACT_EMAIL,
+  APP_DEVELOPER_NAME,
   APP_DEMO_EMAIL_DOMAIN,
 } from "../lib/brand";
 
@@ -21,7 +21,7 @@ i18n.use(initReactI18next).init({
     defaultVariables: {
       brandName: APP_BRAND_NAME,
       brandShortName: APP_BRAND_SHORT_NAME,
-      contactEmail: APP_CONTACT_EMAIL,
+      developerName: APP_DEVELOPER_NAME,
       demoEmailDomain: APP_DEMO_EMAIL_DOMAIN,
     },
   },

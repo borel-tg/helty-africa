@@ -12,6 +12,15 @@ export const APP_PAGE_SUBTITLE = "Formation à la vaccination Polio";
 export const APP_CONTACT_EMAIL = "contact@helty.africa";
 export const APP_SUPPORT_EMAIL = "tchassemborel@gmail.com";
 
+/** Footer — developer credit */
+export const APP_DEVELOPER_NAME = "Brel Solutions LTD";
+export const APP_DEVELOPER_WHATSAPP = "+7 917 576 66 53";
+
+export function getDeveloperWhatsAppUrl() {
+  const digits = APP_DEVELOPER_WHATSAPP.replace(/\D/g, "");
+  return `https://wa.me/${digits}`;
+}
+
 /** Domain used for seeded / demo login accounts only */
 export const APP_DEMO_EMAIL_DOMAIN = "helty.africa";
 
