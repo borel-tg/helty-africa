@@ -27,6 +27,7 @@ import type * as migrations from "../migrations.js";
 import type * as moduleResources from "../moduleResources.js";
 import type * as modules from "../modules.js";
 import type * as notifications from "../notifications.js";
+import type * as organizations from "../organizations.js";
 import type * as passwordReset from "../passwordReset.js";
 import type * as progress from "../progress.js";
 import type * as recentModules from "../recentModules.js";
@@ -62,6 +63,7 @@ declare const fullApi: ApiFromModules<{
   moduleResources: typeof moduleResources;
   modules: typeof modules;
   notifications: typeof notifications;
+  organizations: typeof organizations;
   passwordReset: typeof passwordReset;
   progress: typeof progress;
   recentModules: typeof recentModules;

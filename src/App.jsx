@@ -35,6 +35,7 @@ import EmployeeDetailPage from "./pages/admin/EmployeeDetailPage";
 import StatisticsPage from "./pages/admin/StatisticsPage";
 import CertificateTemplatePage from "./pages/admin/CertificateTemplatePage";
 import NotificationsPage from "./pages/admin/NotificationsPage";
+import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
 
 // Lead pages
 import LeadDashboard from "./pages/lead/LeadDashboard";
@@ -151,6 +152,7 @@ export default function App() {
               <Route path="/admin/stats" element={<StatisticsPage />} />
               <Route path="/admin/certificates" element={<CertificateTemplatePage />} />
               <Route path="/admin/notifications" element={<NotificationsPage />} />
+              <Route path="/admin/settings" element={<AdminSettingsPage />} />
             </Route>
 
           </Route>

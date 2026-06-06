@@ -34,6 +34,7 @@ const NAV_ITEMS = {
     { to: "/admin/stats", icon: BarChart2, labelKey: "nav.statistics" },
     { to: "/admin/certificates", icon: Award, labelKey: "nav.certificates" },
     { to: "/admin/notifications", icon: Bell, labelKey: "nav.notifications" },
+    { to: "/admin/settings", icon: Settings, labelKey: "nav.settings" },
   ],
   super_admin: [
     { to: "/admin", icon: LayoutDashboard, labelKey: "nav.overview" },
