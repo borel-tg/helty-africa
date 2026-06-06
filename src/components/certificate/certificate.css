@@ -1,0 +1,174 @@
+/**
+ * Certificate layout — typography and spacing scale with certificate width (cqi),
+ * not the viewport, so previews stay consistent from mobile to large screens.
+ */
+.cert-canvas {
+  container-type: inline-size;
+  container-name: cert;
+}
+
+.cert-main {
+  padding: clamp(0.45rem, 2.4cqi, 2rem) clamp(0.5rem, 2.8cqi, 2.5rem);
+}
+
+.cert-header {
+  gap: clamp(0.25rem, 1.2cqi, 0.75rem);
+  margin-bottom: clamp(0.15rem, 1cqi, 1rem);
+}
+
+.cert-logo,
+.cert-logo-fallback {
+  width: clamp(1.75rem, 7.5cqi, 3.5rem);
+  height: clamp(1.75rem, 7.5cqi, 3.5rem);
+  flex-shrink: 0;
+}
+
+.cert-logo-fallback svg {
+  width: clamp(0.875rem, 4cqi, 1.75rem);
+  height: clamp(0.875rem, 4cqi, 1.75rem);
+}
+
+.cert-org-title {
+  font-size: clamp(0.68rem, 4cqi, 1.5rem);
+  line-height: 1.15;
+}
+
+.cert-org-subtitle {
+  font-size: clamp(0.45rem, 1.55cqi, 0.75rem);
+  margin-top: clamp(0.1rem, 0.5cqi, 0.35rem);
+  letter-spacing: 0.14em;
+}
+
+.cert-divider {
+  gap: clamp(0.25rem, 1cqi, 0.5rem);
+  margin-bottom: clamp(0.35rem, 2cqi, 1.5rem);
+}
+
+.cert-body {
+  padding-left: clamp(0, 0.5cqi, 0.25rem);
+}
+
+.cert-date {
+  font-size: clamp(0.45rem, 1.45cqi, 0.75rem);
+  margin-bottom: clamp(0.15rem, 1cqi, 0.75rem);
+}
+
+.cert-learner-name {
+  font-size: clamp(0.82rem, 5.2cqi, 1.875rem);
+  line-height: 1.12;
+  margin-bottom: clamp(0.1rem, 0.8cqi, 0.5rem);
+}
+
+.cert-body-text {
+  font-size: clamp(0.5rem, 1.8cqi, 0.875rem);
+  margin-bottom: clamp(0.05rem, 0.5cqi, 0.35rem);
+}
+
+.cert-module-title {
+  font-size: clamp(0.62rem, 3.4cqi, 1.25rem);
+  line-height: 1.2;
+  margin-bottom: clamp(0.15rem, 1.2cqi, 0.75rem);
+}
+
+.cert-footer {
+  gap: clamp(0.25rem, 1.5cqi, 1rem);
+  margin-top: clamp(0.25rem, 1.5cqi, 1rem);
+  padding-top: clamp(0.25rem, 1.5cqi, 1rem);
+}
+
+.cert-signature-img {
+  height: clamp(1.25rem, 4.5cqi, 2.5rem);
+  margin-bottom: clamp(0.05rem, 0.4cqi, 0.25rem);
+}
+
+.cert-signature-line {
+  width: clamp(3.5rem, 18cqi, 9rem);
+  margin-bottom: clamp(0.05rem, 0.4cqi, 0.25rem);
+}
+
+.cert-signature-label {
+  font-size: clamp(0.42rem, 1.35cqi, 0.75rem);
+  line-height: 1.25;
+}
+
+.cert-date-block-label {
+  font-size: clamp(0.45rem, 1.45cqi, 0.75rem);
+}
+
+.cert-date-block-sub {
+  font-size: clamp(0.4rem, 1.2cqi, 0.625rem);
+}
+
+.cert-disclaimer {
+  margin-top: clamp(0.35rem, 2cqi, 2.5rem);
+  font-size: clamp(0.35rem, 1.05cqi, 0.5rem);
+  line-height: 1.25;
+}
+
+.cert-disclaimer-overlay {
+  position: absolute;
+  bottom: clamp(0.1rem, 0.8cqi, 0.5rem);
+  left: clamp(0.35rem, 1.5cqi, 1rem);
+  right: clamp(4.25rem, 28cqi, 32%);
+  z-index: 20;
+  text-align: left;
+  font-size: clamp(0.35rem, 1.05cqi, 0.5rem);
+  line-height: 1.25;
+}
+
+.cert-sidebar {
+  width: clamp(4.25rem, 26cqi, 12.5rem);
+  padding: clamp(0.35rem, 2cqi, 2rem) clamp(0.2rem, 1.2cqi, 0.75rem);
+}
+
+.cert-ribbon {
+  font-size: clamp(0.38rem, 1.35cqi, 0.625rem);
+  letter-spacing: 0.16em;
+  padding-top: clamp(0, 0.5cqi, 0.5rem);
+}
+
+.cert-badge-wrap {
+  width: clamp(2.75rem, 13cqi, 7.5rem);
+}
+
+.cert-score-label {
+  font-size: clamp(0.38rem, 1.25cqi, 0.625rem);
+}
+
+.cert-score-value {
+  font-size: clamp(0.95rem, 4.5cqi, 1.875rem);
+  line-height: 1.1;
+}
+
+.cert-qr-block {
+  gap: clamp(0.15rem, 0.8cqi, 0.5rem);
+  padding-bottom: clamp(0.1rem, 0.5cqi, 0.5rem);
+}
+
+.cert-qr-block svg {
+  width: clamp(2rem, 10cqi, 3.5rem) !important;
+  height: clamp(2rem, 10cqi, 3.5rem) !important;
+}
+
+.cert-ref {
+  font-size: clamp(0.32rem, 1cqi, 0.5rem);
+  line-height: 1.2;
+  max-width: clamp(3.5rem, 22cqi, 7.5rem);
+}
+
+.cert-corner {
+  width: clamp(1.25rem, 6cqi, 3rem);
+  height: clamp(1.25rem, 6cqi, 3rem);
+}
+
+@container cert (max-width: 420px) {
+  .cert-footer {
+    flex-wrap: wrap;
+  }
+
+  .cert-date-block {
+    width: 100%;
+    text-align: left;
+    margin-top: 0.15rem;
+  }
+}

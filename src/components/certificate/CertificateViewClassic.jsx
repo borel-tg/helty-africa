@@ -8,22 +8,6 @@ import { CertificateBadge } from "./CertificateBadge";
 
 /**
  * Template 1 — Classic landscape certificate (default layout).
- *
- * Layout map (A4 landscape, ~72% main + ~28% sidebar):
- * ┌────────────────────────────────────────────┬──────────┐
- * │ HEADER: left logo | org name + subtitle | right logo   │ RIBBON   │
- * ├────────────────────────────────────────────┤ title    │
- * │ BODY: date, learner name, completion line, │ badge    │
- * │       module title, score                  │ score    │
- * ├────────────────────────────────────────────┤ QR+ref   │
- * │ FOOTER: signature 1 | signature 2 | date   │          │
- * └────────────────────────────────────────────┴──────────┘
- * FOOTER DISCLAIMER (absolute, bottom-left)
- *
- * Editable via admin: organizationName, programSubtitle, logos, signatures,
- * borderColor, accentColor, backgroundImageUrl, footerText.
- * Dynamic per certificate: learnerName, moduleTitle, score, issuedAt,
- * certificateNumber, verifyUrl.
  */
 export const CertificateViewClassic = forwardRef(
   function CertificateViewClassic(
@@ -46,10 +30,9 @@ export const CertificateViewClassic = forwardRef(
     const dateStr = formatDate(issuedAt ?? Date.now());
 
     return (
-      /* ── ROOT: A4 landscape canvas (297:210) — PDF export captures this node ── */
       <div
         ref={ref}
-        className={`relative bg-white overflow-hidden select-none ${className}`}
+        className={`cert-canvas relative bg-white overflow-hidden select-none ${className}`}
         style={{
           aspectRatio: "297 / 210",
           width: "100%",
@@ -57,7 +40,6 @@ export const CertificateViewClassic = forwardRef(
           fontFamily: "Inter, system-ui, sans-serif",
         }}
       >
-        {/* ── FRAME: outer double border (admin: borderColor) ── */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{ border: `3px solid ${border}` }}
@@ -67,7 +49,6 @@ export const CertificateViewClassic = forwardRef(
           style={{ border: `1px solid ${border}`, opacity: 0.45 }}
         />
 
-        {/* ── WATERMARK: CSS guilloché pattern (accent color) ── */}
         <div
           className="absolute inset-0 pointer-events-none opacity-[0.06]"
           style={{
@@ -77,7 +58,6 @@ export const CertificateViewClassic = forwardRef(
           }}
         />
 
-        {/* ── BACKGROUND: optional uploaded watermark image (admin: backgroundImageUrl) ── */}
         {template.backgroundImageUrl && (
           <img
             src={template.backgroundImageUrl}
@@ -86,83 +66,70 @@ export const CertificateViewClassic = forwardRef(
           />
         )}
 
-        {/* ── LAYOUT ROW: main content (left) + ribbon sidebar (right) ── */}
         <div className="relative z-10 flex h-full min-h-0">
-          {/* ══════════════════════════════════════════════════════════════
-            MAIN COLUMN (~72% width)
-            ══════════════════════════════════════════════════════════════ */}
-          <div className="flex-1 flex flex-col px-8 py-7 md:px-10 md:py-8 min-w-0">
-            {/* ── HEADER: 3-column — left logo | org title | right logo ── */}
-            <div className="flex items-center justify-between gap-3 mb-1">
-              {/* Header — left logo (admin: logoUrl) */}
+          <div className="cert-main flex-1 flex flex-col min-w-0">
+            <div className="cert-header flex items-center justify-between">
               {template.logoUrl ? (
                 <img
                   src={template.logoUrl}
                   alt=""
-                  className="h-14 w-14 object-contain shrink-0"
+                  className="cert-logo object-contain"
                 />
               ) : (
                 <div
-                  className="h-14 w-14 rounded-full flex items-center justify-center shrink-0"
+                  className="cert-logo-fallback rounded-full flex items-center justify-center"
                   style={{ backgroundColor: accent }}
                 >
-                  <Award size={28} className="text-white" />
+                  <Award className="text-white" />
                 </div>
               )}
 
-              {/* Header — right logo / partner logo (admin: secondLogoUrl) */}
+              <div className="flex-1 text-center min-w-0 px-1">
+                <h1
+                  className="cert-org-title font-bold"
+                  style={{ color: accent }}
+                >
+                  {template.organizationName}
+                </h1>
+                {template.programSubtitle && (
+                  <p className="cert-org-subtitle uppercase text-text-secondary font-medium">
+                    {template.programSubtitle}
+                  </p>
+                )}
+              </div>
+
               {template.secondLogoUrl ? (
                 <img
                   src={template.secondLogoUrl}
                   alt=""
-                  className="h-14 w-14 object-contain shrink-0"
+                  className="cert-logo object-contain"
                 />
               ) : (
                 <div
-                  className="h-14 w-14 rounded-full flex items-center justify-center shrink-0"
+                  className="cert-logo-fallback rounded-full flex items-center justify-center"
                   style={{ backgroundColor: accent }}
                 >
-                  <Award size={28} className="text-white" />
+                  <Award className="text-white" />
                 </div>
               )}
             </div>
 
-            {/* Header — center: organization name + program subtitle */}
-            <div className="text-center min-w-0 px-2mb-3">
-              <h1
-                className="text-xl md:text-2xl font-bold leading-tight"
-                style={{ color: accent }}
-              >
-                {template.organizationName}
-              </h1>
-              {template.programSubtitle && (
-                <p className="text-[11px] md:text-xs uppercase tracking-[0.18em] text-text-secondary mt-1 font-medium">
-                  {template.programSubtitle}
-                </p>
-              )}
-            </div>
+            <div className="cert-body flex-1 flex flex-col justify-center min-h-0">
+              <p className="cert-date text-text-secondary">{dateStr}</p>
 
-            {/* ── BODY: issue date, learner name, completion text, module, score ── */}
-            <div className="flex-1 flex flex-col justify-center">
-              {/* Body — issue date */}
-              <p className="text-xs text-text-secondary mb-2">{dateStr}</p>
-
-              {/* Body — learner full name (dynamic) */}
               <p
-                className="text-2xl md:text-3xl font-bold text-text-primary leading-tight mb-2"
+                className="cert-learner-name font-bold text-text-primary"
                 style={{ fontFamily: "'Libre Baskerville', Georgia, serif" }}
               >
                 {learnerName}
               </p>
 
-              {/* Body — static French line: "a terminé avec succès la formation" */}
-              <p className="text-sm text-text-secondary mb-1">
+              <p className="cert-body-text text-text-secondary">
                 {t("certificate.hasCompleted")}
               </p>
 
-              {/* Body — training program / module title (dynamic) */}
               <p
-                className="text-lg md:text-xl font-semibold mb-3"
+                className="cert-module-title font-semibold"
                 style={{
                   color: accent,
                   fontFamily: "'Libre Baskerville', Georgia, serif",
@@ -171,86 +138,75 @@ export const CertificateViewClassic = forwardRef(
                 {moduleTitle}
               </p>
 
-              {/* Body — optional score line (hidden when score is null) */}
               {score != null && (
-                <p className="text-sm text-text-secondary">
+                <p className="cert-body-text text-text-secondary">
                   {t("certificate.passingScore", { score })}
                 </p>
               )}
             </div>
 
-            {/* ── FOOTER: signatures row + completion date ── */}
-            <div className="flex items-end justify-between gap-4 mt-4 pt-4 border-t border-gray-100">
-              {/* Footer — signature 1 (admin: signatureImageUrl, signatureLine) */}
-              <div className="min-w-0">
+            <div className="cert-footer flex items-end justify-between border-t border-gray-100">
+              <div className="min-w-0 flex-1">
                 {template.signatureImageUrl ? (
                   <img
                     src={template.signatureImageUrl}
                     alt=""
-                    className="h-10 object-contain object-left mb-1"
+                    className="cert-signature-img object-contain object-left"
                   />
                 ) : (
-                  <div className="w-36 border-b-2 border-gray-300 mb-1" />
+                  <div className="cert-signature-line border-b-2 border-gray-300" />
                 )}
-                <p className="text-[10px] md:text-xs text-text-secondary leading-snug">
+                <p className="cert-signature-label text-text-secondary">
                   {template.signatureLine}
                 </p>
               </div>
 
-              {/* Footer — signature 2, optional (admin: signature2ImageUrl, signature2Line) */}
               {(template.signature2ImageUrl || template.signature2Line) && (
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   {template.signature2ImageUrl ? (
                     <img
                       src={template.signature2ImageUrl}
                       alt=""
-                      className="h-10 object-contain object-left mb-1"
+                      className="cert-signature-img object-contain object-left"
                     />
                   ) : (
-                    <div className="w-36 border-b-2 border-gray-300 mb-1" />
+                    <div className="cert-signature-line border-b-2 border-gray-300" />
                   )}
-                  <p className="text-[10px] md:text-xs text-text-secondary leading-snug">
+                  <p className="cert-signature-label text-text-secondary">
                     {template.signature2Line}
                   </p>
                 </div>
               )}
 
-              {/* Footer — completion date block (right-aligned) */}
-              <div className="text-right shrink-0">
-                <p className="text-xs font-medium text-text-primary">
+              <div className="cert-date-block text-right shrink-0">
+                <p className="cert-date-block-label font-medium text-text-primary">
                   {dateStr}
                 </p>
-                <p className="text-[10px] text-text-secondary">
+                <p className="cert-date-block-sub text-text-secondary">
                   {t("certificate.dateOfCompletion")}
                 </p>
               </div>
             </div>
 
-            {/* ── DISCLAIMER: optional footer text (admin: footerText) ── */}
             {template.footerText && (
-              <p className="mt-10 bottom-2 left-3 right-8 text-left text-[7px] md:text-[8px] text-text-secondary leading-tight z-20">
+              <p className="cert-disclaimer text-text-secondary">
                 {template.footerText}
               </p>
             )}
           </div>
 
-          {/* ══════════════════════════════════════════════════════════════
-            RIGHT SIDEBAR RIBBON (~28% width, max 200px)
-            ══════════════════════════════════════════════════════════════ */}
           <div
-            className="w-[28%] max-w-[200px] shrink-0 relative flex flex-col items-center justify-between py-8 px-3 text-center"
+            className="cert-sidebar shrink-0 relative flex flex-col items-center justify-between text-center"
             style={{ backgroundColor: `${accent}18` }}
           >
-            {/* Sidebar — vertical accent stripe (left edge) */}
             <div
               className="absolute left-0 top-0 bottom-0 w-[3px]"
               style={{ backgroundColor: accent }}
             />
 
-            {/* Sidebar — ribbon title: "CERTIFICAT / DE RÉUSSITE" */}
-            <div className="pt-2">
+            <div className="cert-ribbon">
               <p
-                className="text-[10px] font-bold uppercase tracking-[0.22em] leading-relaxed"
+                className="font-bold uppercase leading-relaxed"
                 style={{ color: accent }}
               >
                 {t("certificate.ribbonLine1")}
@@ -259,20 +215,18 @@ export const CertificateViewClassic = forwardRef(
               </p>
             </div>
 
-            {/* Sidebar — COUP award badge (static asset: src/assets/certificate/badge.png) */}
-            <CertificateBadge className="w-[100px] md:w-[120px]" />
+            <CertificateBadge className="cert-badge-wrap" />
 
-            {/* Sidebar — pass score block (hidden when score is null) */}
             {score != null && (
-              <div className="w-full flex flex-col items-center justify-center py-1 px-2">
+              <div className="w-full flex flex-col items-center justify-center px-1">
                 <p
-                  className="text-[10px] font-bold uppercase tracking-widest leading-tight"
+                  className="cert-score-label font-bold uppercase leading-tight"
                   style={{ color: accent }}
                 >
                   {t("certificate.passScore")}
                 </p>
                 <p
-                  className="text-2xl md:text-3xl font-extrabold leading-tight mt-0.5"
+                  className="cert-score-value font-extrabold"
                   style={{ color: accent }}
                 >
                   {score}&nbsp;%
@@ -280,11 +234,10 @@ export const CertificateViewClassic = forwardRef(
               </div>
             )}
 
-            {/* Sidebar — QR verification + reference number (only on issued certificates) */}
             {certificateNumber && verifyUrl && (
-              <div className="flex flex-col items-center gap-2 pb-2">
+              <div className="cert-qr-block flex flex-col items-center">
                 <QRCodeSVG value={verifyUrl} size={56} level="M" />
-                <p className="text-[8px] text-text-secondary leading-tight break-all max-w-[120px]">
+                <p className="cert-ref text-text-secondary break-all">
                   {t("certificate.ref")}: {certificateNumber}
                 </p>
               </div>

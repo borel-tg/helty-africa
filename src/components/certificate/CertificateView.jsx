@@ -2,6 +2,7 @@ import { forwardRef } from "react";
 import { CertificateViewClassic } from "./CertificateViewClassic";
 import { CertificateViewPremium } from "./CertificateViewPremium";
 import { DEFAULT_LAYOUT_ID } from "../../lib/certificate/defaults";
+import "./certificate.css";
 
 export const CertificateView = forwardRef(function CertificateView(props, ref) {
   const layoutId = props.template?.layoutId ?? DEFAULT_LAYOUT_ID;
