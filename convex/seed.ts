@@ -45,6 +45,7 @@ export const seedDemo = mutation({
       "lessons",
       "modules",
       "invitations",
+      "passwordResetTokens",
       "certificateTemplates",
       "users",
       "organizations",

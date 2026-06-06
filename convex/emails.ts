@@ -3,7 +3,7 @@
 import { internalAction } from "./_generated/server";
 import { v } from "convex/values";
 import { APP_BRAND_NAME, getDefaultResendFrom } from "./lib/brand";
-import { buildLoginUrl, buildRegisterUrl } from "./lib/siteUrl";
+import { buildLoginUrl, buildRegisterUrl, buildResetPasswordUrl } from "./lib/siteUrl";
 
 /**
  * Sends invitation email via Resend (dev: onboarding@resend.dev → your Resend account email).
@@ -140,6 +140,68 @@ export const sendManualAccountEmail = internalAction({
         from,
         to: [to],
         subject: `Votre compte ${APP_BRAND_NAME} est prêt`,
+        html,
+      }),
+    });
+
+    if (!res.ok) {
+      const body = await res.text();
+      console.error("[emails] Resend error", res.status, body);
+      return { sent: false, reason: body };
+    }
+
+    return { sent: true };
+  },
+});
+
+/** Password reset link — valid 1 hour. */
+export const sendPasswordResetEmail = internalAction({
+  args: {
+    to: v.string(),
+    token: v.string(),
+    name: v.string(),
+  },
+  handler: async (_ctx, { to, token, name }) => {
+    const apiKey = process.env.RESEND_API_KEY;
+    const resetUrl = buildResetPasswordUrl(token);
+
+    if (!apiKey) {
+      console.warn(
+        "[emails] RESEND_API_KEY not set — password reset email not sent.",
+        resetUrl
+      );
+      return { sent: false, reason: "missing_api_key" };
+    }
+
+    const from = process.env.RESEND_FROM?.trim() || getDefaultResendFrom();
+
+    const html = `
+      <div style="font-family:sans-serif;max-width:520px;line-height:1.5;color:#1a1a1a">
+        <h2 style="color:#2E7D64">Réinitialisation du mot de passe</h2>
+        <p>Bonjour <strong>${escapeHtml(name)}</strong>,</p>
+        <p>Vous avez demandé à réinitialiser votre mot de passe sur ${escapeHtml(APP_BRAND_NAME)}.</p>
+        <p>Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe (lien valable 1 heure) :</p>
+        <p style="margin:24px 0">
+          <a href="${resetUrl}" style="background:#2E7D64;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">
+            Réinitialiser mon mot de passe
+          </a>
+        </p>
+        <p style="font-size:12px;color:#666">Si le bouton ne fonctionne pas, copiez ce lien :<br/>
+        <a href="${resetUrl}">${resetUrl}</a></p>
+        <p style="font-size:12px;color:#666;margin-top:16px">Si vous n'avez pas demandé cette réinitialisation, ignorez cet e-mail.</p>
+      </div>
+    `;
+
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from,
+        to: [to],
+        subject: `Réinitialisation de mot de passe — ${APP_BRAND_NAME}`,
         html,
       }),
     });

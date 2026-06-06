@@ -14,3 +14,7 @@ export function buildRegisterUrl(token: string): string {
 export function buildLoginUrl(): string {
   return `${getSiteUrl()}/login`;
 }
+
+export function buildResetPasswordUrl(token: string): string {
+  return `${getSiteUrl()}/reset-password?token=${encodeURIComponent(token)}`;
+}

@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useMutation } from "convex/react";
 import { Mail, ArrowLeft, CheckCircle } from "lucide-react";
+import { api } from "../../../convex/_generated/api";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { AuthLayout } from "../../components/auth/AuthLayout";
 
 export default function ForgotPasswordPage() {
   const { t } = useTranslation();
+  const requestReset = useMutation(api.passwordReset.requestReset);
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -25,9 +28,14 @@ export default function ForgotPasswordPage() {
     }
     setError("");
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setLoading(false);
-    setSubmitted(true);
+    try {
+      await requestReset({ email: email.trim() });
+      setSubmitted(true);
+    } catch (err) {
+      setError(err.message || t("common.error"));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -44,10 +52,9 @@ export default function ForgotPasswordPage() {
             {t("auth.checkEmail")}
           </h2>
           <p className="text-text-secondary text-sm leading-relaxed">
-            {t("auth.resetLinkSent")}{" "}
-            <span className="font-medium text-text-primary">{email}</span>.
-            {" "}{t("auth.linkExpires")}
+            {t("auth.resetSent")}
           </p>
+          <p className="text-text-secondary text-xs">{t("auth.resetLinkExpires1h")}</p>
           <Link
             to="/login"
             className="inline-flex items-center gap-2 text-sm text-primary hover:underline mt-2 font-medium"

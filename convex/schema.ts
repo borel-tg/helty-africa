@@ -67,6 +67,18 @@ export default defineSchema({
     .index("by_token", ["token"])
     .index("by_email", ["email"]),
 
+  // ── Password reset ─────────────────────────────────────────────
+  passwordResetTokens: defineTable({
+    userId: v.id("users"),
+    email: v.string(),
+    token: v.string(),
+    expiresAt: v.number(),
+    usedAt: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index("by_token", ["token"])
+    .index("by_user", ["userId"]),
+
   // ── Training programs ─────────────────────────────────────────
   trainingPrograms: defineTable({
     organizationId: v.id("organizations"),

@@ -241,6 +241,7 @@ export default function EmployeesPage() {
   const deactivate = useMutation(api.users.deactivate);
   const reactivate = useMutation(api.users.reactivate);
   const resendInviteEmail = useMutation(api.invitations.resendEmail);
+  const requestPasswordReset = useMutation(api.passwordReset.requestReset);
   const [resendingId, setResendingId] = useState(null);
 
   const handleResendInvitation = async (invitationId) => {
@@ -475,9 +476,26 @@ export default function EmployeesPage() {
                   </button>
                   {openMenu === emp._id && (
                     <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-card shadow-modal border border-gray-100 z-10">
-                      <button onClick={() => { toast.success(`Password reset sent to ${emp.name}`); setOpenMenu(null); }}
-                        className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-text-secondary hover:bg-gray-50">
-                        <KeyRound size={14} /> Reset Password
+                      <button
+                        onClick={async () => {
+                          if (!emp.email) {
+                            toast.error(t("admin.passwordResetNoEmail"));
+                            setOpenMenu(null);
+                            return;
+                          }
+                          try {
+                            await requestPasswordReset({ email: emp.email });
+                            toast.success(
+                              t("admin.passwordResetSent", { name: emp.name })
+                            );
+                          } catch (err) {
+                            toast.error(err.message || t("common.error"));
+                          }
+                          setOpenMenu(null);
+                        }}
+                        className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-text-secondary hover:bg-gray-50"
+                      >
+                        <KeyRound size={14} /> {t("admin.resetPassword")}
                       </button>
                       <button onClick={() => { setDeactivateTarget(emp); setOpenMenu(null); }}
                         className={`flex items-center gap-2 w-full px-3 py-2.5 text-sm hover:bg-gray-50 ${emp.status === "active" ? "text-amber-600" : "text-green-600"}`}>
