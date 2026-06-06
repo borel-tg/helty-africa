@@ -20,10 +20,10 @@ export default defineConfig({
             `<title>${getAppPageTitle()}</title>`
           )
           .replace(
-            /content="COUP DRC"/g,
+            /content="COUP RDC"/g,
             `content="${APP_BRAND_SHORT_NAME}"`
           )
-          .replace(/aria-label="COUP DRC icon"/g, `aria-label="${APP_BRAND_NAME} icon"`);
+          .replace(/aria-label="COUP RDC icon"/g, `aria-label="${APP_BRAND_NAME} icon"`);
       },
     },
     VitePWA({

@@ -1,6 +1,6 @@
-# COUP DRC — Current Limitations & Production Requirements
+# COUP RDC — Current Limitations & Production Requirements
 
-**Project:** COUP DRC (health training platform for francophone Africa)  
+**Project:** COUP RDC (health training platform for francophone Africa)  
 **Repository:** https://github.com/Borel-TG/helty-africa  
 **App location:** project root (`evtp-app/` folder locally — rename optional)  
 **Last updated:** May 2026  
