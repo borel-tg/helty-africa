@@ -1,5 +1,5 @@
 import { mutation, query } from "./_generated/server";
-import type { MutationCtx } from "./_generated/server";
+import type { MutationCtx, QueryCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
 import { enrichCertificateTemplate } from "./lib/certificateTemplate";
@@ -80,6 +80,61 @@ function generateCertificateNumber() {
   return `EVT-${year}-${suffix}`;
 }
 
+function normalizeCertificateRef(certificateNumber: string) {
+  return certificateNumber.trim().replace(/\s+/g, "").toUpperCase();
+}
+
+async function findCertificateByNumber(ctx: QueryCtx, certificateNumber: string) {
+  const normalized = normalizeCertificateRef(certificateNumber);
+  const cert = await ctx.db
+    .query("certificates")
+    .withIndex("by_certificate_number", (q) =>
+      q.eq("certificateNumber", normalized)
+    )
+    .unique();
+  return { cert, normalized };
+}
+
+/** Fast public verification — no template image URL resolution. */
+export const verifyByNumber = query({
+  args: { certificateNumber: v.string() },
+  handler: async (ctx, { certificateNumber }) => {
+    const { cert, normalized } = await findCertificateByNumber(
+      ctx,
+      certificateNumber
+    );
+
+    console.log("[certificates.verifyByNumber]", {
+      normalized,
+      found: cert != null,
+      certificateId: cert?._id ?? null,
+    });
+
+    if (!cert) return null;
+
+    const [user, program, legacyModule, organization, rawTemplate] =
+      await Promise.all([
+        ctx.db.get(cert.userId),
+        cert.programId ? ctx.db.get(cert.programId) : null,
+        cert.moduleId ? ctx.db.get(cert.moduleId) : null,
+        ctx.db.get(cert.organizationId),
+        ctx.db
+          .query("certificateTemplates")
+          .withIndex("by_org", (q) => q.eq("organizationId", cert.organizationId))
+          .unique(),
+      ]);
+
+    return {
+      certificate: cert,
+      learnerName: user?.name ?? "—",
+      moduleTitle: program?.title ?? legacyModule?.title ?? "—",
+      organizationName:
+        rawTemplate?.organizationName ?? organization?.name ?? "—",
+      organizationId: cert.organizationId,
+    };
+  },
+});
+
 export const getForUserProgram = query({
   args: { userId: v.id("users"), programId: v.id("trainingPrograms") },
   handler: async (ctx, { userId, programId }) => {
@@ -128,12 +183,13 @@ export const getById = query({
 export const getByNumber = query({
   args: { certificateNumber: v.string() },
   handler: async (ctx, { certificateNumber }) => {
-    const cert = await ctx.db
-      .query("certificates")
-      .withIndex("by_certificate_number", (q) =>
-        q.eq("certificateNumber", certificateNumber)
-      )
-      .unique();
+    const { cert, normalized } = await findCertificateByNumber(
+      ctx,
+      certificateNumber
+    );
+
+    console.log("[certificates.getByNumber]", { normalized, found: cert != null });
+
     if (!cert) return null;
 
     const [user, program, legacyModule, rawTemplate, organization] =

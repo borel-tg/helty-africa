@@ -555,6 +555,8 @@
     "generating": "Génération du PDF…",
     "downloadError": "Impossible de générer le PDF. Réessayez.",
     "notEligible": "Vous devez réussir l'examen pour obtenir ce certificat.",
+    "verifying": "Vérification en cours…",
+    "loadingPreview": "Chargement de l'aperçu du certificat…",
     "loading": "Chargement du certificat…",
     "backgroundWatermark": "Filigrane d'arrière-plan (optionnel)"
   },
