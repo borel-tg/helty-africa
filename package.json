@@ -13,11 +13,14 @@
     "icons": "node scripts/generate-icons.mjs"
   },
   "dependencies": {
+    "@auth/core": "^0.37.0",
+    "@convex-dev/auth": "^0.0.93",
     "@tiptap/react": "^2.4.0",
     "@tiptap/starter-kit": "^2.4.0",
     "browser-image-compression": "^2.0.2",
     "clsx": "^2.1.1",
     "convex": "^1.13.0",
+    "convex-helpers": "^0.1.118",
     "date-fns": "^3.6.0",
     "html-to-image": "^1.11.13",
     "i18next": "^26.3.0",
