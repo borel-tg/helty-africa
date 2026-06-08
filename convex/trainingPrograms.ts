@@ -1,4 +1,10 @@
-import { mutation, query } from "./_generated/server";
+import {
+  adminMutation,
+  adminQuery,
+  authedMutation,
+  authedQuery,
+  leadOrAdminQuery,
+} from "./lib/functions";
 import { v } from "convex/values";
 import {
   DEFAULT_EVALUATION_POLICY,
@@ -8,6 +14,7 @@ import {
   type ModuleExamSummary,
 } from "./lib/evaluation";
 import { evaluationPolicyValidator } from "./schema";
+import { assertOrgAdmin, assertOrgMember } from "./lib/requireAuth";
 
 async function getProgramModuleIds(ctx: { db: any }, programId: any) {
   const links = await ctx.db
@@ -161,9 +168,10 @@ async function buildEvaluationSnapshot(
 
 // ── Admin list / CRUD ───────────────────────────────────────────────────────
 
-export const listForOrg = query({
+export const listForOrg = adminQuery({
   args: { organizationId: v.id("organizations") },
   handler: async (ctx, { organizationId }) => {
+    assertOrgAdmin(ctx.user, organizationId);
     const programs = await ctx.db
       .query("trainingPrograms")
       .withIndex("by_org", (q) => q.eq("organizationId", organizationId))
@@ -184,11 +192,12 @@ export const listForOrg = query({
   },
 });
 
-export const getById = query({
+export const getById = authedQuery({
   args: { programId: v.id("trainingPrograms") },
   handler: async (ctx, { programId }) => {
     const program = await ctx.db.get(programId);
     if (!program) return null;
+    assertOrgMember(ctx.user, program.organizationId);
 
     const links = await getProgramModuleIds(ctx, programId);
     const modules = await Promise.all(
@@ -220,15 +229,16 @@ export const getById = query({
   },
 });
 
-export const create = mutation({
+export const create = adminMutation({
   args: {
     organizationId: v.id("organizations"),
     title: v.string(),
     description: v.string(),
-    createdBy: v.id("users"),
     accessMode: v.optional(v.union(v.literal("open"), v.literal("closed"))),
   },
   handler: async (ctx, args) => {
+    const user = ctx.user;
+    assertOrgAdmin(user, args.organizationId);
     const now = Date.now();
     return ctx.db.insert("trainingPrograms", {
       organizationId: args.organizationId,
@@ -237,14 +247,14 @@ export const create = mutation({
       status: "draft",
       accessMode: args.accessMode ?? "open",
       evaluationPolicy: { ...DEFAULT_EVALUATION_POLICY },
-      createdBy: args.createdBy,
+      createdBy: user._id,
       createdAt: now,
       updatedAt: now,
     });
   },
 });
 
-export const update = mutation({
+export const update = adminMutation({
   args: {
     programId: v.id("trainingPrograms"),
     title: v.optional(v.string()),
@@ -256,6 +266,7 @@ export const update = mutation({
   handler: async (ctx, { programId, evaluationPolicy, ...rest }) => {
     const program = await ctx.db.get(programId);
     if (!program) throw new Error("Program not found");
+    assertOrgAdmin(ctx.user, program.organizationId);
 
     if (evaluationPolicy) {
       validateEvaluationPolicy(evaluationPolicy);
@@ -278,13 +289,14 @@ export const update = mutation({
   },
 });
 
-export const addModule = mutation({
+export const addModule = adminMutation({
   args: {
     programId: v.id("trainingPrograms"),
     moduleId: v.id("modules"),
     organizationId: v.id("organizations"),
   },
   handler: async (ctx, args) => {
+    assertOrgAdmin(ctx.user, args.organizationId);
     const mod = await ctx.db.get(args.moduleId);
     if (!mod) throw new Error("Module not found");
     if (mod.organizationId !== args.organizationId) {
@@ -312,18 +324,22 @@ export const addModule = mutation({
   },
 });
 
-export const removeModule = mutation({
+export const removeModule = adminMutation({
   args: { linkId: v.id("trainingProgramModules") },
   handler: async (ctx, { linkId }) => {
+    const link = await ctx.db.get(linkId);
+    if (!link) throw new Error("Link not found");
+    assertOrgAdmin(ctx.user, link.organizationId);
     await ctx.db.delete(linkId);
   },
 });
 
-export const remove = mutation({
+export const remove = adminMutation({
   args: { programId: v.id("trainingPrograms") },
   handler: async (ctx, { programId }) => {
     const program = await ctx.db.get(programId);
     if (!program) throw new Error("Program not found");
+    assertOrgAdmin(ctx.user, program.organizationId);
 
     const links = await ctx.db
       .query("trainingProgramModules")
@@ -378,9 +394,11 @@ export const remove = mutation({
 
 // ── Learner catalog & enrollment ──────────────────────────────────────────
 
-export const listAvailableForLearner = query({
-  args: { organizationId: v.id("organizations"), userId: v.id("users") },
-  handler: async (ctx, { organizationId, userId }) => {
+export const listAvailableForLearner = authedQuery({
+  args: { organizationId: v.id("organizations") },
+  handler: async (ctx, { organizationId }) => {
+    const user = ctx.user;
+    assertOrgMember(user, organizationId);
     const programs = await ctx.db
       .query("trainingPrograms")
       .withIndex("by_org_status", (q) =>
@@ -395,7 +413,7 @@ export const listAvailableForLearner = query({
       const enrollment = await ctx.db
         .query("programEnrollments")
         .withIndex("by_user_program", (q) =>
-          q.eq("userId", userId).eq("programId", program._id)
+          q.eq("userId", user._id).eq("programId", program._id)
         )
         .unique();
 
@@ -419,13 +437,14 @@ export const listAvailableForLearner = query({
   },
 });
 
-export const enroll = mutation({
+export const enroll = authedMutation({
   args: {
-    userId: v.id("users"),
     programId: v.id("trainingPrograms"),
     organizationId: v.id("organizations"),
   },
   handler: async (ctx, args) => {
+    const user = ctx.user;
+    assertOrgMember(user, args.organizationId);
     const program = await ctx.db.get(args.programId);
     if (!program) throw new Error("Program not found");
     if (!(await isProgramAvailableToLearners(ctx, program))) {
@@ -438,13 +457,13 @@ export const enroll = mutation({
     const existing = await ctx.db
       .query("programEnrollments")
       .withIndex("by_user_program", (q) =>
-        q.eq("userId", args.userId).eq("programId", args.programId)
+        q.eq("userId", user._id).eq("programId", args.programId)
       )
       .unique();
     if (existing) return existing._id;
 
     return ctx.db.insert("programEnrollments", {
-      userId: args.userId,
+      userId: user._id,
       programId: args.programId,
       organizationId: args.organizationId,
       enrolledAt: Date.now(),
@@ -452,23 +471,24 @@ export const enroll = mutation({
   },
 });
 
-export const getLearnerEvaluation = query({
+export const getLearnerEvaluation = authedQuery({
   args: {
     programId: v.id("trainingPrograms"),
-    userId: v.id("users"),
   },
-  handler: async (ctx, { programId, userId }) => {
+  handler: async (ctx, { programId }) => {
+    const user = ctx.user;
     const program = await ctx.db.get(programId);
     if (!program) return null;
+    if (program.organizationId !== user.organizationId) return null;
 
     const enrollment = await ctx.db
       .query("programEnrollments")
       .withIndex("by_user_program", (q) =>
-        q.eq("userId", userId).eq("programId", programId)
+        q.eq("userId", user._id).eq("programId", programId)
       )
       .unique();
 
-    const snapshot = await buildEvaluationSnapshot(ctx, program, userId);
+    const snapshot = await buildEvaluationSnapshot(ctx, program, user._id);
 
     return {
       program,
@@ -480,15 +500,19 @@ export const getLearnerEvaluation = query({
 });
 
 /** Recompute and persist enrollment outcome; issue certificate if passed. */
-export const finalizeProgramEvaluation = mutation({
+export const finalizeProgramEvaluation = authedMutation({
   args: {
-    userId: v.id("users"),
     programId: v.id("trainingPrograms"),
   },
-  handler: async (ctx, { userId, programId }) => {
+  handler: async (ctx, { programId }) => {
+    const user = ctx.user;
     const program = await ctx.db.get(programId);
     if (!program) throw new Error("Program not found");
+    if (program.organizationId !== user.organizationId) {
+      throw new Error("Unauthorized");
+    }
 
+    const userId = user._id;
     const snapshot = await buildEvaluationSnapshot(ctx, program, userId);
     const { policy, finalScore, passed, generalExamEnabled, generalUnlocked } =
       snapshot;
@@ -550,26 +574,36 @@ export const finalizeProgramEvaluation = mutation({
   },
 });
 
-export const getLearnerProgramProgress = query({
-  args: { userId: v.id("users"), programId: v.id("trainingPrograms") },
-  handler: async (ctx, args) => {
-    const program = await ctx.db.get(args.programId);
+export const getLearnerProgramProgress = authedQuery({
+  args: { programId: v.id("trainingPrograms") },
+  handler: async (ctx, { programId }) => {
+    const user = ctx.user;
+    const program = await ctx.db.get(programId);
     if (!program) return null;
-    return buildEvaluationSnapshot(ctx, program, args.userId);
+    if (program.organizationId !== user.organizationId) return null;
+    return buildEvaluationSnapshot(ctx, program, user._id);
   },
 });
 
 /** Lead/admin: evaluation breakdown for a learner in a program */
-export const getEvaluationForStaff = query({
+export const getEvaluationForStaff = leadOrAdminQuery({
   args: {
     userId: v.id("users"),
     programId: v.id("trainingPrograms"),
   },
   handler: async (ctx, args) => {
+    const actor = ctx.user;
     const program = await ctx.db.get(args.programId);
     if (!program) return null;
-    const user = await ctx.db.get(args.userId);
+    if (program.organizationId !== actor.organizationId) return null;
+    const target = await ctx.db.get(args.userId);
+    if (!target || target.organizationId !== actor.organizationId) {
+      throw new Error("User not found");
+    }
+    if (actor.role === "lead" && target.leadId !== actor._id) {
+      throw new Error("Unauthorized");
+    }
     const snapshot = await buildEvaluationSnapshot(ctx, program, args.userId);
-    return { user, program, ...snapshot };
+    return { user: target, program, ...snapshot };
   },
 });

@@ -1,25 +1,17 @@
-import { mutation, query } from "./_generated/server";
-import type { MutationCtx, QueryCtx } from "./_generated/server";
+import {
+  adminMutation,
+  authedMutation,
+  authedQuery,
+  publicQuery,
+} from "./lib/functions";
+import type { QueryCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
 import { enrichCertificateTemplate } from "./lib/certificateTemplate";
+import { assertOrgAdmin, assertOrgMember } from "./lib/requireAuth";
 
 const nullableString = v.optional(v.union(v.string(), v.null()));
 const nullableStorageId = v.optional(v.union(v.id("_storage"), v.null()));
-
-async function requireTemplateAdmin(
-  ctx: MutationCtx,
-  userId: Id<"users">,
-  organizationId: Id<"organizations">
-) {
-  const user = await ctx.db.get(userId);
-  if (!user || user.organizationId !== organizationId) {
-    throw new Error("Unauthorized");
-  }
-  if (user.role !== "admin" && user.role !== "super_admin") {
-    throw new Error("Admin access required");
-  }
-}
 
 type TemplateUpsertArgs = {
   layoutId?: "classic" | "premium";
@@ -96,7 +88,7 @@ async function findCertificateByNumber(ctx: QueryCtx, certificateNumber: string)
 }
 
 /** Fast public verification — no template image URL resolution. */
-export const verifyByNumber = query({
+export const verifyByNumber = publicQuery({
   args: { certificateNumber: v.string() },
   handler: async (ctx, { certificateNumber }) => {
     const { cert, normalized } = await findCertificateByNumber(
@@ -135,26 +127,36 @@ export const verifyByNumber = query({
   },
 });
 
-export const getForUserProgram = query({
-  args: { userId: v.id("users"), programId: v.id("trainingPrograms") },
-  handler: async (ctx, { userId, programId }) => {
+export const getForUserProgram = authedQuery({
+  args: { programId: v.id("trainingPrograms") },
+  handler: async (ctx, { programId }) => {
+    const user = ctx.user;
     const cert = await ctx.db
       .query("certificates")
       .withIndex("by_user_program", (q) =>
-        q.eq("userId", userId).eq("programId", programId)
+        q.eq("userId", user._id).eq("programId", programId)
       )
       .unique();
     return cert?.programId ? cert : null;
   },
 });
 
-export const getById = query({
+export const getById = authedQuery({
   args: { certificateId: v.id("certificates") },
   handler: async (ctx, { certificateId }) => {
+    const actor = ctx.user;
     const cert = await ctx.db.get(certificateId);
     if (!cert) return null;
+    if (cert.organizationId !== actor.organizationId) return null;
+    if (
+      cert.userId !== actor._id &&
+      actor.role !== "admin" &&
+      actor.role !== "super_admin"
+    ) {
+      throw new Error("Unauthorized");
+    }
 
-    const [user, program, legacyModule, rawTemplate, organization] =
+    const [learner, program, legacyModule, rawTemplate, organization] =
       await Promise.all([
         ctx.db.get(cert.userId),
         cert.programId ? ctx.db.get(cert.programId) : null,
@@ -170,7 +172,7 @@ export const getById = query({
 
     return {
       certificate: cert,
-      learnerName: user?.name ?? "—",
+      learnerName: learner?.name ?? "—",
       programTitle: program?.title ?? legacyModule?.title ?? "—",
       moduleTitle: program?.title ?? legacyModule?.title ?? "—",
       organizationName:
@@ -180,7 +182,7 @@ export const getById = query({
   },
 });
 
-export const getByNumber = query({
+export const getByNumber = publicQuery({
   args: { certificateNumber: v.string() },
   handler: async (ctx, { certificateNumber }) => {
     const { cert, normalized } = await findCertificateByNumber(
@@ -218,12 +220,13 @@ export const getByNumber = query({
   },
 });
 
-export const listForUser = query({
-  args: { userId: v.id("users") },
-  handler: async (ctx, { userId }) => {
+export const listForUser = authedQuery({
+  args: {},
+  handler: async (ctx) => {
+    const user = ctx.user;
     const certs = await ctx.db
       .query("certificates")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
 
     return Promise.all(
@@ -243,25 +246,26 @@ export const listForUser = query({
   },
 });
 
-export const issue = mutation({
+export const issue = authedMutation({
   args: {
-    userId: v.id("users"),
     programId: v.id("trainingPrograms"),
     organizationId: v.id("organizations"),
     generalExamAttemptId: v.optional(v.id("generalExamAttempts")),
     score: v.number(),
   },
   handler: async (ctx, args) => {
+    const user = ctx.user;
+    assertOrgMember(user, args.organizationId);
     const existing = await ctx.db
       .query("certificates")
       .withIndex("by_user_program", (q) =>
-        q.eq("userId", args.userId).eq("programId", args.programId)
+        q.eq("userId", user._id).eq("programId", args.programId)
       )
       .unique();
     if (existing) return existing._id;
 
     return ctx.db.insert("certificates", {
-      userId: args.userId,
+      userId: user._id,
       programId: args.programId,
       organizationId: args.organizationId,
       generalExamAttemptId: args.generalExamAttemptId,
@@ -274,7 +278,7 @@ export const issue = mutation({
 
 // ── Certificate Templates ──────────────────────────────────────────────────
 
-export const getTemplate = query({
+export const getTemplate = publicQuery({
   args: { organizationId: v.id("organizations") },
   handler: async (ctx, { organizationId }) => {
     const template = await ctx.db
@@ -285,9 +289,8 @@ export const getTemplate = query({
   },
 });
 
-export const upsertTemplate = mutation({
+export const upsertTemplate = adminMutation({
   args: {
-    userId: v.id("users"),
     organizationId: v.id("organizations"),
     layoutId: v.optional(
       v.union(v.literal("classic"), v.literal("premium"))
@@ -311,7 +314,7 @@ export const upsertTemplate = mutation({
     footerText: nullableString,
   },
   handler: async (ctx, args) => {
-    await requireTemplateAdmin(ctx, args.userId, args.organizationId);
+    assertOrgAdmin(ctx.user, args.organizationId);
 
     const fields = buildTemplateFields(args);
     const existing = await ctx.db

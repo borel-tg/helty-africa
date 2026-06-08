@@ -1,15 +1,23 @@
-import { mutation, query } from "./_generated/server";
+import {
+  adminMutation,
+  adminQuery,
+  publicMutation,
+  publicQuery,
+} from "./lib/functions";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { hashPassword } from "./lib/password";
+import { ensurePasswordAccount } from "./lib/passwordAccount";
 import {
   isLearnerCategoryKey,
   learnerCategoryKeyValidator,
 } from "./lib/learnerCategories";
+import { assertOrgAdmin } from "./lib/requireAuth";
 
-export const listByOrg = query({
+export const listByOrg = adminQuery({
   args: { organizationId: v.id("organizations") },
   handler: async (ctx, { organizationId }) => {
+    assertOrgAdmin(ctx.user, organizationId);
     const now = Date.now();
     const rows = await ctx.db
       .query("invitations")
@@ -38,7 +46,7 @@ export const listByOrg = query({
 });
 
 /** Register page — safe invitation preview (no token in response). */
-export const getPublicByToken = query({
+export const getPublicByToken = publicQuery({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
     const invitation = await ctx.db
@@ -68,28 +76,32 @@ export const getPublicByToken = query({
   },
 });
 
-export const getByToken = query({
+export const getByToken = adminQuery({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
-    return ctx.db
+    const invitation = await ctx.db
       .query("invitations")
       .withIndex("by_token", (q) => q.eq("token", token))
       .unique();
+    if (!invitation) return null;
+    assertOrgAdmin(ctx.user, invitation.organizationId);
+    return invitation;
   },
 });
 
-export const create = mutation({
+export const create = adminMutation({
   args: {
     organizationId: v.id("organizations"),
     email: v.string(),
     role: v.union(v.literal("admin"), v.literal("lead"), v.literal("learner")),
-    invitedBy: v.id("users"),
   },
   handler: async (ctx, args) => {
+    const user = ctx.user;
+    assertOrgAdmin(user, args.organizationId);
     const normalizedEmail = args.email.trim().toLowerCase();
     const existingUser = await ctx.db
       .query("users")
-      .withIndex("by_email", (q) => q.eq("email", normalizedEmail))
+      .withIndex("email", (q) => q.eq("email", normalizedEmail))
       .first();
     if (existingUser) {
       throw new Error("Un compte existe déjà avec cette adresse e-mail.");
@@ -103,7 +115,7 @@ export const create = mutation({
       organizationId: args.organizationId,
       email: normalizedEmail,
       role: args.role,
-      invitedBy: args.invitedBy,
+      invitedBy: user._id,
       token,
       expiresAt,
       createdAt: Date.now(),
@@ -121,11 +133,12 @@ export const create = mutation({
   },
 });
 
-export const resendEmail = mutation({
+export const resendEmail = adminMutation({
   args: { invitationId: v.id("invitations") },
   handler: async (ctx, { invitationId }) => {
     const invitation = await ctx.db.get(invitationId);
     if (!invitation) throw new Error("Invitation not found");
+    assertOrgAdmin(ctx.user, invitation.organizationId);
     if (invitation.usedAt) throw new Error("Invitation already used");
 
     const org = await ctx.db.get(invitation.organizationId);
@@ -138,7 +151,7 @@ export const resendEmail = mutation({
   },
 });
 
-export const completeRegistration = mutation({
+export const completeRegistration = publicMutation({
   args: {
     token: v.string(),
     firstName: v.string(),
@@ -162,7 +175,7 @@ export const completeRegistration = mutation({
     const normalizedEmail = invitation.email.trim().toLowerCase();
     const existing = await ctx.db
       .query("users")
-      .withIndex("by_email", (q) => q.eq("email", normalizedEmail))
+      .withIndex("email", (q) => q.eq("email", normalizedEmail))
       .first();
     if (existing) {
       throw new Error("Un compte existe déjà avec cette adresse e-mail.");
@@ -204,6 +217,8 @@ export const completeRegistration = mutation({
       createdAt: now,
     });
 
+    await ensurePasswordAccount(ctx, userId, normalizedEmail, passwordHash);
+
     await ctx.db.patch(invitation._id, { usedAt: now });
 
     const user = await ctx.db.get(userId);
@@ -214,7 +229,7 @@ export const completeRegistration = mutation({
   },
 });
 
-export const consume = mutation({
+export const consume = adminMutation({
   args: { token: v.string() },
   handler: async (ctx, { token }) => {
     const invitation = await ctx.db
@@ -223,6 +238,7 @@ export const consume = mutation({
       .unique();
 
     if (!invitation) throw new Error("Invitation not found");
+    assertOrgAdmin(ctx.user, invitation.organizationId);
     if (invitation.usedAt) throw new Error("Invitation already used");
     if (invitation.expiresAt < Date.now()) throw new Error("Invitation expired");
 

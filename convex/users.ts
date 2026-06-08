@@ -1,24 +1,32 @@
-import { mutation, query } from "./_generated/server";
+import {
+  adminMutation,
+  adminQuery,
+  authedQuery,
+  leadOrAdminQuery,
+} from "./lib/functions";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { hashPassword } from "./lib/password";
 import { learnerCategoryKeyValidator } from "./lib/learnerCategories";
+import { ensurePasswordAccount } from "./lib/passwordAccount";
+import {
+  assertOrgAdmin,
+  loadOrgUserAccess,
+} from "./lib/requireAuth";
 
 // ── Queries ────────────────────────────────────────────────────────────────
 
-export const getMe = query({
-  args: { tokenIdentifier: v.string() },
-  handler: async (ctx, { tokenIdentifier }) => {
-    return ctx.db
-      .query("users")
-      .withIndex("by_token", (q) => q.eq("tokenIdentifier", tokenIdentifier))
-      .unique();
+export const current = authedQuery({
+  args: {},
+  handler: async (ctx) => {
+    return ctx.user;
   },
 });
 
-export const listByOrg = query({
+export const listByOrg = adminQuery({
   args: { organizationId: v.id("organizations") },
   handler: async (ctx, { organizationId }) => {
+    assertOrgAdmin(ctx.user, organizationId);
     return ctx.db
       .query("users")
       .withIndex("by_org", (q) => q.eq("organizationId", organizationId))
@@ -26,9 +34,17 @@ export const listByOrg = query({
   },
 });
 
-export const listLearnersByLead = query({
+export const listLearnersByLead = leadOrAdminQuery({
   args: { leadId: v.id("users") },
   handler: async (ctx, { leadId }) => {
+    const user = ctx.user;
+    const lead = await ctx.db.get(leadId);
+    if (!lead || lead.organizationId !== user.organizationId) {
+      throw new Error("Unauthorized");
+    }
+    if (user.role === "lead" && user._id !== leadId) {
+      throw new Error("Unauthorized");
+    }
     return ctx.db
       .query("users")
       .withIndex("by_lead", (q) => q.eq("leadId", leadId))
@@ -36,26 +52,18 @@ export const listLearnersByLead = query({
   },
 });
 
-export const getById = query({
+export const getById = authedQuery({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {
-    return ctx.db.get(userId);
-  },
-});
-
-export const getByEmail = query({
-  args: { email: v.string() },
-  handler: async (ctx, { email }) => {
-    const normalized = email.trim().toLowerCase();
-    const byIndex = await ctx.db
-      .query("users")
-      .withIndex("by_email", (q) => q.eq("email", normalized))
-      .first();
-    if (byIndex) return byIndex;
-
-    // Fallback: legacy rows may have non-normalized email casing
-    const all = await ctx.db.query("users").collect();
-    return all.find((u) => u.email?.toLowerCase() === normalized) ?? null;
+    const user = ctx.user;
+    const target = await ctx.db.get(userId);
+    if (!target || target.organizationId !== user.organizationId) {
+      return null;
+    }
+    if (user._id === userId) return target;
+    if (user.role === "admin" || user.role === "super_admin") return target;
+    if (user.role === "lead" && target.leadId === user._id) return target;
+    return null;
   },
 });
 
@@ -68,7 +76,8 @@ const userRoleValidator = v.union(
   v.literal("learner")
 );
 
-export const create = mutation({
+/** Seed only — not exposed to clients after auth hardening. */
+export const create = adminMutation({
   args: {
     organizationId: v.id("organizations"),
     name: v.string(),
@@ -78,7 +87,6 @@ export const create = mutation({
     passwordHash: v.optional(v.string()),
     password: v.optional(v.string()),
     mustChangePassword: v.optional(v.boolean()),
-    tokenIdentifier: v.optional(v.string()),
     leadId: v.optional(v.id("users")),
     learnerCategoryKey: v.optional(learnerCategoryKeyValidator),
   },
@@ -89,17 +97,20 @@ export const create = mutation({
     if (password && !passwordHash) {
       passwordHash = await hashPassword(password);
     }
-    return ctx.db.insert("users", {
+    const userId = await ctx.db.insert("users", {
       ...rest,
       passwordHash,
       status: "active",
       createdAt: now,
     });
+    if (rest.email && passwordHash) {
+      await ensurePasswordAccount(ctx, userId, rest.email, passwordHash);
+    }
+    return userId;
   },
 });
 
-/** Admin manual create — inserts user and emails login link (requires email). */
-export const createManualAccount = mutation({
+export const createManualAccount = adminMutation({
   args: {
     organizationId: v.id("organizations"),
     name: v.string(),
@@ -111,6 +122,8 @@ export const createManualAccount = mutation({
     leadId: v.optional(v.id("users")),
   },
   handler: async (ctx, args) => {
+    assertOrgAdmin(ctx.user, args.organizationId);
+
     const normalizedEmail = args.email.trim().toLowerCase();
     if (!normalizedEmail) {
       throw new Error("L'adresse e-mail est obligatoire pour envoyer le lien de connexion.");
@@ -118,7 +131,7 @@ export const createManualAccount = mutation({
 
     const existing = await ctx.db
       .query("users")
-      .withIndex("by_email", (q) => q.eq("email", normalizedEmail))
+      .withIndex("email", (q) => q.eq("email", normalizedEmail))
       .first();
     if (existing) {
       throw new Error("Un compte existe déjà avec cette adresse e-mail.");
@@ -142,6 +155,8 @@ export const createManualAccount = mutation({
       createdAt: now,
     });
 
+    await ensurePasswordAccount(ctx, userId, normalizedEmail, passwordHash);
+
     const org = await ctx.db.get(args.organizationId);
     await ctx.scheduler.runAfter(0, internal.emails.sendManualAccountEmail, {
       to: normalizedEmail,
@@ -154,19 +169,12 @@ export const createManualAccount = mutation({
   },
 });
 
-export const update = mutation({
+export const update = adminMutation({
   args: {
     userId: v.id("users"),
     name: v.optional(v.string()),
     phone: v.optional(v.string()),
-    role: v.optional(
-      v.union(
-        v.literal("super_admin"),
-        v.literal("admin"),
-        v.literal("lead"),
-        v.literal("learner")
-      )
-    ),
+    role: v.optional(userRoleValidator),
     leadId: v.optional(v.id("users")),
     learnerCategoryKey: v.optional(learnerCategoryKeyValidator),
     status: v.optional(v.union(v.literal("active"), v.literal("inactive"))),
@@ -174,41 +182,48 @@ export const update = mutation({
     mustChangePassword: v.optional(v.boolean()),
   },
   handler: async (ctx, { userId, ...updates }) => {
+    await loadOrgUserAccess(ctx, ctx.user, userId);
     await ctx.db.patch(userId, updates);
   },
 });
 
-export const deactivate = mutation({
+export const deactivate = adminMutation({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {
+    await loadOrgUserAccess(ctx, ctx.user, userId);
     await ctx.db.patch(userId, { status: "inactive" });
   },
 });
 
-export const reactivate = mutation({
+export const reactivate = adminMutation({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {
+    await loadOrgUserAccess(ctx, ctx.user, userId);
     await ctx.db.patch(userId, { status: "active" });
   },
 });
 
-export const hardDelete = mutation({
+export const hardDelete = adminMutation({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {
+    await loadOrgUserAccess(ctx, ctx.user, userId);
     await ctx.db.delete(userId);
   },
 });
 
-export const assignLead = mutation({
+export const assignLead = adminMutation({
   args: { learnerId: v.id("users"), leadId: v.optional(v.id("users")) },
   handler: async (ctx, { learnerId, leadId }) => {
+    const { target } = await loadOrgUserAccess(ctx, ctx.user, learnerId);
+    if (target.role !== "learner") {
+      throw new Error("Only learners can be assigned to a lead");
+    }
+    if (leadId) {
+      const lead = await ctx.db.get(leadId);
+      if (!lead || lead.organizationId !== target.organizationId) {
+        throw new Error("Lead not found");
+      }
+    }
     await ctx.db.patch(learnerId, { leadId });
-  },
-});
-
-export const recordLogin = mutation({
-  args: { userId: v.id("users") },
-  handler: async (ctx, { userId }) => {
-    await ctx.db.patch(userId, { lastLoginAt: Date.now() });
   },
 });

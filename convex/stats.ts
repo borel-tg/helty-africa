@@ -1,6 +1,16 @@
-import { query } from "./_generated/server";
+import {
+  adminQuery,
+  leadOrAdminQuery,
+} from "./lib/functions";
+import type { QueryCtx } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
 import { learnerCategoryKeyValidator } from "./lib/learnerCategories";
+import {
+  assertOrgAdmin,
+  assertOrgMember,
+  type SafeUser,
+} from "./lib/requireAuth";
 import {
   buildCategoryBuckets,
   getCategoryBucketKey,
@@ -18,6 +28,23 @@ const learnerCategoryFilterValidator = v.optional(
   )
 );
 
+async function requireStaffAccessToLearner(
+  ctx: QueryCtx,
+  actor: SafeUser,
+  organizationId: Id<"organizations">,
+  userId: Id<"users">
+) {
+  assertOrgMember(actor, organizationId);
+  const target = await ctx.db.get(userId);
+  if (!target || target.organizationId !== organizationId) {
+    throw new Error("User not found");
+  }
+  if (actor.role === "lead" && target.leadId !== actor._id) {
+    throw new Error("Unauthorized");
+  }
+  return { actor, target };
+}
+
 function formatDuration(totalSeconds: number): string {
   if (totalSeconds <= 0) return "0m";
   const hours = Math.floor(totalSeconds / 3600);
@@ -26,9 +53,10 @@ function formatDuration(totalSeconds: number): string {
   return `${minutes}m`;
 }
 
-export const getOrgDashboard = query({
+export const getOrgDashboard = adminQuery({
   args: { organizationId: v.id("organizations") },
   handler: async (ctx, { organizationId }) => {
+    assertOrgAdmin(ctx.user, organizationId);
     const users = await ctx.db
       .query("users")
       .withIndex("by_org", (q) => q.eq("organizationId", organizationId))
@@ -170,12 +198,13 @@ export const getOrgDashboard = query({
 });
 
 /** Published programs for learner detail program picker (enrollment flags). */
-export const getLearnerProgramOptions = query({
+export const getLearnerProgramOptions = leadOrAdminQuery({
   args: {
     userId: v.id("users"),
     organizationId: v.id("organizations"),
   },
   handler: async (ctx, { userId, organizationId }) => {
+    await requireStaffAccessToLearner(ctx, ctx.user, organizationId, userId);
     const programs = await ctx.db
       .query("trainingPrograms")
       .withIndex("by_org_status", (q) =>
@@ -209,13 +238,14 @@ export const getLearnerProgramOptions = query({
 });
 
 /** Per-learner module progress for a training program (admin/lead detail). */
-export const getLearnerModuleProgress = query({
+export const getLearnerModuleProgress = leadOrAdminQuery({
   args: {
     userId: v.id("users"),
     organizationId: v.id("organizations"),
     programId: v.id("trainingPrograms"),
   },
   handler: async (ctx, { userId, organizationId, programId }) => {
+    await requireStaffAccessToLearner(ctx, ctx.user, organizationId, userId);
     const program = await ctx.db.get(programId);
     if (!program || program.organizationId !== organizationId) {
       throw new Error("Program not found");
@@ -284,12 +314,22 @@ export const getLearnerModuleProgress = query({
 });
 
 /** Lead view: assigned learners with per-module status */
-export const getLeadTeamOverview = query({
+export const getLeadTeamOverview = leadOrAdminQuery({
   args: {
     leadId: v.id("users"),
     organizationId: v.id("organizations"),
   },
   handler: async (ctx, { leadId, organizationId }) => {
+    const actor = ctx.user;
+    assertOrgMember(actor, organizationId);
+    const lead = await ctx.db.get(leadId);
+    if (!lead || lead.organizationId !== organizationId) {
+      throw new Error("Lead not found");
+    }
+    if (actor.role === "lead" && actor._id !== leadId) {
+      throw new Error("Unauthorized");
+    }
+
     const learners = await ctx.db
       .query("users")
       .withIndex("by_lead", (q) => q.eq("leadId", leadId))
@@ -380,13 +420,14 @@ export const getLeadTeamOverview = query({
  * Admin statistics scoped to a training program, with optional learner category filter.
  * Category breakdown is always shown for the whole program; KPIs and lists use the filter.
  */
-export const getProgramStats = query({
+export const getProgramStats = adminQuery({
   args: {
     organizationId: v.id("organizations"),
     programId: v.id("trainingPrograms"),
     learnerCategoryKey: learnerCategoryFilterValidator,
   },
   handler: async (ctx, { organizationId, programId, learnerCategoryKey }) => {
+    assertOrgAdmin(ctx.user, organizationId);
     const program = await ctx.db.get(programId);
     if (!program || program.organizationId !== organizationId) {
       throw new Error("Program not found");

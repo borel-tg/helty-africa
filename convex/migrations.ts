@@ -1,10 +1,10 @@
-import { mutation } from "./_generated/server";
+import { adminMutation } from "./lib/functions";
 
 /**
  * Removes pre–training-program certificate rows (moduleId only, no programId).
  * Run once after schema update: npx convex run migrations:removeLegacyCertificates
  */
-export const removeLegacyCertificates = mutation({
+export const removeLegacyCertificates = adminMutation({
   args: {},
   handler: async (ctx) => {
     const certs = await ctx.db.query("certificates").collect();

@@ -1,24 +1,30 @@
-import { mutation, query } from "./_generated/server";
+import {
+  authedMutation,
+  authedQuery,
+} from "./lib/functions";
 import { v } from "convex/values";
+import { assertOrgMember } from "./lib/requireAuth";
 
-export const listForRecipient = query({
-  args: { recipientId: v.id("users") },
-  handler: async (ctx, { recipientId }) => {
+export const listForRecipient = authedQuery({
+  args: {},
+  handler: async (ctx) => {
+    const user = ctx.user;
     return ctx.db
       .query("notifications")
-      .withIndex("by_recipient", (q) => q.eq("recipientId", recipientId))
+      .withIndex("by_recipient", (q) => q.eq("recipientId", user._id))
       .order("desc")
       .take(50);
   },
 });
 
 /** Notifications with learner and module names for UI display */
-export const listEnrichedForRecipient = query({
-  args: { recipientId: v.id("users") },
-  handler: async (ctx, { recipientId }) => {
+export const listEnrichedForRecipient = authedQuery({
+  args: {},
+  handler: async (ctx) => {
+    const user = ctx.user;
     const rows = await ctx.db
       .query("notifications")
-      .withIndex("by_recipient", (q) => q.eq("recipientId", recipientId))
+      .withIndex("by_recipient", (q) => q.eq("recipientId", user._id))
       .order("desc")
       .take(50);
 
@@ -38,20 +44,21 @@ export const listEnrichedForRecipient = query({
   },
 });
 
-export const countUnread = query({
-  args: { recipientId: v.id("users") },
-  handler: async (ctx, { recipientId }) => {
+export const countUnread = authedQuery({
+  args: {},
+  handler: async (ctx) => {
+    const user = ctx.user;
     const unread = await ctx.db
       .query("notifications")
       .withIndex("by_recipient_unread", (q) =>
-        q.eq("recipientId", recipientId).eq("read", false)
+        q.eq("recipientId", user._id).eq("read", false)
       )
       .collect();
     return unread.length;
   },
 });
 
-export const create = mutation({
+export const create = authedMutation({
   args: {
     recipientId: v.id("users"),
     organizationId: v.id("organizations"),
@@ -60,6 +67,7 @@ export const create = mutation({
     score: v.number(),
   },
   handler: async (ctx, args) => {
+    assertOrgMember(ctx.user, args.organizationId);
     return ctx.db.insert("notifications", {
       ...args,
       type: "exam_passed",
@@ -69,20 +77,26 @@ export const create = mutation({
   },
 });
 
-export const markRead = mutation({
+export const markRead = authedMutation({
   args: { notificationId: v.id("notifications") },
   handler: async (ctx, { notificationId }) => {
+    const user = ctx.user;
+    const notification = await ctx.db.get(notificationId);
+    if (!notification || notification.recipientId !== user._id) {
+      throw new Error("Unauthorized");
+    }
     await ctx.db.patch(notificationId, { read: true });
   },
 });
 
-export const markAllRead = mutation({
-  args: { recipientId: v.id("users") },
-  handler: async (ctx, { recipientId }) => {
+export const markAllRead = authedMutation({
+  args: {},
+  handler: async (ctx) => {
+    const user = ctx.user;
     const unread = await ctx.db
       .query("notifications")
       .withIndex("by_recipient_unread", (q) =>
-        q.eq("recipientId", recipientId).eq("read", false)
+        q.eq("recipientId", user._id).eq("read", false)
       )
       .collect();
     for (const n of unread) {

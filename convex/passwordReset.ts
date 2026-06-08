@@ -2,6 +2,7 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { hashPassword } from "./lib/password";
+import { ensurePasswordAccount } from "./lib/passwordAccount";
 
 const RESET_TTL_MS = 60 * 60 * 1000;
 
@@ -13,7 +14,7 @@ export const requestReset = mutation({
 
     const user = await ctx.db
       .query("users")
-      .withIndex("by_email", (q) => q.eq("email", normalized))
+      .withIndex("email", (q) => q.eq("email", normalized))
       .first();
 
     if (!user || user.status !== "active" || !user.email) {
@@ -100,6 +101,9 @@ export const completeReset = mutation({
       passwordHash,
       mustChangePassword: false,
     });
+    if (row.email) {
+      await ensurePasswordAccount(ctx, user._id, row.email, passwordHash);
+    }
     await ctx.db.patch(row._id, { usedAt: now });
 
     return { success: true as const, email: row.email };

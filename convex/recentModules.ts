@@ -1,4 +1,7 @@
-import { mutation, query } from "./_generated/server";
+import {
+  authedMutation,
+  authedQuery,
+} from "./lib/functions";
 import { v } from "convex/values";
 
 async function getProgramModuleLinks(ctx: { db: any }, programId: any) {
@@ -9,15 +12,15 @@ async function getProgramModuleLinks(ctx: { db: any }, programId: any) {
 }
 
 /** Module belongs to an enrolled program for this learner. */
-export const findEnrolledProgramForModule = query({
+export const findEnrolledProgramForModule = authedQuery({
   args: {
-    userId: v.id("users"),
     moduleId: v.id("modules"),
   },
-  handler: async (ctx, { userId, moduleId }) => {
+  handler: async (ctx, { moduleId }) => {
+    const user = ctx.user;
     const enrollments = await ctx.db
       .query("programEnrollments")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
 
     for (const enrollment of enrollments) {
@@ -48,18 +51,22 @@ export const findEnrolledProgramForModule = query({
   },
 });
 
-export const recordAccess = mutation({
+export const recordAccess = authedMutation({
   args: {
-    userId: v.id("users"),
     moduleId: v.id("modules"),
     programId: v.id("trainingPrograms"),
     organizationId: v.id("organizations"),
   },
   handler: async (ctx, args) => {
+    const user = ctx.user;
+    if (user.organizationId !== args.organizationId) {
+      throw new Error("Unauthorized");
+    }
+
     const enrollment = await ctx.db
       .query("programEnrollments")
       .withIndex("by_user_program", (q) =>
-        q.eq("userId", args.userId).eq("programId", args.programId)
+        q.eq("userId", user._id).eq("programId", args.programId)
       )
       .unique();
     if (!enrollment) return;
@@ -74,7 +81,7 @@ export const recordAccess = mutation({
     const existing = await ctx.db
       .query("learnerModuleAccess")
       .withIndex("by_user_module", (q) =>
-        q.eq("userId", args.userId).eq("moduleId", args.moduleId)
+        q.eq("userId", user._id).eq("moduleId", args.moduleId)
       )
       .unique();
 
@@ -87,22 +94,25 @@ export const recordAccess = mutation({
     }
 
     return ctx.db.insert("learnerModuleAccess", {
-      ...args,
+      userId: user._id,
+      moduleId: args.moduleId,
+      programId: args.programId,
+      organizationId: args.organizationId,
       lastAccessedAt: now,
     });
   },
 });
 
 /** Recently opened modules in enrolled programs (fresh titles from DB). */
-export const listForLearner = query({
+export const listForLearner = authedQuery({
   args: {
-    userId: v.id("users"),
     limit: v.optional(v.number()),
   },
-  handler: async (ctx, { userId, limit = 3 }) => {
+  handler: async (ctx, { limit = 3 }) => {
+    const user = ctx.user;
     const enrollments = await ctx.db
       .query("programEnrollments")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
 
     const enrolledProgramIds = new Set(
@@ -112,7 +122,7 @@ export const listForLearner = query({
 
     const accessRows = await ctx.db
       .query("learnerModuleAccess")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
       .collect();
 
     const results = [];

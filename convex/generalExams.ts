@@ -1,9 +1,34 @@
-import { mutation, query } from "./_generated/server";
+import {
+  adminMutation,
+  adminQuery,
+  authedMutation,
+  authedQuery,
+} from "./lib/functions";
+import type { QueryCtx, MutationCtx } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
+import { assertOrgAdmin, assertOrgMember, type SafeUser } from "./lib/requireAuth";
 
-export const listQuestions = query({
+async function requireProgramAdmin(
+  ctx: QueryCtx | MutationCtx,
+  user: SafeUser,
+  programId: Id<"trainingPrograms">
+) {
+  const program = await ctx.db.get(programId);
+  if (!program) throw new Error("Program not found");
+  assertOrgAdmin(user, program.organizationId);
+  return program;
+}
+
+export const listQuestions = authedQuery({
   args: { programId: v.id("trainingPrograms") },
   handler: async (ctx, { programId }) => {
+    const program = await ctx.db.get(programId);
+    if (!program) return [];
+    const user = ctx.user;
+    if (program.organizationId !== user.organizationId) {
+      throw new Error("Unauthorized");
+    }
     return ctx.db
       .query("generalExamQuestions")
       .withIndex("by_program_order", (q) => q.eq("programId", programId))
@@ -12,13 +37,14 @@ export const listQuestions = query({
 });
 
 /** Exam questions from one program module (import picker). */
-export const listImportableModuleQuestions = query({
+export const listImportableModuleQuestions = adminQuery({
   args: {
     programId: v.id("trainingPrograms"),
     moduleId: v.id("modules"),
     search: v.optional(v.string()),
   },
   handler: async (ctx, { programId, moduleId, search }) => {
+    await requireProgramAdmin(ctx, ctx.user, programId);
     const link = await ctx.db
       .query("trainingProgramModules")
       .withIndex("by_program", (q) => q.eq("programId", programId))
@@ -60,7 +86,7 @@ export const listImportableModuleQuestions = query({
   },
 });
 
-export const addQuestion = mutation({
+export const addQuestion = adminMutation({
   args: {
     programId: v.id("trainingPrograms"),
     organizationId: v.id("organizations"),
@@ -71,6 +97,7 @@ export const addQuestion = mutation({
     sourceModuleQuestionId: v.optional(v.id("examQuestions")),
   },
   handler: async (ctx, args) => {
+    assertOrgAdmin(ctx.user, args.organizationId);
     const existing = await ctx.db
       .query("generalExamQuestions")
       .withIndex("by_program", (q) => q.eq("programId", args.programId))
@@ -83,7 +110,7 @@ export const addQuestion = mutation({
   },
 });
 
-export const updateQuestion = mutation({
+export const updateQuestion = adminMutation({
   args: {
     questionId: v.id("generalExamQuestions"),
     questionText: v.optional(v.string()),
@@ -94,17 +121,21 @@ export const updateQuestion = mutation({
     correctOptionId: v.optional(v.string()),
   },
   handler: async (ctx, { questionId, ...updates }) => {
+    const question = await ctx.db.get(questionId);
+    if (!question) throw new Error("Question not found");
+    assertOrgAdmin(ctx.user, question.organizationId);
     await ctx.db.patch(questionId, updates);
   },
 });
 
-export const importFromModuleQuestion = mutation({
+export const importFromModuleQuestion = adminMutation({
   args: {
     programId: v.id("trainingPrograms"),
     organizationId: v.id("organizations"),
     moduleQuestionId: v.id("examQuestions"),
   },
   handler: async (ctx, args) => {
+    assertOrgAdmin(ctx.user, args.organizationId);
     const src = await ctx.db.get(args.moduleQuestionId);
     if (!src) throw new Error("Source question not found");
 
@@ -143,16 +174,25 @@ export const importFromModuleQuestion = mutation({
   },
 });
 
-export const deleteQuestion = mutation({
+export const deleteQuestion = adminMutation({
   args: { questionId: v.id("generalExamQuestions") },
   handler: async (ctx, { questionId }) => {
+    const question = await ctx.db.get(questionId);
+    if (!question) throw new Error("Question not found");
+    assertOrgAdmin(ctx.user, question.organizationId);
     await ctx.db.delete(questionId);
   },
 });
 
-export const getSettings = query({
+export const getSettings = authedQuery({
   args: { programId: v.id("trainingPrograms") },
   handler: async (ctx, { programId }) => {
+    const program = await ctx.db.get(programId);
+    if (!program) return null;
+    const user = ctx.user;
+    if (program.organizationId !== user.organizationId) {
+      throw new Error("Unauthorized");
+    }
     return ctx.db
       .query("generalExamSettings")
       .withIndex("by_program", (q) => q.eq("programId", programId))
@@ -160,7 +200,7 @@ export const getSettings = query({
   },
 });
 
-export const upsertSettings = mutation({
+export const upsertSettings = adminMutation({
   args: {
     programId: v.id("trainingPrograms"),
     organizationId: v.id("organizations"),
@@ -170,6 +210,7 @@ export const upsertSettings = mutation({
     randomizeQuestions: v.boolean(),
   },
   handler: async (ctx, args) => {
+    assertOrgAdmin(ctx.user, args.organizationId);
     const existing = await ctx.db
       .query("generalExamSettings")
       .withIndex("by_program", (q) => q.eq("programId", args.programId))
@@ -182,38 +223,46 @@ export const upsertSettings = mutation({
   },
 });
 
-export const getAttempts = query({
+export const getAttempts = authedQuery({
   args: {
-    userId: v.id("users"),
     programId: v.id("trainingPrograms"),
   },
-  handler: async (ctx, { userId, programId }) => {
+  handler: async (ctx, { programId }) => {
+    const user = ctx.user;
+    const program = await ctx.db.get(programId);
+    if (!program || program.organizationId !== user.organizationId) {
+      throw new Error("Unauthorized");
+    }
     return ctx.db
       .query("generalExamAttempts")
       .withIndex("by_user_program", (q) =>
-        q.eq("userId", userId).eq("programId", programId)
+        q.eq("userId", user._id).eq("programId", programId)
       )
       .collect();
   },
 });
 
-export const startAttempt = mutation({
+export const startAttempt = authedMutation({
   args: {
-    userId: v.id("users"),
     programId: v.id("trainingPrograms"),
     organizationId: v.id("organizations"),
     attemptNumber: v.number(),
   },
   handler: async (ctx, args) => {
+    const user = ctx.user;
+    assertOrgMember(user, args.organizationId);
     return ctx.db.insert("generalExamAttempts", {
-      ...args,
+      userId: user._id,
+      programId: args.programId,
+      organizationId: args.organizationId,
+      attemptNumber: args.attemptNumber,
       answers: [],
       startedAt: Date.now(),
     });
   },
 });
 
-export const submitAttempt = mutation({
+export const submitAttempt = authedMutation({
   args: {
     attemptId: v.id("generalExamAttempts"),
     answers: v.array(
@@ -224,8 +273,11 @@ export const submitAttempt = mutation({
     ),
   },
   handler: async (ctx, { attemptId, answers }) => {
+    const user = ctx.user;
     const attempt = await ctx.db.get(attemptId);
-    if (!attempt) throw new Error("Attempt not found");
+    if (!attempt || attempt.userId !== user._id) {
+      throw new Error("Unauthorized");
+    }
 
     const questions = await ctx.db
       .query("generalExamQuestions")

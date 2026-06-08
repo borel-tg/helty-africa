@@ -1,6 +1,7 @@
 import { mutation } from "./_generated/server";
 import { demoAccountEmail } from "./lib/brand";
 import { hashPassword } from "./lib/password";
+import { ensurePasswordAccount } from "./lib/passwordAccount";
 
 const DEMO_PASSWORD = "demo1234";
 
@@ -27,6 +28,12 @@ export const seedDemo = mutation({
 
     // Clear existing demo data to keep this seed idempotent.
     const tableNames = [
+      "authRefreshTokens",
+      "authVerificationCodes",
+      "authVerifiers",
+      "authRateLimits",
+      "authAccounts",
+      "authSessions",
       "learnerModuleAccess",
       "moduleNotificationSettings",
       "notifications",
@@ -839,6 +846,13 @@ export const seedDemo = mutation({
       expiresAt: now - 5 * 86400000,
       createdAt: now - 12 * 86400000,
     });
+
+    const allUsers = await ctx.db.query("users").collect();
+    for (const user of allUsers) {
+      if (user.email && user.passwordHash) {
+        await ensurePasswordAccount(ctx, user._id, user.email, user.passwordHash);
+      }
+    }
 
     return {
       success: true,

@@ -1,8 +1,9 @@
-import { query } from "./_generated/server";
+import { authedQuery } from "./lib/functions";
 import type { QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import { learnerCategoryKeyValidator } from "./lib/learnerCategories";
+import { assertOrgMember } from "./lib/requireAuth";
 import {
   getEnrolledActiveLearners,
   getProgramPublishedModules,
@@ -144,10 +145,9 @@ const learnerCategoryFilterValidator = v.optional(
   v.union(learnerCategoryKeyValidator, v.literal("uncategorized"))
 );
 
-export const getOrgLeaderboard = query({
+export const getOrgLeaderboard = authedQuery({
   args: {
     organizationId: v.id("organizations"),
-    viewerUserId: v.id("users"),
     period: v.union(v.literal("week"), v.literal("today")),
     limit: v.optional(v.number()),
     /** When set, only enrolled learners in this program; points scoped to program modules. */
@@ -155,6 +155,8 @@ export const getOrgLeaderboard = query({
     learnerCategoryKey: learnerCategoryFilterValidator,
   },
   handler: async (ctx, args) => {
+    const viewer = ctx.user;
+    assertOrgMember(viewer, args.organizationId);
     const since = getPeriodStart(args.period);
     const limit = args.limit ?? 5;
     const categoryFilter = args.learnerCategoryKey as
@@ -232,8 +234,8 @@ export const getOrgLeaderboard = query({
     const ranked = assignRanks(scored);
     const withActivity = ranked.filter((r) => r.points > 0);
 
-    const viewerRow = ranked.find((r) => r.userId === args.viewerUserId);
-    const viewerRankIndex = ranked.findIndex((r) => r.userId === args.viewerUserId);
+    const viewerRow = ranked.find((r) => r.userId === viewer._id);
+    const viewerRankIndex = ranked.findIndex((r) => r.userId === viewer._id);
     const viewerRank = viewerRankIndex >= 0 ? viewerRankIndex + 1 : null;
 
     return {

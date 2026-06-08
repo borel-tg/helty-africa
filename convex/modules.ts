@@ -1,9 +1,15 @@
-import { mutation, query } from "./_generated/server";
+import {
+  adminMutation,
+  adminQuery,
+  authedQuery,
+} from "./lib/functions";
 import { v } from "convex/values";
+import { assertOrgAdmin, assertOrgMember } from "./lib/requireAuth";
 
-export const list = query({
+export const list = adminQuery({
   args: { organizationId: v.id("organizations") },
   handler: async (ctx, { organizationId }) => {
+    assertOrgAdmin(ctx.user, organizationId);
     const modules = await ctx.db
       .query("modules")
       .withIndex("by_org_order", (q) => q.eq("organizationId", organizationId))
@@ -35,9 +41,10 @@ export const list = query({
   },
 });
 
-export const listPublished = query({
+export const listPublished = authedQuery({
   args: { organizationId: v.id("organizations") },
   handler: async (ctx, { organizationId }) => {
+    assertOrgMember(ctx.user, organizationId);
     const modules = await ctx.db
       .query("modules")
       .withIndex("by_org_order", (q) => q.eq("organizationId", organizationId))
@@ -46,14 +53,19 @@ export const listPublished = query({
   },
 });
 
-export const getById = query({
+export const getById = authedQuery({
   args: { moduleId: v.id("modules") },
   handler: async (ctx, { moduleId }) => {
-    return ctx.db.get(moduleId);
+    const user = ctx.user;
+    const mod = await ctx.db.get(moduleId);
+    if (!mod || mod.organizationId !== user.organizationId) {
+      return null;
+    }
+    return mod;
   },
 });
 
-export const create = mutation({
+export const create = adminMutation({
   args: {
     organizationId: v.id("organizations"),
     title: v.string(),
@@ -61,9 +73,10 @@ export const create = mutation({
     thumbnailUrl: v.optional(v.string()),
     passingScore: v.number(),
     maxRetakes: v.union(v.number(), v.literal("unlimited")),
-    createdBy: v.id("users"),
   },
   handler: async (ctx, args) => {
+    const user = ctx.user;
+    assertOrgAdmin(user, args.organizationId);
     const existing = await ctx.db
       .query("modules")
       .withIndex("by_org", (q) => q.eq("organizationId", args.organizationId))
@@ -71,6 +84,7 @@ export const create = mutation({
     const now = Date.now();
     return ctx.db.insert("modules", {
       ...args,
+      createdBy: user._id,
       status: "draft",
       order: existing.length,
       createdAt: now,
@@ -79,7 +93,7 @@ export const create = mutation({
   },
 });
 
-export const update = mutation({
+export const update = adminMutation({
   args: {
     moduleId: v.id("modules"),
     title: v.optional(v.string()),
@@ -90,15 +104,19 @@ export const update = mutation({
     maxRetakes: v.optional(v.union(v.number(), v.literal("unlimited"))),
   },
   handler: async (ctx, { moduleId, ...updates }) => {
+    const mod = await ctx.db.get(moduleId);
+    if (!mod) throw new Error("Module not found");
+    assertOrgAdmin(ctx.user, mod.organizationId);
     await ctx.db.patch(moduleId, { ...updates, updatedAt: Date.now() });
   },
 });
 
-export const remove = mutation({
+export const remove = adminMutation({
   args: { moduleId: v.id("modules") },
   handler: async (ctx, { moduleId }) => {
     const mod = await ctx.db.get(moduleId);
     if (!mod) throw new Error("Module not found");
+    assertOrgAdmin(ctx.user, mod.organizationId);
 
     const programLinks = await ctx.db
       .query("trainingProgramModules")
@@ -144,12 +162,13 @@ export const remove = mutation({
   },
 });
 
-export const reorder = mutation({
+export const reorder = adminMutation({
   args: {
     organizationId: v.id("organizations"),
     orderedIds: v.array(v.id("modules")),
   },
-  handler: async (ctx, { orderedIds }) => {
+  handler: async (ctx, { organizationId, orderedIds }) => {
+    assertOrgAdmin(ctx.user, organizationId);
     for (let i = 0; i < orderedIds.length; i++) {
       await ctx.db.patch(orderedIds[i], { order: i });
     }
