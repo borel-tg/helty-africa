@@ -1,6 +1,9 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { authTables } from "@convex-dev/auth/server";
 import { learnerCategoryKeyValidator } from "./lib/learnerCategories";
+
+const { users: _authUsersTable, ...authSupportTables } = authTables;
 
 /** Per training program — fully configurable evaluation rules. */
 export const evaluationPolicyValidator = v.object({
@@ -16,6 +19,8 @@ export const evaluationPolicyValidator = v.object({
 });
 
 export default defineSchema({
+  ...authSupportTables,
+
   // ── Organizations ──────────────────────────────────────────────
   organizations: defineTable({
     name: v.string(),
@@ -24,12 +29,16 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_slug", ["slug"]),
 
-  // ── Users ──────────────────────────────────────────────────────
+  // ── Users (Convex Auth + app fields) ───────────────────────────
   users: defineTable({
-    organizationId: v.id("organizations"),
-    name: v.string(),
+    name: v.optional(v.string()),
+    image: v.optional(v.string()),
     email: v.optional(v.string()),
+    emailVerificationTime: v.optional(v.number()),
     phone: v.optional(v.string()),
+    phoneVerificationTime: v.optional(v.number()),
+    isAnonymous: v.optional(v.boolean()),
+    organizationId: v.id("organizations"),
     role: v.union(
       v.literal("super_admin"),
       v.literal("admin"),
@@ -37,19 +46,16 @@ export default defineSchema({
       v.literal("learner")
     ),
     status: v.union(v.literal("active"), v.literal("inactive")),
-    leadId: v.optional(v.id("users")), // learner's assigned lead
-    /** Stats only — national / provincial / zonal */
+    leadId: v.optional(v.id("users")),
     learnerCategoryKey: v.optional(learnerCategoryKeyValidator),
     passwordHash: v.optional(v.string()),
     mustChangePassword: v.optional(v.boolean()),
     lastLoginAt: v.optional(v.number()),
     createdAt: v.number(),
-    // Convex Auth token subject (used by auth)
-    tokenIdentifier: v.optional(v.string()),
   })
+    .index("email", ["email"])
+    .index("phone", ["phone"])
     .index("by_org", ["organizationId"])
-    .index("by_email", ["email"])
-    .index("by_token", ["tokenIdentifier"])
     .index("by_lead", ["leadId"])
     .index("by_org_category", ["organizationId", "learnerCategoryKey"]),
 
