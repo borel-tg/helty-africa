@@ -23,6 +23,7 @@
     "notEnoughActivity": "Not enough activity this period yet. Complete lessons or pass an exam to appear on the rankings!"
   },
   "learner": {
-    "viewProgramEvaluation": "View program evaluation"
+    "viewProgramEvaluation": "View program evaluation",
+    "documentPptBlocked": "This PowerPoint file cannot be displayed directly. Use a Google Drive or Google Slides link."
   }
 }

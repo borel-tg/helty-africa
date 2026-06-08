@@ -54,8 +54,28 @@ function officeEmbedUrl(url) {
   return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`;
 }
 
+/** True when the URL points at a raw PowerPoint file (not a viewer/embed page). */
+export function isDirectPptFileUrl(url) {
+  if (!url?.trim()) return false;
+  return PPT_EXT.test(url.trim());
+}
+
+function isSafeEmbedViewerUrl(url) {
+  if (!url) return false;
+  return (
+    url.includes("view.officeapps.live.com") ||
+    url.includes("drive.google.com/") ||
+    url.includes("docs.google.com/")
+  );
+}
+
+/** Embedding this src in an iframe would trigger a browser file download. */
+export function wouldTriggerPptDownload(src) {
+  return isDirectPptFileUrl(src) && !isSafeEmbedViewerUrl(src);
+}
+
 /**
- * @returns {{ kind: 'none'|'embed'|'pdf'|'image', embedSrc?: string, pdfSrc?: string, imageSrc?: string, supportsSlideNav?: boolean }}
+ * @returns {{ kind: 'none'|'embed'|'pdf'|'image'|'blocked', embedSrc?: string, pdfSrc?: string, imageSrc?: string, supportsSlideNav?: boolean }}
  */
 export function detectDocumentMedia(fileUrl, fileName, fileType) {
   if (!fileUrl?.trim()) return { kind: "none" };
@@ -69,6 +89,13 @@ export function detectDocumentMedia(fileUrl, fileName, fileType) {
     parsed = new URL(url);
     pathHint = extHint(parsed.pathname + parsed.search);
   } catch {
+    if (
+      wouldTriggerPptDownload(url) ||
+      nameHint === "ppt" ||
+      fileType === "ppt"
+    ) {
+      return { kind: "blocked" };
+    }
     return { kind: "embed", embedSrc: url };
   }
 

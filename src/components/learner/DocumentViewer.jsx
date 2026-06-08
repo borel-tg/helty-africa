@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
+  AlertTriangle,
   ChevronLeft,
   ChevronRight,
   Expand,
@@ -17,6 +19,7 @@ import {
   detectDocumentMedia,
   getGoogleDriveFileId,
   getGoogleDrivePreviewUrl,
+  wouldTriggerPptDownload,
 } from "../../lib/documentMedia";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -34,6 +37,9 @@ export function DocumentViewer({ fileUrl, fileName, fileType }) {
   );
 
   if (media.kind === "none") return null;
+  if (media.kind === "blocked") {
+    return <BlockedDocumentFrame fileName={fileName} />;
+  }
   if (media.kind === "image") {
     return (
       <ImageDocumentFrame src={media.imageSrc} fileName={fileName} />
@@ -122,6 +128,24 @@ function ImageDocumentFrame({ src, fileName }) {
   );
 }
 
+function BlockedDocumentFrame({ fileName }) {
+  const { t } = useTranslation();
+
+  return (
+    <div className="bg-white border border-gray-100 rounded-lg overflow-hidden">
+      <DocumentToolbar fileName={fileName} />
+      <div className="bg-gray-50 min-h-[420px] flex items-center justify-center p-6">
+        <div className="flex flex-col items-center gap-3 text-center max-w-md">
+          <AlertTriangle size={28} className="text-amber-500 shrink-0" />
+          <p className="text-sm text-text-secondary">
+            {t("learner.documentPptBlocked")}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function EmbeddedDocumentFrame({
   src,
   fileName,
@@ -148,6 +172,10 @@ function EmbeddedDocumentFrame({
     }
     await document.exitFullscreen?.();
   };
+
+  if (wouldTriggerPptDownload(src)) {
+    return <BlockedDocumentFrame fileName={fileName} />;
+  }
 
   const iframeSrc =
     supportsSlideNav && src.includes("docs.google.com/presentation")
