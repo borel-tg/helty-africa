@@ -17,9 +17,11 @@ export default function ResetPasswordPage() {
   const { login } = useAuth();
   const completeReset = useMutation(api.passwordReset.completeReset);
 
+  const [done, setDone] = useState(false);
+
   const resetInfo = useQuery(
     api.passwordReset.getPublicByToken,
-    token ? { token } : "skip"
+    done || !token ? "skip" : { token }
   );
 
   const [password, setPassword] = useState("");
@@ -27,10 +29,10 @@ export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
   const [step, setStep] = useState(null);
 
   useEffect(() => {
+    if (done) return;
     if (!token) {
       setStep("invalid");
       return;
@@ -38,7 +40,7 @@ export default function ResetPasswordPage() {
     if (resetInfo === undefined) return;
     if (resetInfo.status === "valid") setStep("form");
     else setStep("invalid");
-  }, [token, resetInfo]);
+  }, [token, resetInfo, done]);
 
   const validate = () => {
     const errs = {};
@@ -61,17 +63,30 @@ export default function ResetPasswordPage() {
     setLoading(true);
     try {
       const result = await completeReset({ token, password });
+      setDone(true);
       if (result.success && result.email) {
         await login(result.email, password);
       }
-      setDone(true);
-      setTimeout(() => navigate("/", { replace: true }), 2000);
+      navigate("/", { replace: true });
     } catch (err) {
       setErrors({ form: err.message || t("common.error") });
     } finally {
       setLoading(false);
     }
   };
+
+  if (done) {
+    return (
+      <AuthLayout title={t("auth.resetSuccessTitle")} showFooter={false}>
+        <div className="text-center space-y-4">
+          <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mx-auto">
+            <CheckCircle size={28} className="text-green-500" />
+          </div>
+          <p className="text-text-secondary text-sm">{t("auth.resetSuccessDesc")}</p>
+        </div>
+      </AuthLayout>
+    );
+  }
 
   if (step === null) {
     return (
@@ -111,19 +126,6 @@ export default function ResetPasswordPage() {
               {t("auth.backToLogin")}
             </Link>
           </div>
-        </div>
-      </AuthLayout>
-    );
-  }
-
-  if (done) {
-    return (
-      <AuthLayout title={t("auth.resetSuccessTitle")} showFooter={false}>
-        <div className="text-center space-y-4">
-          <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mx-auto">
-            <CheckCircle size={28} className="text-green-500" />
-          </div>
-          <p className="text-text-secondary text-sm">{t("auth.resetSuccessDesc")}</p>
         </div>
       </AuthLayout>
     );
