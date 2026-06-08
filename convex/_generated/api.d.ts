@@ -21,6 +21,7 @@ import type * as lessons from "../lessons.js";
 import type * as lib_brand from "../lib/brand.js";
 import type * as lib_certificateTemplate from "../lib/certificateTemplate.js";
 import type * as lib_evaluation from "../lib/evaluation.js";
+import type * as lib_examAttempt from "../lib/examAttempt.js";
 import type * as lib_functions from "../lib/functions.js";
 import type * as lib_learnerCategories from "../lib/learnerCategories.js";
 import type * as lib_password from "../lib/password.js";
@@ -62,6 +63,7 @@ declare const fullApi: ApiFromModules<{
   "lib/brand": typeof lib_brand;
   "lib/certificateTemplate": typeof lib_certificateTemplate;
   "lib/evaluation": typeof lib_evaluation;
+  "lib/examAttempt": typeof lib_examAttempt;
   "lib/functions": typeof lib_functions;
   "lib/learnerCategories": typeof lib_learnerCategories;
   "lib/password": typeof lib_password;

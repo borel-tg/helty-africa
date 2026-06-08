@@ -173,6 +173,10 @@ export default defineSchema({
     score: v.optional(v.number()),
     startedAt: v.number(),
     submittedAt: v.optional(v.number()),
+    /** Snapshot at start — 0 = unlimited */
+    timeLimitMinutes: v.optional(v.number()),
+    /** Question order for resume (especially when randomized) */
+    questionOrder: v.optional(v.array(v.id("generalExamQuestions"))),
     savedAnswers: v.optional(
       v.array(
         v.object({
@@ -287,6 +291,8 @@ export default defineSchema({
     passed: v.optional(v.boolean()),
     startedAt: v.number(),
     submittedAt: v.optional(v.number()),
+    /** Snapshot at start — 0 = unlimited */
+    timeLimitMinutes: v.optional(v.number()),
     // For resuming in-progress exams
     savedAnswers: v.optional(
       v.array(v.object({ questionId: v.id("examQuestions"), selectedOptionId: v.string() }))
