@@ -15,6 +15,8 @@ import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import { cn } from "../../lib/utils";
+import { useMediaQuery } from "../../hooks/useMediaQuery";
+import { usePdfZoomGestures } from "../../hooks/usePdfZoomGestures";
 import {
   detectDocumentMedia,
   getGoogleDriveFileId,
@@ -28,6 +30,9 @@ export const PUBLIC_DEMO_PDF = "/demo/sample-pdf.pdf";
 export const PUBLIC_DEMO_PPT = "/demo/sample-ppt.ppt";
 
 const PDF_LOAD_ERROR = "Failed to load PDF.";
+const PDF_MIN_SCALE = 0.6;
+const PDF_MAX_SCALE = 2.5;
+const PDF_ZOOM_STEP = 0.15;
 
 /** Single entry: picks embed / pdf.js / image from URL + metadata. */
 export function DocumentViewer({ fileUrl, fileName, fileType }) {
@@ -249,6 +254,8 @@ export function PdfDocumentViewer({ fileUrl, fileName, pdfSrc }) {
 }
 
 function PdfJsDocumentViewer({ fileUrl, fileName, normalizedFileUrl }) {
+  const { t } = useTranslation();
+  const isMobile = useMediaQuery();
   const containerRef = useRef(null);
   const [numPages, setNumPages] = useState(0);
   const [page, setPage] = useState(1);
@@ -258,6 +265,17 @@ function PdfJsDocumentViewer({ fileUrl, fileName, normalizedFileUrl }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [embedFallback, setEmbedFallback] = useState(null);
+
+  const { scrollRef, zoomIn, zoomOut } = usePdfZoomGestures({
+    scale,
+    setScale,
+    minScale: PDF_MIN_SCALE,
+    maxScale: PDF_MAX_SCALE,
+    step: PDF_ZOOM_STEP,
+  });
+
+  const pagePadding = isMobile ? 8 : isFullscreen ? 16 : 32;
+  const pageWidth = Math.max(280, containerWidth - pagePadding);
 
   useEffect(() => {
     const node = containerRef.current;
@@ -282,6 +300,8 @@ function PdfJsDocumentViewer({ fileUrl, fileName, normalizedFileUrl }) {
     setLoading(true);
     setError(null);
     setEmbedFallback(null);
+    setScale(1);
+    setPage(1);
   }, [normalizedFileUrl]);
 
   const toggleReaderMode = async () => {
@@ -320,24 +340,36 @@ function PdfJsDocumentViewer({ fileUrl, fileName, normalizedFileUrl }) {
         onToggleReaderMode={toggleReaderMode}
         onPrev={() => setPage((p) => Math.max(1, p - 1))}
         onNext={() => setPage((p) => Math.min(numPages, p + 1))}
-        onZoomIn={() => setScale((s) => Math.min(2, s + 0.15))}
-        onZoomOut={() => setScale((s) => Math.max(0.6, s - 0.15))}
+        onZoomIn={zoomIn}
+        onZoomOut={zoomOut}
+        hideZoomOnMobile={isMobile}
       />
 
       <div
+        ref={scrollRef}
         className={cn(
-          "bg-gray-100 min-h-[420px] flex justify-center overflow-auto p-2 md:p-4",
+          "relative bg-gray-100 min-h-[420px] flex justify-center overflow-auto p-1 md:p-4 touch-pan-x touch-pan-y",
           isFullscreen && "flex-1 min-h-0"
         )}
       >
+        <p className="sr-only" aria-live="polite">
+          {numPages > 0
+            ? t("learner.documentZoomStatus", {
+                page,
+                total: numPages,
+                zoom: Math.round(scale * 100),
+              })
+            : ""}
+        </p>
+
         {loading && (
           <div className="flex flex-col items-center justify-center gap-2 py-16">
             <Loader2 className="animate-spin text-primary" size={28} />
-            <p className="text-sm text-text-secondary">Loading PDF…</p>
+            <p className="text-sm text-text-secondary">{t("learner.documentLoading")}</p>
           </div>
         )}
         {error && (
-          <p className="text-sm text-red-600 py-8 text-center">{error}</p>
+          <p className="text-sm text-red-600 py-8 text-center">{t("learner.documentError")}</p>
         )}
         <Document
           file={normalizedFileUrl}
@@ -366,13 +398,26 @@ function PdfJsDocumentViewer({ fileUrl, fileName, normalizedFileUrl }) {
         >
           <Page
             pageNumber={page}
-            width={Math.max(280, containerWidth - (isFullscreen ? 16 : 32))}
+            width={pageWidth}
             scale={scale}
             className="shadow-md"
             renderTextLayer
             renderAnnotationLayer
           />
         </Document>
+
+        {isMobile && numPages > 0 && !loading && (
+          <MobileZoomControls
+            scale={scale}
+            minScale={PDF_MIN_SCALE}
+            maxScale={PDF_MAX_SCALE}
+            onZoomIn={zoomIn}
+            onZoomOut={zoomOut}
+            onReset={() => setScale(1)}
+            canZoomOut={scale > PDF_MIN_SCALE + 0.01}
+            canZoomIn={scale < PDF_MAX_SCALE - 0.01}
+          />
+        )}
       </div>
       <div className="border-t border-gray-100">
         <DocumentBottomNav
@@ -388,6 +433,50 @@ function PdfJsDocumentViewer({ fileUrl, fileName, normalizedFileUrl }) {
   );
 }
 
+function MobileZoomControls({
+  scale,
+  onZoomIn,
+  onZoomOut,
+  onReset,
+  canZoomIn,
+  canZoomOut,
+}) {
+  return (
+    <div
+      className="md:hidden absolute bottom-4 right-3 z-10 flex flex-col gap-2"
+      role="group"
+      aria-label="Zoom controls"
+    >
+      <button
+        type="button"
+        onClick={onZoomIn}
+        disabled={!canZoomIn}
+        className="min-h-[44px] min-w-[44px] rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center disabled:opacity-40"
+        aria-label="Zoom in"
+      >
+        <ZoomIn size={20} />
+      </button>
+      <button
+        type="button"
+        onClick={onReset}
+        className="min-h-[36px] min-w-[44px] rounded-full bg-white/95 shadow-md border border-gray-200 text-xs font-medium text-text-secondary tabular-nums"
+        aria-label="Reset zoom"
+      >
+        {Math.round(scale * 100)}%
+      </button>
+      <button
+        type="button"
+        onClick={onZoomOut}
+        disabled={!canZoomOut}
+        className="min-h-[44px] min-w-[44px] rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center disabled:opacity-40"
+        aria-label="Zoom out"
+      >
+        <ZoomOut size={20} />
+      </button>
+    </div>
+  );
+}
+
 function DocumentToolbar({
   fileName,
   page,
@@ -397,6 +486,7 @@ function DocumentToolbar({
   onNext,
   onZoomIn,
   onZoomOut,
+  hideZoomOnMobile = false,
   isFullscreen = false,
   onToggleReaderMode,
 }) {
@@ -433,7 +523,10 @@ function DocumentToolbar({
             <button
               type="button"
               onClick={onZoomOut}
-              className="p-2 rounded hover:bg-gray-200 min-h-[36px] min-w-[36px] flex items-center justify-center"
+              className={cn(
+                "p-2 rounded hover:bg-gray-200 min-h-[36px] min-w-[36px] flex items-center justify-center",
+                hideZoomOnMobile && "hidden md:flex"
+              )}
               aria-label="Zoom out"
             >
               <ZoomOut size={16} />
@@ -443,14 +536,22 @@ function DocumentToolbar({
             <button
               type="button"
               onClick={onZoomIn}
-              className="p-2 rounded hover:bg-gray-200 min-h-[36px] min-w-[36px] flex items-center justify-center"
+              className={cn(
+                "p-2 rounded hover:bg-gray-200 min-h-[36px] min-w-[36px] flex items-center justify-center",
+                hideZoomOnMobile && "hidden md:flex"
+              )}
               aria-label="Zoom in"
             >
               <ZoomIn size={16} />
             </button>
           )}
           {typeof scale === "number" && (
-            <span className="text-xs text-text-secondary tabular-nums">
+            <span
+              className={cn(
+                "text-xs text-text-secondary tabular-nums",
+                hideZoomOnMobile && "hidden md:inline"
+              )}
+            >
               {Math.round(scale * 100)}%
             </span>
           )}

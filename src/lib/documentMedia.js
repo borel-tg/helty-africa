@@ -1,6 +1,7 @@
 /**
  * Detect how to render a document lesson from URL, filename, and stored type hint.
- * Prefers embed viewers for share links (Google Drive, etc.); pdf.js only for direct PDFs.
+ * Google Drive PDFs use pdf.js first (fallback to Drive preview iframe on load error).
+ * Slides / PPT stay in embed viewers.
  */
 
 export function getGoogleDriveFileId(url) {
@@ -21,6 +22,17 @@ export function getGoogleDriveFileId(url) {
 
 export function getGoogleDrivePreviewUrl(fileId) {
   return `https://drive.google.com/file/d/${fileId}/preview`;
+}
+
+/** Public export URL for pdf.js (requires file shared as “anyone with the link”). */
+export function getGoogleDrivePdfUrl(fileId) {
+  return `https://drive.google.com/uc?export=download&id=${fileId}`;
+}
+
+function isDrivePptLesson(nameHint, pathHint, fileType) {
+  const detected =
+    nameHint || pathHint || (fileType === "ppt" ? "ppt" : fileType === "pdf" ? "pdf" : null);
+  return detected === "ppt";
 }
 
 const IMAGE_EXT = /\.(png|jpe?g|gif|webp|svg|bmp)(\?|#|$)/i;
@@ -101,7 +113,10 @@ export function detectDocumentMedia(fileUrl, fileName, fileType) {
 
   const driveId = getGoogleDriveFileId(url);
   if (driveId) {
-    return { kind: "embed", embedSrc: getGoogleDrivePreviewUrl(driveId) };
+    if (isDrivePptLesson(nameHint, pathHint, fileType)) {
+      return { kind: "embed", embedSrc: getGoogleDrivePreviewUrl(driveId) };
+    }
+    return { kind: "pdf", pdfSrc: getGoogleDrivePdfUrl(driveId) };
   }
 
   if (parsed.hostname.includes("docs.google.com")) {

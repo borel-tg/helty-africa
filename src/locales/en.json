@@ -24,6 +24,9 @@
   },
   "learner": {
     "viewProgramEvaluation": "View program evaluation",
-    "documentPptBlocked": "This PowerPoint file cannot be displayed directly. Use a Google Drive or Google Slides link."
+    "documentPptBlocked": "This PowerPoint file cannot be displayed directly. Use a Google Drive or Google Slides link.",
+    "documentLoading": "Loading document…",
+    "documentError": "Unable to display this document",
+    "documentZoomStatus": "Page {{page}} of {{total}}, zoom {{zoom}}%"
   }
 }

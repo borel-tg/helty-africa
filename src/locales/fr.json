@@ -479,6 +479,7 @@
     "openExternal": "Ouvrir dans un nouvel onglet",
     "documentLoading": "Chargement du document…",
     "documentError": "Impossible d'afficher ce document",
+    "documentZoomStatus": "Page {{page}} sur {{total}}, zoom {{zoom}} %",
     "documentPptBlocked": "Ce fichier PowerPoint ne peut pas être affiché directement. Utilisez un lien Google Drive ou Google Slides.",
     "hello": "Bonjour, {{name}} 👋",
     "dashboardSubtitle": "Poursuivez votre formation à la vaccination ci-dessous.",
