@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery } from "convex/react";
@@ -7,8 +7,15 @@ import { api } from "../../../convex/_generated/api";
 import { Button } from "../../components/ui/Button";
 import { ProgressBar } from "../../components/ui/Progress";
 import { cn } from "../../lib/utils";
+import {
+  answersToPayload,
+  computeRemainingSeconds,
+  savedAnswersToMap,
+} from "../../lib/examTimer";
 import { useLearnerModule } from "../../hooks/useLearnerModule";
 import { useConvexSession } from "../../hooks/useConvexSession";
+
+const DEFAULT_MINUTES = 30;
 
 export default function ExamPage() {
   const { t } = useTranslation();
@@ -16,19 +23,37 @@ export default function ExamPage() {
   const navigate = useNavigate();
   const { convexUser } = useConvexSession();
   const { module, examQuestions, isLoading, notFound } = useLearnerModule(moduleId);
+
+  const examSettings = useQuery(
+    api.exams.getSettings,
+    moduleId ? { moduleId } : "skip"
+  );
   const attempts = useQuery(
     api.exams.getAttempts,
-    convexUser?._id && moduleId ? { moduleId } : "skip"
+    moduleId ? { moduleId } : "skip"
   );
+  const activeAttempt = useQuery(
+    api.exams.getActiveAttempt,
+    moduleId ? { moduleId } : "skip"
+  );
+
   const startAttempt = useMutation(api.exams.startAttempt);
+  const saveProgress = useMutation(api.exams.saveProgress);
   const submitAttempt = useMutation(api.exams.submitAttempt);
+  const finalizeExpiredAttempt = useMutation(api.exams.finalizeExpiredAttempt);
 
   const [started, setStarted] = useState(false);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [answers, setAnswers] = useState({});
-  const [timeLeft, setTimeLeft] = useState(30 * 60);
+  const [timeLeft, setTimeLeft] = useState(null);
   const [attemptId, setAttemptId] = useState(null);
+  const [timeLimitMinutes, setTimeLimitMinutes] = useState(DEFAULT_MINUTES);
+  const [sessionReady, setSessionReady] = useState(false);
+
   const timerRef = useRef(null);
+  const expiredHandledRef = useRef(false);
+  const submitInFlightRef = useRef(false);
+  const startedAtRef = useRef(null);
 
   const questions = examQuestions ?? [];
   const submittedAttempts = (attempts ?? []).filter((a) => a.submittedAt != null);
@@ -38,21 +63,137 @@ export default function ExamPage() {
       ? Infinity
       : Math.max(0, maxRetakes - submittedAttempts.length);
   const canStartExam = retakesLeft > 0;
+  const configuredMinutes = examSettings?.timeLimitMinutes ?? DEFAULT_MINUTES;
+  const hasTimeLimit = configuredMinutes > 0;
+
+  const goToResults = useCallback(
+    (result, autoSubmit = false) => {
+      navigate(`/learn/module/${moduleId}/results`, {
+        state: {
+          score: result.score,
+          passed: result.passed,
+          answers,
+          questions,
+          autoSubmit,
+          programId: null,
+        },
+      });
+    },
+    [navigate, moduleId, answers, questions]
+  );
+
+  const handleSubmit = useCallback(
+    async (autoSubmit = false) => {
+      if (!attemptId || submitInFlightRef.current) return;
+      submitInFlightRef.current = true;
+      clearInterval(timerRef.current);
+
+      try {
+        const payload = answersToPayload(answers, questions);
+        const result = await submitAttempt({ attemptId, answers: payload });
+        goToResults(result, autoSubmit);
+      } catch {
+        submitInFlightRef.current = false;
+      }
+    },
+    [attemptId, answers, questions, submitAttempt, goToResults]
+  );
 
   useEffect(() => {
-    if (!started) return;
-    timerRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timerRef.current);
-          handleSubmit(true);
-          return 0;
+    if (activeAttempt === undefined || sessionReady || expiredHandledRef.current) {
+      return;
+    }
+
+    if (!activeAttempt) {
+      setSessionReady(true);
+      return;
+    }
+
+    if (activeAttempt.expired) {
+      expiredHandledRef.current = true;
+      (async () => {
+        try {
+          const result = await finalizeExpiredAttempt({
+            attemptId: activeAttempt.attemptId,
+          });
+          goToResults(
+            { score: result.score, passed: result.passed ?? false },
+            true
+          );
+        } catch {
+          expiredHandledRef.current = false;
+          setSessionReady(true);
         }
-        return prev - 1;
-      });
+      })();
+      return;
+    }
+
+    setAttemptId(activeAttempt.attemptId);
+    setAnswers(savedAnswersToMap(activeAttempt.savedAnswers));
+    setTimeLimitMinutes(activeAttempt.timeLimitMinutes || DEFAULT_MINUTES);
+    startedAtRef.current = activeAttempt.startedAt;
+    setTimeLeft(
+      activeAttempt.remainingSeconds ??
+        computeRemainingSeconds(
+          activeAttempt.startedAt,
+          activeAttempt.timeLimitMinutes
+        )
+    );
+    setStarted(true);
+    setSessionReady(true);
+  }, [
+    activeAttempt,
+    sessionReady,
+    finalizeExpiredAttempt,
+    goToResults,
+  ]);
+
+  useEffect(() => {
+    if (!started || !hasTimeLimit || startedAtRef.current == null) return;
+
+    timerRef.current = setInterval(() => {
+      const remaining = computeRemainingSeconds(
+        startedAtRef.current,
+        timeLimitMinutes
+      );
+      if (remaining == null) return;
+      setTimeLeft(remaining);
+      if (remaining <= 0) {
+        clearInterval(timerRef.current);
+        handleSubmit(true);
+      }
     }, 1000);
+
     return () => clearInterval(timerRef.current);
-  }, [started]);
+  }, [started, hasTimeLimit, timeLimitMinutes, handleSubmit]);
+
+  useEffect(() => {
+    if (!attemptId || !started) return;
+    const payload = answersToPayload(answers, questions);
+    const timeout = setTimeout(() => {
+      saveProgress({ attemptId, savedAnswers: payload }).catch(() => {});
+    }, 400);
+    return () => clearTimeout(timeout);
+  }, [attemptId, started, answers, questions, saveProgress]);
+
+  const handleStart = async () => {
+    if (!convexUser?._id || !moduleId || !canStartExam) return;
+
+    const session = await startAttempt({
+      moduleId,
+      organizationId: convexUser.organizationId,
+    });
+
+    setAttemptId(session.attemptId);
+    setAnswers(savedAnswersToMap(session.savedAnswers));
+    setTimeLimitMinutes(session.timeLimitMinutes || configuredMinutes);
+    startedAtRef.current = session.startedAt;
+    setTimeLeft(
+      computeRemainingSeconds(session.startedAt, session.timeLimitMinutes)
+    );
+    setStarted(true);
+    setSessionReady(true);
+  };
 
   const formatTime = (s) => {
     const m = Math.floor(s / 60);
@@ -60,45 +201,7 @@ export default function ExamPage() {
     return `${m}:${sec.toString().padStart(2, "0")}`;
   };
 
-  const handleStart = async () => {
-    if (!convexUser?._id || !moduleId || !canStartExam) return;
-    const id = await startAttempt({
-      moduleId,
-      organizationId: convexUser.organizationId,
-    });
-    setAttemptId(id);
-    setStarted(true);
-  };
-
-  const handleSubmit = async (autoSubmit = false) => {
-    clearInterval(timerRef.current);
-    let score = 0;
-    let passed = false;
-
-    const answerList = questions.map((q) => ({
-      questionId: q._id,
-      selectedOptionId: answers[q._id] ?? "",
-    }));
-
-    if (attemptId) {
-      const result = await submitAttempt({ attemptId, answers: answerList });
-      score = result.score;
-      passed = result.passed;
-    } else {
-      let correct = 0;
-      for (const q of questions) {
-        if (answers[q._id] === q.correctOptionId) correct++;
-      }
-      score = questions.length > 0 ? Math.round((correct / questions.length) * 100) : 0;
-      passed = score >= (module?.passingScore || 70);
-    }
-
-    navigate(`/learn/module/${moduleId}/results`, {
-      state: { score, passed, answers, questions, autoSubmit, programId: null },
-    });
-  };
-
-  if (isLoading) {
+  if (isLoading || activeAttempt === undefined || !sessionReady) {
     return (
       <div className="p-6 text-center text-text-secondary">{t("common.loading")}</div>
     );
@@ -137,6 +240,11 @@ export default function ExamPage() {
               score: module.passingScore,
             })}
           </p>
+          {hasTimeLimit && (
+            <p className="text-sm text-text-secondary mb-4">
+              {t("learner.timeLimit")}: {configuredMinutes} {t("evaluation.minutes")}
+            </p>
+          )}
           {!canStartExam && (
             <p className="text-sm text-red-600 mb-4">{t("learner.noRetakesLeft")}</p>
           )}
@@ -158,10 +266,12 @@ export default function ExamPage() {
         <span className="text-sm text-text-secondary">
           {t("learner.questionOf", { current: currentIdx + 1, total: totalQ })}
         </span>
-        <span className="flex items-center gap-1 text-sm font-medium text-secondary">
-          <Clock size={14} />
-          {formatTime(timeLeft)}
-        </span>
+        {hasTimeLimit && timeLeft != null && (
+          <span className="flex items-center gap-1 text-sm font-medium text-secondary">
+            <Clock size={14} />
+            {formatTime(timeLeft)}
+          </span>
+        )}
       </div>
       <ProgressBar value={pct} size="sm" className="mb-6" />
 

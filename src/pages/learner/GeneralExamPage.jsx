@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery } from "convex/react";
@@ -7,8 +7,15 @@ import { api } from "../../../convex/_generated/api";
 import { Button } from "../../components/ui/Button";
 import { ProgressBar } from "../../components/ui/Progress";
 import { cn } from "../../lib/utils";
+import {
+  answersToPayload,
+  computeRemainingSeconds,
+  savedAnswersToMap,
+} from "../../lib/examTimer";
 import { useConvexSession } from "../../hooks/useConvexSession";
 import { useProgramEvaluation } from "../../hooks/useProgramEvaluation";
+
+const DEFAULT_MINUTES = 45;
 
 function shuffleArray(items) {
   const arr = [...items];
@@ -17,6 +24,16 @@ function shuffleArray(items) {
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
+}
+
+function orderQuestions(allQuestions, questionOrder) {
+  if (!questionOrder?.length) return allQuestions;
+  const byId = new Map(allQuestions.map((q) => [q._id, q]));
+  const ordered = questionOrder
+    .map((id) => byId.get(id))
+    .filter(Boolean);
+  if (ordered.length === allQuestions.length) return ordered;
+  return allQuestions;
 }
 
 export default function GeneralExamPage() {
@@ -30,27 +47,37 @@ export default function GeneralExamPage() {
     api.generalExams.listQuestions,
     programId ? { programId } : "skip"
   );
-
   const examSettings = useQuery(
     api.generalExams.getSettings,
     programId ? { programId } : "skip"
   );
-
   const attempts = useQuery(
     api.generalExams.getAttempts,
-    convexUser?._id && programId ? { programId } : "skip"
+    programId ? { programId } : "skip"
+  );
+  const activeAttempt = useQuery(
+    api.generalExams.getActiveAttempt,
+    programId ? { programId } : "skip"
   );
 
   const startAttempt = useMutation(api.generalExams.startAttempt);
+  const saveProgress = useMutation(api.generalExams.saveProgress);
   const submitAttempt = useMutation(api.generalExams.submitAttempt);
+  const finalizeExpiredAttempt = useMutation(api.generalExams.finalizeExpiredAttempt);
 
   const [started, setStarted] = useState(false);
   const [displayQuestions, setDisplayQuestions] = useState([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [answers, setAnswers] = useState({});
-  const [timeLeft, setTimeLeft] = useState(45 * 60);
+  const [timeLeft, setTimeLeft] = useState(null);
   const [attemptId, setAttemptId] = useState(null);
+  const [timeLimitMinutes, setTimeLimitMinutes] = useState(DEFAULT_MINUTES);
+  const [sessionReady, setSessionReady] = useState(false);
+
   const timerRef = useRef(null);
+  const expiredHandledRef = useRef(false);
+  const submitInFlightRef = useRef(false);
+  const startedAtRef = useRef(null);
 
   const policy = evaluation?.policy;
   const maxRetakes = policy?.generalExamMaxRetakes ?? 3;
@@ -60,35 +87,167 @@ export default function GeneralExamPage() {
       ? Infinity
       : Math.max(0, maxRetakes - submittedAttempts.length);
   const canStartExam = retakesLeft > 0;
-
-  const defaultMinutes = examSettings?.timeLimitMinutes ?? 45;
-  const hasTimeLimit = defaultMinutes > 0;
-
-  useEffect(() => {
-    if (examSettings === undefined) return;
-    const minutes = examSettings?.timeLimitMinutes ?? 45;
-    if (minutes > 0) setTimeLeft(minutes * 60);
-  }, [examSettings]);
-
-  useEffect(() => {
-    if (!started || !hasTimeLimit) return;
-    timerRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timerRef.current);
-          handleSubmit(true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timerRef.current);
-  }, [started, hasTimeLimit]);
+  const configuredMinutes = examSettings?.timeLimitMinutes ?? DEFAULT_MINUTES;
+  const hasTimeLimit = configuredMinutes > 0;
 
   const sortedQuestions = useMemo(
     () => [...(convexQuestions ?? [])].sort((a, b) => a.order - b.order),
     [convexQuestions]
   );
+
+  const applySession = useCallback(
+    (session, allQuestions) => {
+      const ordered = orderQuestions(allQuestions, session.questionOrder);
+      setDisplayQuestions(ordered);
+      setAttemptId(session.attemptId);
+      setAnswers(savedAnswersToMap(session.savedAnswers));
+      setTimeLimitMinutes(session.timeLimitMinutes || configuredMinutes);
+      startedAtRef.current = session.startedAt;
+      setTimeLeft(
+        computeRemainingSeconds(session.startedAt, session.timeLimitMinutes)
+      );
+      setStarted(true);
+      setSessionReady(true);
+    },
+    [configuredMinutes]
+  );
+
+  const goToResults = useCallback(
+    (score, autoSubmit = false) => {
+      navigate(`/learn/program/${programId}/final-results`, {
+        state: { score, autoSubmit },
+      });
+    },
+    [navigate, programId]
+  );
+
+  const handleSubmit = useCallback(
+    async (autoSubmit = false) => {
+      if (!attemptId || submitInFlightRef.current) return;
+      submitInFlightRef.current = true;
+      clearInterval(timerRef.current);
+
+      const questions =
+        displayQuestions.length > 0 ? displayQuestions : sortedQuestions;
+
+      try {
+        const result = await submitAttempt({
+          attemptId,
+          answers: answersToPayload(answers, questions),
+        });
+        await handleFinalize();
+        goToResults(result.score, autoSubmit);
+      } catch {
+        submitInFlightRef.current = false;
+      }
+    },
+    [
+      attemptId,
+      displayQuestions,
+      sortedQuestions,
+      answers,
+      submitAttempt,
+      handleFinalize,
+      goToResults,
+    ]
+  );
+
+  useEffect(() => {
+    if (activeAttempt === undefined || sessionReady || expiredHandledRef.current) {
+      return;
+    }
+
+    if (!activeAttempt) {
+      setSessionReady(true);
+      return;
+    }
+
+    if (sortedQuestions.length === 0) {
+      return;
+    }
+
+    if (activeAttempt.expired) {
+      expiredHandledRef.current = true;
+      (async () => {
+        try {
+          const result = await finalizeExpiredAttempt({
+            attemptId: activeAttempt.attemptId,
+          });
+          await handleFinalize();
+          goToResults(result.score, true);
+        } catch {
+          expiredHandledRef.current = false;
+          setSessionReady(true);
+        }
+      })();
+      return;
+    }
+
+    applySession(activeAttempt, sortedQuestions);
+  }, [
+    activeAttempt,
+    sortedQuestions,
+    sessionReady,
+    applySession,
+    finalizeExpiredAttempt,
+    handleFinalize,
+    goToResults,
+  ]);
+
+  useEffect(() => {
+    if (!started || !hasTimeLimit || startedAtRef.current == null) return;
+
+    timerRef.current = setInterval(() => {
+      const remaining = computeRemainingSeconds(
+        startedAtRef.current,
+        timeLimitMinutes
+      );
+      if (remaining == null) return;
+      setTimeLeft(remaining);
+      if (remaining <= 0) {
+        clearInterval(timerRef.current);
+        handleSubmit(true);
+      }
+    }, 1000);
+
+    return () => clearInterval(timerRef.current);
+  }, [started, hasTimeLimit, timeLimitMinutes, handleSubmit]);
+
+  useEffect(() => {
+    if (!attemptId || !started) return;
+    const questions =
+      displayQuestions.length > 0 ? displayQuestions : sortedQuestions;
+    const payload = answersToPayload(answers, questions);
+    const timeout = setTimeout(() => {
+      saveProgress({ attemptId, savedAnswers: payload }).catch(() => {});
+    }, 400);
+    return () => clearTimeout(timeout);
+  }, [attemptId, started, answers, displayQuestions, sortedQuestions, saveProgress]);
+
+  const formatTime = (s) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m}:${sec.toString().padStart(2, "0")}`;
+  };
+
+  const handleStart = async () => {
+    if (!convexUser?._id || !programId || !canStartExam || sortedQuestions.length === 0) {
+      return;
+    }
+
+    const ordered = examSettings?.randomizeQuestions
+      ? shuffleArray(sortedQuestions)
+      : sortedQuestions;
+
+    const session = await startAttempt({
+      programId,
+      organizationId: convexUser.organizationId,
+      questionOrder: ordered.map((q) => q._id),
+    });
+
+    applySession({ ...session, questionOrder: ordered.map((q) => q._id) }, sortedQuestions);
+    setDisplayQuestions(ordered);
+  };
 
   if (!evaluation?.generalUnlocked) {
     return (
@@ -104,60 +263,19 @@ export default function GeneralExamPage() {
     );
   }
 
-  const formatTime = (s) => {
-    const m = Math.floor(s / 60);
-    const sec = s % 60;
-    return `${m}:${sec.toString().padStart(2, "0")}`;
-  };
+  if (
+    convexQuestions === undefined ||
+    activeAttempt === undefined ||
+    examSettings === undefined ||
+    !sessionReady
+  ) {
+    return (
+      <div className="p-6 text-center text-text-secondary">{t("common.loading")}</div>
+    );
+  }
 
   const totalQ = displayQuestions.length;
   const currentQ = displayQuestions[currentIdx];
-
-  const handleStart = async () => {
-    if (!convexUser?._id || !programId || !canStartExam || sortedQuestions.length === 0) {
-      return;
-    }
-
-    const ordered = examSettings?.randomizeQuestions
-      ? shuffleArray(sortedQuestions)
-      : sortedQuestions;
-    setDisplayQuestions(ordered);
-
-    const id = await startAttempt({
-      programId,
-      organizationId: convexUser.organizationId,
-      attemptNumber: submittedAttempts.length + 1,
-    });
-    setAttemptId(id);
-    setStarted(true);
-  };
-
-  const handleSubmit = async (autoSubmit = false) => {
-    clearInterval(timerRef.current);
-
-    const questions = displayQuestions.length > 0 ? displayQuestions : sortedQuestions;
-    let correct = 0;
-    for (const q of questions) {
-      if (answers[q._id] === q.correctOptionId) correct++;
-    }
-    const score =
-      questions.length > 0 ? Math.round((correct / questions.length) * 1000) / 10 : 0;
-
-    if (convexUser?._id && programId && attemptId) {
-      await submitAttempt({
-        attemptId,
-        answers: questions.map((q) => ({
-          questionId: q._id,
-          selectedOptionId: answers[q._id] ?? "",
-        })),
-      });
-      await handleFinalize();
-    }
-
-    navigate(`/learn/program/${programId}/final-results`, {
-      state: { score, autoSubmit },
-    });
-  };
 
   if (!started) {
     return (
@@ -184,7 +302,7 @@ export default function GeneralExamPage() {
             <li>
               {t("learner.timeLimit")}:{" "}
               {hasTimeLimit
-                ? `${defaultMinutes} ${t("evaluation.minutes")}`
+                ? `${configuredMinutes} ${t("evaluation.minutes")}`
                 : t("common.unlimited")}
             </li>
             <li>
@@ -238,7 +356,7 @@ export default function GeneralExamPage() {
             total: totalQ,
           })}
         </span>
-        {hasTimeLimit && (
+        {hasTimeLimit && timeLeft != null && (
           <span className="flex items-center gap-1 text-sm font-medium text-secondary">
             <Clock size={14} />
             {formatTime(timeLeft)}
