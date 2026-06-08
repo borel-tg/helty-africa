@@ -12,9 +12,7 @@ export function useRecordModuleAccess(moduleId) {
 
   const convexCtx = useQuery(
     api.recentModules.findEnrolledProgramForModule,
-    convexUser?._id && moduleId
-      ? { userId: convexUser._id, moduleId }
-      : "skip"
+    convexUser?._id && moduleId ? { moduleId } : "skip"
   );
 
   const program = convexCtx?.program ?? null;
@@ -24,7 +22,6 @@ export function useRecordModuleAccess(moduleId) {
     if (!moduleId || !program || !convexUser?._id) return;
 
     recordAccess({
-      userId: convexUser._id,
       moduleId,
       programId: program._id,
       organizationId: convexUser.organizationId,

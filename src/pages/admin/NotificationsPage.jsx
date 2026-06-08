@@ -11,7 +11,7 @@ export default function NotificationsPage() {
 
   const notifications = useQuery(
     api.notifications.listEnrichedForRecipient,
-    convexUser?._id ? { recipientId: convexUser._id } : "skip"
+    convexUser?._id ? {} : "skip"
   );
 
   if (!notifications) {
@@ -24,10 +24,7 @@ export default function NotificationsPage() {
         <h2 className="text-xl font-semibold text-text-primary">Notifications</h2>
         <button
           type="button"
-          onClick={() =>
-            convexUser?._id &&
-            markAllRead({ recipientId: convexUser._id })
-          }
+          onClick={() => convexUser?._id && markAllRead({})}
           className="text-sm text-primary hover:underline"
         >
           Mark all read

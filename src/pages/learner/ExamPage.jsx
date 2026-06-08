@@ -18,9 +18,7 @@ export default function ExamPage() {
   const { module, examQuestions, isLoading, notFound } = useLearnerModule(moduleId);
   const attempts = useQuery(
     api.exams.getAttempts,
-    convexUser?._id && moduleId
-      ? { userId: convexUser._id, moduleId }
-      : "skip"
+    convexUser?._id && moduleId ? { moduleId } : "skip"
   );
   const startAttempt = useMutation(api.exams.startAttempt);
   const submitAttempt = useMutation(api.exams.submitAttempt);
@@ -65,10 +63,8 @@ export default function ExamPage() {
   const handleStart = async () => {
     if (!convexUser?._id || !moduleId || !canStartExam) return;
     const id = await startAttempt({
-      userId: convexUser._id,
       moduleId,
       organizationId: convexUser.organizationId,
-      attemptNumber: submittedAttempts.length + 1,
     });
     setAttemptId(id);
     setStarted(true);

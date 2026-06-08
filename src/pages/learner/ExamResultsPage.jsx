@@ -19,16 +19,12 @@ export default function ExamResultsPage() {
 
   const attempts = useQuery(
     api.exams.getAttempts,
-    convexUser?._id && moduleId
-      ? { userId: convexUser._id, moduleId }
-      : "skip"
+    convexUser?._id && moduleId ? { moduleId } : "skip"
   );
 
   const enrolledCtx = useQuery(
     api.recentModules.findEnrolledProgramForModule,
-    convexUser?._id && moduleId
-      ? { userId: convexUser._id, moduleId }
-      : "skip"
+    convexUser?._id && moduleId ? { moduleId } : "skip"
   );
 
   const programId = enrolledCtx?.program?._id;

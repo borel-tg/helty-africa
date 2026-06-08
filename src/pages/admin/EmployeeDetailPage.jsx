@@ -169,8 +169,9 @@ export default function EmployeeDetailPage() {
                       size="xs"
                       onClick={async () => {
                         await resetProgress({
-                          userId: emp._id,
+                          targetUserId: emp._id,
                           moduleId: mod._id,
+                          organizationId: orgId,
                         });
                         toast.success(t("admin.progressReset"));
                       }}

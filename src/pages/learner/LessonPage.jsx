@@ -52,7 +52,6 @@ export default function LessonPage() {
     if (convexUser?._id && module && lesson) {
       try {
         await markCompleted({
-          userId: convexUser._id,
           lessonId: lesson._id,
           moduleId,
           organizationId: convexUser.organizationId,

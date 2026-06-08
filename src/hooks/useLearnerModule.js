@@ -42,12 +42,12 @@ export function useLearnerModule(moduleId) {
 
   const convexProgress = useQuery(
     api.progress.getModuleProgress,
-    needsUserData ? { userId: convexUser._id, moduleId } : "skip"
+    needsUserData ? { moduleId } : "skip"
   );
 
   const enrolledCtx = useQuery(
     api.recentModules.findEnrolledProgramForModule,
-    needsUserData ? { userId: convexUser._id, moduleId } : "skip"
+    needsUserData ? { moduleId } : "skip"
   );
 
   const convexExamQuestions = useQuery(
@@ -91,7 +91,6 @@ export function useLearnerModule(moduleId) {
     if (!moduleId || !module || !program || !convexUser?._id) return;
 
     recordAccess({
-      userId: convexUser._id,
       moduleId,
       programId: program._id,
       organizationId: convexUser.organizationId,

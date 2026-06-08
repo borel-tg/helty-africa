@@ -38,9 +38,7 @@ export default function GeneralExamPage() {
 
   const attempts = useQuery(
     api.generalExams.getAttempts,
-    convexUser?._id && programId
-      ? { userId: convexUser._id, programId }
-      : "skip"
+    convexUser?._id && programId ? { programId } : "skip"
   );
 
   const startAttempt = useMutation(api.generalExams.startAttempt);
@@ -126,7 +124,6 @@ export default function GeneralExamPage() {
     setDisplayQuestions(ordered);
 
     const id = await startAttempt({
-      userId: convexUser._id,
       programId,
       organizationId: convexUser.organizationId,
       attemptNumber: submittedAttempts.length + 1,

@@ -38,7 +38,6 @@ function CreateModuleModal({ open, onClose, convexUser, onCreated }) {
         thumbnailUrl: thumbnail?.url,
         passingScore: Number(form.passingScore),
         maxRetakes: form.maxRetakes === "unlimited" ? "unlimited" : Number(form.maxRetakes),
-        createdBy: convexUser._id,
       });
       toast.success(t("admin.moduleCreated"));
       setForm({ title: "", description: "", passingScore: "70", maxRetakes: "2" });

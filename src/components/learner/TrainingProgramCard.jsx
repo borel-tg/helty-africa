@@ -7,7 +7,7 @@ import { Card } from "../ui/Card";
 import { Button } from "../ui/Button";
 import { ProgressBar } from "../ui/Progress";
 
-export function TrainingProgramCard({ program, userId, onJoin }) {
+export function TrainingProgramCard({ program, onJoin }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const enrolled = program.enrolled;
@@ -15,9 +15,7 @@ export function TrainingProgramCard({ program, userId, onJoin }) {
 
   const progress = useQuery(
     api.trainingPrograms.getLearnerProgramProgress,
-    enrolled && userId && program._id
-      ? { userId, programId: program._id }
-      : "skip"
+    enrolled && program._id ? { programId: program._id } : "skip"
   );
 
   const moduleSummaries = progress?.moduleSummaries ?? [];

@@ -14,7 +14,7 @@ export default function MyCertificatesPage() {
 
   const certs = useQuery(
     api.certificates.listForUser,
-    convexUser?._id ? { userId: convexUser._id } : "skip"
+    convexUser?._id ? {} : "skip"
   );
 
   const isLoading = convexUser?._id && certs === undefined;

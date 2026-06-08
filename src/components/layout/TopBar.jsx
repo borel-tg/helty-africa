@@ -19,7 +19,7 @@ export function TopBar({ title, onMenuToggle }) {
   const notifications = useQuery(
     api.notifications.listEnrichedForRecipient,
     currentUser?._id && (currentUser.role === "lead" || currentUser.role === "admin" || currentUser.role === "super_admin")
-      ? { recipientId: currentUser._id }
+      ? {}
       : "skip"
   );
 
@@ -50,7 +50,7 @@ export function TopBar({ title, onMenuToggle }) {
 
   const handleMarkAllRead = () => {
     if (currentUser?._id) {
-      markAllRead({ recipientId: currentUser._id }).catch(() => {});
+      markAllRead({}).catch(() => {});
     }
   };
 

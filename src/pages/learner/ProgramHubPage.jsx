@@ -34,8 +34,8 @@ export default function ProgramHubPage() {
 
   const allProgress = useQuery(
     api.progress.getAllProgressForUser,
-    convexUser?._id && convexUser?.organizationId
-      ? { userId: convexUser._id, organizationId: convexUser.organizationId }
+    convexUser?.organizationId
+      ? { organizationId: convexUser.organizationId }
       : "skip"
   );
 
@@ -206,7 +206,6 @@ export default function ProgramHubPage() {
                       key={mod._id}
                       module={mod}
                       examSummary={examSummary}
-                      userId={convexUser?._id}
                     />
                   );
                 })}

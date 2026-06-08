@@ -19,9 +19,7 @@ export function useProgramEvaluation(programId) {
 
   const convexEval = useQuery(
     api.trainingPrograms.getLearnerEvaluation,
-    convexUser?._id && programId
-      ? { programId, userId: convexUser._id }
-      : "skip"
+    convexUser?._id && programId ? { programId } : "skip"
   );
 
   const evaluation = useMemo(
@@ -40,7 +38,6 @@ export function useProgramEvaluation(programId) {
       throw new Error("Cannot enroll: session not ready");
     }
     await enroll({
-      userId: convexUser._id,
       programId,
       organizationId: convexUser.organizationId,
     });
@@ -50,7 +47,7 @@ export function useProgramEvaluation(programId) {
     if (!convexUser?._id || !programId) {
       throw new Error("Cannot finalize: session not ready");
     }
-    return finalize({ userId: convexUser._id, programId });
+    return finalize({ programId });
   };
 
   return {
@@ -67,11 +64,8 @@ export function useAvailablePrograms() {
 
   const convexPrograms = useQuery(
     api.trainingPrograms.listAvailableForLearner,
-    convexUser?._id && convexUser?.organizationId
-      ? {
-          organizationId: convexUser.organizationId,
-          userId: convexUser._id,
-        }
+    convexUser?.organizationId
+      ? { organizationId: convexUser.organizationId }
       : "skip"
   );
 

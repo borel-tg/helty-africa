@@ -30,7 +30,7 @@ const MANUAL_CREATE_INITIAL = {
   learnerCategoryKey: "zonal",
   tempPassword: "",
 };
-function InviteModal({ open, onClose, organizationId, invitedBy }) {
+function InviteModal({ open, onClose, organizationId }) {
   const { t } = useTranslation();
   const toast = useToast();
   const createInvite = useMutation(api.invitations.create);
@@ -39,10 +39,10 @@ function InviteModal({ open, onClose, organizationId, invitedBy }) {
   const [loading, setLoading] = useState(false);
 
   const handleInvite = async () => {
-    if (!email.trim() || !organizationId || !invitedBy) return;
+    if (!email.trim() || !organizationId) return;
     setLoading(true);
     try {
-      await createInvite({ organizationId, email: email.trim(), role, invitedBy });
+      await createInvite({ organizationId, email: email.trim(), role });
       toast.success(t("admin.invitationSentTo", { email }));
       setEmail("");
       onClose();
@@ -535,7 +535,6 @@ export default function EmployeesPage() {
         open={showInvite}
         onClose={() => setShowInvite(false)}
         organizationId={convexUser?.organizationId}
-        invitedBy={convexUser?._id}
       />
       <CreateManualModal
         open={showCreate}

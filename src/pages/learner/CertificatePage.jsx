@@ -25,9 +25,7 @@ export default function CertificatePage() {
 
   const certificate = useQuery(
     api.certificates.getForUserProgram,
-    convexUser?._id && programId
-      ? { userId: convexUser._id, programId }
-      : "skip"
+    convexUser?._id && programId ? { programId } : "skip"
   );
 
   const convexProgram = useQuery(
@@ -50,7 +48,6 @@ export default function CertificatePage() {
     if (scoreFromState == null) return;
 
     issueCertificate({
-      userId: convexUser._id,
       programId,
       organizationId: convexUser.organizationId,
       score: scoreFromState,

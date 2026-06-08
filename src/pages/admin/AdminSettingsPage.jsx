@@ -42,7 +42,6 @@ export default function AdminSettingsPage() {
     setSaving(true);
     try {
       await updateName({
-        userId: convexUser._id,
         organizationId: convexUser.organizationId,
         name: trimmed,
       });

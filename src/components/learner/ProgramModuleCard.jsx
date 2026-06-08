@@ -8,14 +8,14 @@ import { StatusBadge } from "../ui/Badge";
 import { ProgressBar } from "../ui/Progress";
 import { Button } from "../ui/Button";
 
-export function ProgramModuleCard({ module, examSummary, userId }) {
+export function ProgramModuleCard({ module, examSummary }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
   const lessons = useQuery(api.lessons.listByModule, { moduleId: module._id });
   const progressRows = useQuery(
     api.progress.getModuleProgress,
-    userId ? { userId, moduleId: module._id } : "skip"
+    { moduleId: module._id }
   );
 
   const total = lessons?.length ?? 0;

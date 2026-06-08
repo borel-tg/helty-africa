@@ -93,7 +93,6 @@ export default function CertificateTemplatePage() {
     setSaving(true);
     try {
       await upsertTemplate({
-        userId: convexUser._id,
         organizationId: convexUser.organizationId,
         layoutId: form.layoutId,
         organizationName: form.organizationName.trim(),

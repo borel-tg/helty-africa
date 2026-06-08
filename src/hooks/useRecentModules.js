@@ -8,7 +8,7 @@ export function useRecentModules(_enrolledPrograms, limit = 3) {
 
   const convexRecent = useQuery(
     api.recentModules.listForLearner,
-    convexUser?._id ? { userId: convexUser._id, limit } : "skip"
+    convexUser?._id ? { limit } : "skip"
   );
 
   return {

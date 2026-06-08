@@ -35,7 +35,6 @@ export default function TrainingProgramsPage() {
       organizationId: convexUser.organizationId,
       title: t("evaluation.newProgramTitle"),
       description: "",
-      createdBy: convexUser._id,
     });
     navigate(`/admin/programs/${id}`);
   };

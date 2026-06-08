@@ -11,15 +11,13 @@ import { TrainingProgramCard } from "../../components/learner/TrainingProgramCar
 import { useAvailablePrograms } from "../../hooks/useProgramEvaluation";
 import { useRecentModules } from "../../hooks/useRecentModules";
 
-function RecentModuleRow({ entry, userId }) {
+function RecentModuleRow({ entry }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
   const progressData = useQuery(
     api.progress.getModuleProgress,
-    userId && entry.moduleId
-      ? { userId, moduleId: entry.moduleId }
-      : "skip"
+    entry.moduleId ? { moduleId: entry.moduleId } : "skip"
   );
 
   const lessons = useQuery(
@@ -77,7 +75,6 @@ export default function LearnerDashboard() {
   const onJoinProgram = async (program) => {
     if (!convexUser?._id) return;
     await enrollMutation({
-      userId: convexUser._id,
       programId: program._id,
       organizationId: convexUser.organizationId,
     });
@@ -109,7 +106,6 @@ export default function LearnerDashboard() {
                 <RecentModuleRow
                   key={`${entry.moduleId}-${entry.accessedAt}`}
                   entry={entry}
-                  userId={convexUser?._id}
                 />
               ))}
             </div>
@@ -130,11 +126,7 @@ export default function LearnerDashboard() {
         ) : (
           <div className="space-y-3">
             {enrolledPrograms.map((program) => (
-              <TrainingProgramCard
-                key={program._id}
-                program={program}
-                userId={currentUser?._id}
-              />
+              <TrainingProgramCard key={program._id} program={program} />
             ))}
           </div>
         )}
@@ -150,7 +142,6 @@ export default function LearnerDashboard() {
               <TrainingProgramCard
                 key={program._id}
                 program={program}
-                userId={currentUser?._id}
                 onJoin={onJoinProgram}
               />
             ))}
