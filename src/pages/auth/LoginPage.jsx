@@ -43,12 +43,7 @@ export default function LoginPage() {
     }
     setErrors({});
     const result = await login(email, password);
-    if (result.success) {
-      const role = result.user.role;
-      if (role === "learner") navigate("/learn");
-      else if (role === "lead") navigate("/lead/learners");
-      else navigate("/admin");
-    } else {
+    if (!result.success) {
       toast.error(t("auth.invalidCredentials"));
     }
   };

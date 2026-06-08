@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { ConvexProvider, ConvexReactClient } from "convex/react";
+import { ConvexReactClient } from "convex/react";
+import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import App from "./App";
 import "./i18n";
 import "./index.css";
@@ -21,11 +22,11 @@ registerSW({ immediate: true });
 
 function AppProviders({ children }) {
   return (
-    <ConvexProvider client={convex}>
+    <ConvexAuthProvider client={convex}>
       <AuthProvider>
         <ToastProvider>{children}</ToastProvider>
       </AuthProvider>
-    </ConvexProvider>
+    </ConvexAuthProvider>
   );
 }
 
