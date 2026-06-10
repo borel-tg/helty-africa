@@ -189,6 +189,7 @@ function AddLessonModal({ open, onClose, onAdd }) {
 
 function EditLessonModal({ open, onClose, onUpdate, initialLesson }) {
   const toast = useToast();
+  const [type, setType] = useState("text");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [content, setContent] = useState("");
@@ -200,6 +201,7 @@ function EditLessonModal({ open, onClose, onUpdate, initialLesson }) {
 
   useEffect(() => {
     if (!open || !initialLesson) return;
+    setType(initialLesson.type ?? "text");
     setTitle(initialLesson.title ?? "");
     setDescription(initialLesson.description ?? "");
     setContent(initialLesson.content ?? "");
@@ -219,7 +221,7 @@ function EditLessonModal({ open, onClose, onUpdate, initialLesson }) {
       toast.error("Lesson title is required.");
       return;
     }
-    if (initialLesson?.type === "document") {
+    if (type === "document") {
       if (documentSource === "upload" && !document?.url && !documentUrl) {
         toast.error("Please upload a file or provide a document URL.");
         return;
@@ -231,36 +233,34 @@ function EditLessonModal({ open, onClose, onUpdate, initialLesson }) {
     }
 
     const resolvedUrl =
-      initialLesson?.type === "document"
+      type === "document"
         ? documentSource === "upload"
           ? document?.url
           : documentUrl.trim()
         : undefined;
     const resolvedFileName =
-      initialLesson?.type === "document"
+      type === "document"
         ? documentSource === "upload"
           ? document?.fileName
           : getFileNameFromUrl(documentUrl)
         : undefined;
     const resolvedFileType =
-      initialLesson?.type === "document"
+      type === "document"
         ? documentSource === "upload"
           ? inferFileTypeFromName(resolvedFileName)
           : inferStoredFileType(resolvedUrl, resolvedFileName, documentFormat)
         : undefined;
 
     onUpdate({
+      type,
       title: title.trim(),
       description: description.trim() || undefined,
-      content: initialLesson?.type === "text" ? content : undefined,
-      videoUrl: initialLesson?.type === "video" ? videoUrl.trim() || undefined : undefined,
-      videoId:
-        initialLesson?.type === "video"
-          ? extractYoutubeId(videoUrl.trim())
-          : undefined,
+      content: type === "text" ? content : undefined,
+      videoUrl: type === "video" ? videoUrl.trim() || undefined : undefined,
+      videoId: type === "video" ? extractYoutubeId(videoUrl.trim()) : undefined,
       fileUrl: resolvedUrl,
       fileName: resolvedFileName,
-      fileType: initialLesson?.type === "document" ? resolvedFileType : undefined,
+      fileType: type === "document" ? resolvedFileType : undefined,
     });
   };
 
@@ -279,9 +279,11 @@ function EditLessonModal({ open, onClose, onUpdate, initialLesson }) {
       }
     >
       <div className="space-y-4">
-        <p className="text-xs text-text-secondary capitalize">
-          Type: {initialLesson.type}
-        </p>
+        <Select label="Lesson Type" value={type} onChange={(e) => setType(e.target.value)}>
+          <option value="text">Text</option>
+          <option value="video">Video (YouTube)</option>
+          <option value="document">Document (PDF/PPT)</option>
+        </Select>
         <Input
           label="Title *"
           value={title}
@@ -293,14 +295,14 @@ function EditLessonModal({ open, onClose, onUpdate, initialLesson }) {
           onChange={(e) => setDescription(e.target.value)}
           rows={2}
         />
-        {initialLesson.type === "text" && (
+        {type === "text" && (
           <RichTextEditor
             label="Lesson Content"
             value={content}
             onChange={setContent}
           />
         )}
-        {initialLesson.type === "video" && (
+        {type === "video" && (
           <Input
             label="Video URL"
             placeholder="https://www.youtube.com/watch?v=..."
@@ -308,7 +310,7 @@ function EditLessonModal({ open, onClose, onUpdate, initialLesson }) {
             onChange={(e) => setVideoUrl(e.target.value)}
           />
         )}
-        {initialLesson.type === "document" && (
+        {type === "document" && (
           <>
             <div className="flex items-center gap-2">
               <button
@@ -758,6 +760,7 @@ export default function ModuleEditorPage() {
     try {
       await updateLessonMutation({
         lessonId: editingLesson._id,
+        type: data.type,
         title: data.title,
         description: data.description,
         content: data.content,

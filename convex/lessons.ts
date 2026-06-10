@@ -71,6 +71,9 @@ export const create = adminMutation({
 export const update = adminMutation({
   args: {
     lessonId: v.id("lessons"),
+    type: v.optional(
+      v.union(v.literal("text"), v.literal("video"), v.literal("document"))
+    ),
     title: v.optional(v.string()),
     description: v.optional(v.string()),
     content: v.optional(v.string()),
@@ -80,13 +83,31 @@ export const update = adminMutation({
     fileType: v.optional(v.union(v.literal("pdf"), v.literal("ppt"))),
     fileName: v.optional(v.string()),
   },
-  handler: async (ctx, { lessonId, ...updates }) => {
+  handler: async (ctx, { lessonId, type, ...updates }) => {
     const lesson = await ctx.db.get(lessonId);
     if (!lesson) throw new Error("Lesson not found");
     const mod = await ctx.db.get(lesson.moduleId);
     if (!mod) throw new Error("Module not found");
     assertOrgAdmin(ctx.user, mod.organizationId);
-    await ctx.db.patch(lessonId, { ...updates, updatedAt: Date.now() });
+
+    const now = Date.now();
+    if (type !== undefined) {
+      await ctx.db.patch(lessonId, {
+        type,
+        title: updates.title,
+        description: updates.description,
+        content: type === "text" ? updates.content : undefined,
+        videoUrl: type === "video" ? updates.videoUrl : undefined,
+        videoId: type === "video" ? updates.videoId : undefined,
+        fileUrl: type === "document" ? updates.fileUrl : undefined,
+        fileType: type === "document" ? updates.fileType : undefined,
+        fileName: type === "document" ? updates.fileName : undefined,
+        updatedAt: now,
+      });
+      return;
+    }
+
+    await ctx.db.patch(lessonId, { ...updates, updatedAt: now });
   },
 });
 
