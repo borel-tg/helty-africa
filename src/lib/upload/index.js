@@ -29,7 +29,8 @@ export const UPLOAD_PRESETS = {
   },
   document: {
     maxBytes: 50 * 1024 * 1024,
-    accept: ".pdf,.ppt,.pptx,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation",
-    hint: "PDF or PowerPoint, max 50MB",
+    accept:
+      ".pdf,.ppt,.pptx,.doc,.docx,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    hint: "PDF, PowerPoint, or Word, max 50MB",
   },
 };

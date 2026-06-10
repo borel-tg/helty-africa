@@ -4,6 +4,41 @@
  * Slides / PPT stay in embed viewers.
  */
 
+/** Normalize pasted document URLs (trim, first link when duplicated, strip trailing junk). */
+export function normalizeDocumentUrl(value) {
+  if (!value?.trim()) return "";
+  const trimmed = value.trim();
+  const parts = trimmed.split(/(?=https?:\/\/)/i).filter(Boolean);
+  const candidate = (parts.length > 1 ? parts[0] : trimmed).trim();
+  return candidate.replace(/[)\]},;]+$/, "").trim();
+}
+
+/** Infer stored file type from URL host/path (Google Docs, Slides, file extensions). */
+export function inferUrlDocumentType(url) {
+  const normalized = normalizeDocumentUrl(url);
+  if (!normalized) return null;
+
+  try {
+    const parsed = new URL(normalized);
+    const host = parsed.hostname.toLowerCase();
+    const path = parsed.pathname.toLowerCase();
+
+    if (host.includes("docs.google.com")) {
+      if (path.includes("/document/")) return "doc";
+      if (path.includes("/presentation/")) return "ppt";
+    }
+
+    const pathHint = extHint(parsed.pathname + parsed.search);
+    if (pathHint === "pdf" || pathHint === "ppt" || pathHint === "doc") {
+      return pathHint;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
 export function getGoogleDriveFileId(url) {
   if (!url) return null;
   try {
@@ -29,15 +64,22 @@ export function getGoogleDrivePdfUrl(fileId) {
   return `https://drive.google.com/uc?export=download&id=${fileId}`;
 }
 
-function isDrivePptLesson(nameHint, pathHint, fileType) {
-  const detected =
-    nameHint || pathHint || (fileType === "ppt" ? "ppt" : fileType === "pdf" ? "pdf" : null);
-  return detected === "ppt";
+function storedTypeHint(fileType) {
+  if (fileType === "ppt" || fileType === "pdf" || fileType === "doc") {
+    return fileType;
+  }
+  return null;
+}
+
+function isDriveEmbedLesson(nameHint, pathHint, fileType) {
+  const detected = nameHint || pathHint || storedTypeHint(fileType);
+  return detected === "ppt" || detected === "doc";
 }
 
 const IMAGE_EXT = /\.(png|jpe?g|gif|webp|svg|bmp)(\?|#|$)/i;
 const PDF_EXT = /\.pdf(\?|#|$)/i;
 const PPT_EXT = /\.(pptx?|ppsx?|odp)(\?|#|$)/i;
+const DOC_EXT = /\.docx?(\?|#|$)/i;
 
 function extHint(value) {
   if (!value) return null;
@@ -45,6 +87,7 @@ function extHint(value) {
   if (IMAGE_EXT.test(lower)) return "image";
   if (PDF_EXT.test(lower)) return "pdf";
   if (PPT_EXT.test(lower)) return "ppt";
+  if (DOC_EXT.test(lower)) return "doc";
   return null;
 }
 
@@ -92,7 +135,7 @@ export function wouldTriggerPptDownload(src) {
 export function detectDocumentMedia(fileUrl, fileName, fileType) {
   if (!fileUrl?.trim()) return { kind: "none" };
 
-  const url = fileUrl.trim();
+  const url = normalizeDocumentUrl(fileUrl);
   const nameHint = extHint(fileName);
   let pathHint = null;
   let parsed;
@@ -113,7 +156,7 @@ export function detectDocumentMedia(fileUrl, fileName, fileType) {
 
   const driveId = getGoogleDriveFileId(url);
   if (driveId) {
-    if (isDrivePptLesson(nameHint, pathHint, fileType)) {
+    if (isDriveEmbedLesson(nameHint, pathHint, fileType)) {
       return { kind: "embed", embedSrc: getGoogleDrivePreviewUrl(driveId) };
     }
     return { kind: "pdf", pdfSrc: getGoogleDrivePdfUrl(driveId) };
@@ -137,13 +180,13 @@ export function detectDocumentMedia(fileUrl, fileName, fileType) {
     }
   }
 
-  const detected = nameHint || pathHint || (fileType === "ppt" ? "ppt" : fileType === "pdf" ? "pdf" : null);
+  const detected = nameHint || pathHint || storedTypeHint(fileType);
 
   if (detected === "image") {
     return { kind: "image", imageSrc: url };
   }
 
-  if (detected === "ppt") {
+  if (detected === "ppt" || detected === "doc") {
     return { kind: "embed", embedSrc: officeEmbedUrl(url) };
   }
 
@@ -166,17 +209,25 @@ export function detectDocumentMedia(fileUrl, fileName, fileType) {
   return { kind: "pdf", pdfSrc: url };
 }
 
-/** Convex `fileType` field: pdf | ppt (viewer also detects images from URL). */
+/** Convex `fileType` field: pdf | ppt | doc (viewer also detects images from URL). */
 export function inferStoredFileType(fileUrl, fileName, manualFormat = "pdf") {
-  const hint = extHint(fileName) || extHint(safePath(fileUrl));
+  const normalizedUrl = fileUrl ? normalizeDocumentUrl(fileUrl) : "";
+
+  const urlType = inferUrlDocumentType(normalizedUrl);
+  if (urlType) return urlType;
+
+  const hint = extHint(fileName) || extHint(safePath(normalizedUrl));
   if (hint === "ppt") return "ppt";
   if (hint === "pdf") return "pdf";
-  return manualFormat === "ppt" ? "ppt" : "pdf";
+  if (hint === "doc") return "doc";
+  if (manualFormat === "ppt") return "ppt";
+  if (manualFormat === "doc") return "doc";
+  return "pdf";
 }
 
 function safePath(url) {
   try {
-    const parsed = new URL(url.trim());
+    const parsed = new URL(normalizeDocumentUrl(url));
     return parsed.pathname + parsed.search;
   } catch {
     return "";

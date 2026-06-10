@@ -15,7 +15,11 @@ import { FileUpload } from "../../components/ui/FileUpload";
 import { RichTextEditor } from "../../components/ui/RichTextEditor";
 import { useToast } from "../../components/ui/Toast";
 import { useConvexSession } from "../../hooks/useConvexSession";
-import { inferStoredFileType } from "../../lib/documentMedia";
+import {
+  inferStoredFileType,
+  inferUrlDocumentType,
+  normalizeDocumentUrl,
+} from "../../lib/documentMedia";
 import { LessonPreviewModal } from "../../components/admin/LessonPreviewModal";
 
 function extractYoutubeId(url) {
@@ -48,7 +52,7 @@ function AddLessonModal({ open, onClose, onAdd }) {
     if (!title.trim()) return;
     if (type === "document") {
       if (documentSource === "upload" && !document?.url) {
-        toast.error("Please upload a PDF or PowerPoint file.");
+        toast.error("Please upload a PDF, PowerPoint, or Word file.");
         return;
       }
       if (documentSource === "url" && !documentUrl.trim()) {
@@ -60,9 +64,12 @@ function AddLessonModal({ open, onClose, onAdd }) {
         return;
       }
     }
-    const resolvedUrl = documentSource === "upload" ? document?.url : documentUrl.trim();
+    const resolvedUrl =
+      documentSource === "upload"
+        ? document?.url
+        : normalizeDocumentUrl(documentUrl);
     const resolvedFileName =
-      documentSource === "upload" ? document?.fileName : getFileNameFromUrl(documentUrl);
+      documentSource === "upload" ? document?.fileName : getFileNameFromUrl(resolvedUrl);
     const resolvedFileType =
       documentSource === "upload"
         ? inferFileTypeFromName(resolvedFileName)
@@ -112,7 +119,7 @@ function AddLessonModal({ open, onClose, onAdd }) {
         <Select label="Lesson Type" value={type} onChange={(e) => setType(e.target.value)}>
           <option value="text">Text</option>
           <option value="video">Video (YouTube)</option>
-          <option value="document">Document (PDF/PPT)</option>
+          <option value="document">Document (PDF/PPT/Word)</option>
         </Select>
         <Input label="Lesson Title *" placeholder="e.g. Introduction to Polio Eradication" value={title} onChange={(e) => setTitle(e.target.value)} />
         <Textarea label="Description" placeholder="Brief description (optional)" value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
@@ -158,10 +165,13 @@ function AddLessonModal({ open, onClose, onAdd }) {
               <>
                 <Input
                   label="Document URL"
-                  placeholder="https://example.com/files/lesson.pdf"
+                  placeholder="https://docs.google.com/document/d/.../edit"
                   value={documentUrl}
                   onChange={(e) => setDocumentUrl(e.target.value)}
-                  helperText="Any public link (Google Drive, PDF, PowerPoint, image). Format is detected automatically when possible."
+                  onBlur={() =>
+                    handleDocumentUrlBlur(documentUrl, setDocumentUrl, setDocumentFormat)
+                  }
+                  helperText="Google Docs, Drive, PDF, PowerPoint, Word, or image links. Format is auto-detected when possible."
                 />
                 <Select
                   label="Document format"
@@ -170,6 +180,7 @@ function AddLessonModal({ open, onClose, onAdd }) {
                 >
                   <option value="pdf">PDF</option>
                   <option value="ppt">PowerPoint (PPT / PPTX)</option>
+                  <option value="doc">Word (DOC / DOCX)</option>
                 </Select>
               </>
             )}
@@ -207,7 +218,13 @@ function EditLessonModal({ open, onClose, onUpdate, initialLesson }) {
     setContent(initialLesson.content ?? "");
     setVideoUrl(initialLesson.videoUrl ?? "");
     setDocumentUrl(initialLesson.fileUrl ?? "");
-    setDocumentFormat(initialLesson.fileType === "ppt" ? "ppt" : "pdf");
+    setDocumentFormat(
+      initialLesson.fileType === "ppt"
+        ? "ppt"
+        : initialLesson.fileType === "doc"
+          ? "doc"
+          : "pdf"
+    );
     setDocument(
       initialLesson.fileUrl
         ? { url: initialLesson.fileUrl, fileName: initialLesson.fileName }
@@ -236,13 +253,13 @@ function EditLessonModal({ open, onClose, onUpdate, initialLesson }) {
       type === "document"
         ? documentSource === "upload"
           ? document?.url
-          : documentUrl.trim()
+          : normalizeDocumentUrl(documentUrl)
         : undefined;
     const resolvedFileName =
       type === "document"
         ? documentSource === "upload"
           ? document?.fileName
-          : getFileNameFromUrl(documentUrl)
+          : getFileNameFromUrl(resolvedUrl)
         : undefined;
     const resolvedFileType =
       type === "document"
@@ -282,7 +299,7 @@ function EditLessonModal({ open, onClose, onUpdate, initialLesson }) {
         <Select label="Lesson Type" value={type} onChange={(e) => setType(e.target.value)}>
           <option value="text">Text</option>
           <option value="video">Video (YouTube)</option>
-          <option value="document">Document (PDF/PPT)</option>
+          <option value="document">Document (PDF/PPT/Word)</option>
         </Select>
         <Input
           label="Title *"
@@ -340,10 +357,13 @@ function EditLessonModal({ open, onClose, onUpdate, initialLesson }) {
               <>
                 <Input
                   label="Document URL"
-                  placeholder="https://example.com/files/lesson.pdf"
+                  placeholder="https://docs.google.com/document/d/.../edit"
                   value={documentUrl}
                   onChange={(e) => setDocumentUrl(e.target.value)}
-                  helperText="Any public link (Google Drive, PDF, PowerPoint, image). Format is detected automatically when possible."
+                  onBlur={() =>
+                    handleDocumentUrlBlur(documentUrl, setDocumentUrl, setDocumentFormat)
+                  }
+                  helperText="Google Docs, Drive, PDF, PowerPoint, Word, or image links. Format is auto-detected when possible."
                 />
                 <Select
                   label="Document format"
@@ -352,6 +372,7 @@ function EditLessonModal({ open, onClose, onUpdate, initialLesson }) {
                 >
                   <option value="pdf">PDF</option>
                   <option value="ppt">PowerPoint (PPT / PPTX)</option>
+                  <option value="doc">Word (DOC / DOCX)</option>
                 </Select>
               </>
             ) : (
@@ -371,11 +392,19 @@ function EditLessonModal({ open, onClose, onUpdate, initialLesson }) {
 
 function isValidUrl(value) {
   try {
-    new URL(value);
+    new URL(normalizeDocumentUrl(value));
     return true;
   } catch {
     return false;
   }
+}
+
+function handleDocumentUrlBlur(url, setUrl, setFormat) {
+  if (!url.trim()) return;
+  const normalized = normalizeDocumentUrl(url);
+  if (normalized !== url) setUrl(normalized);
+  const detected = inferUrlDocumentType(normalized);
+  if (detected) setFormat(detected);
 }
 
 function getFileNameFromUrl(value) {
@@ -401,6 +430,7 @@ function getFileNameFromUrl(value) {
 function inferFileTypeFromName(name) {
   const lower = (name || "").toLowerCase();
   if (lower.endsWith(".ppt") || lower.endsWith(".pptx")) return "ppt";
+  if (lower.endsWith(".doc") || lower.endsWith(".docx")) return "doc";
   return "pdf";
 }
 

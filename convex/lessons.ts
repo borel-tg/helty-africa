@@ -45,7 +45,9 @@ export const create = adminMutation({
     videoUrl: v.optional(v.string()),
     videoId: v.optional(v.string()),
     fileUrl: v.optional(v.string()),
-    fileType: v.optional(v.union(v.literal("pdf"), v.literal("ppt"))),
+    fileType: v.optional(
+      v.union(v.literal("pdf"), v.literal("ppt"), v.literal("doc"))
+    ),
     fileName: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -80,7 +82,9 @@ export const update = adminMutation({
     videoUrl: v.optional(v.string()),
     videoId: v.optional(v.string()),
     fileUrl: v.optional(v.string()),
-    fileType: v.optional(v.union(v.literal("pdf"), v.literal("ppt"))),
+    fileType: v.optional(
+      v.union(v.literal("pdf"), v.literal("ppt"), v.literal("doc"))
+    ),
     fileName: v.optional(v.string()),
   },
   handler: async (ctx, { lessonId, type, ...updates }) => {

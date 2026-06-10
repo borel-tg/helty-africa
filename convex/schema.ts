@@ -221,7 +221,9 @@ export default defineSchema({
     videoId: v.optional(v.string()), // extracted YouTube ID
     // Document lesson
     fileUrl: v.optional(v.string()), // Convex storage URL
-    fileType: v.optional(v.union(v.literal("pdf"), v.literal("ppt"))),
+    fileType: v.optional(
+      v.union(v.literal("pdf"), v.literal("ppt"), v.literal("doc"))
+    ),
     fileName: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
