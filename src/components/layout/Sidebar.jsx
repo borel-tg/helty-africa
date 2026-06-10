@@ -11,6 +11,7 @@ import {
   LogOut,
   GraduationCap,
   ClipboardList,
+  User,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useAuth } from "../../hooks/useAuth";
@@ -20,6 +21,7 @@ const NAV_ITEMS = {
   learner: [
     { to: "/learn", icon: LayoutDashboard, labelKey: "nav.myTrainings" },
     { to: "/learn/certificates", icon: Award, labelKey: "nav.certificates" },
+    { to: "/learn/profile", icon: User, labelKey: "nav.profile" },
   ],
   lead: [
     { to: "/lead/learners", icon: Users, labelKey: "nav.learners" },

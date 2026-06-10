@@ -8,6 +8,7 @@ import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { useAuth } from "../../hooks/useAuth";
 import { AuthLayout } from "../../components/auth/AuthLayout";
+import { clearFormFieldError } from "../../lib/formErrors";
 
 export default function ResetPasswordPage() {
   const { t } = useTranslation();
@@ -150,7 +151,11 @@ export default function ResetPasswordPage() {
           type={showPassword ? "text" : "password"}
           placeholder={t("auth.passwordPlaceholder")}
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            clearFormFieldError(setErrors, "password");
+            clearFormFieldError(setErrors, "confirmPassword");
+          }}
           error={errors.password}
           leftIcon={<Lock size={16} />}
           rightIcon={
@@ -172,7 +177,10 @@ export default function ResetPasswordPage() {
           type={showPassword ? "text" : "password"}
           placeholder={t("auth.confirmPasswordPlaceholder")}
           value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
+          onChange={(e) => {
+            setConfirmPassword(e.target.value);
+            clearFormFieldError(setErrors, "confirmPassword");
+          }}
           error={errors.confirmPassword}
           leftIcon={<Lock size={16} />}
           autoComplete="new-password"

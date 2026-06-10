@@ -1,0 +1,3307 @@
+{
+  "version": 1,
+  "source": "INRB-UMIE/BDBV2026-Data — DRC_Health_zones.shp (519 zones, MoH / HDX)",
+  "builtAt": "2026-06-10T06:33:34.086Z",
+  "provinces": [
+    {
+      "id": "bas-uélé",
+      "labelFr": "Bas-Uélé",
+      "labelEn": "Bas-Uélé",
+      "zones": [
+        {
+          "id": "bas-uélé__cd5204zs01",
+          "labelFr": "Aketi",
+          "labelEn": "Aketi",
+          "code": "CD5204ZS01"
+        },
+        {
+          "id": "bas-uélé__cd5207zs01",
+          "labelFr": "Ango",
+          "labelEn": "Ango",
+          "code": "CD5207ZS01"
+        },
+        {
+          "id": "bas-uélé__cd5206zs01",
+          "labelFr": "Bili",
+          "labelEn": "Bili",
+          "code": "CD5206ZS01"
+        },
+        {
+          "id": "bas-uélé__cd5206zs02",
+          "labelFr": "Bondo",
+          "labelEn": "Bondo",
+          "code": "CD5206ZS02"
+        },
+        {
+          "id": "bas-uélé__cd5202zs01",
+          "labelFr": "Buta",
+          "labelEn": "Buta",
+          "code": "CD5202ZS01"
+        },
+        {
+          "id": "bas-uélé__cd5209zs01",
+          "labelFr": "Ganga",
+          "labelEn": "Ganga",
+          "code": "CD5209ZS01"
+        },
+        {
+          "id": "bas-uélé__cd5204zs02",
+          "labelFr": "Likati",
+          "labelEn": "Likati",
+          "code": "CD5204ZS02"
+        },
+        {
+          "id": "bas-uélé__cd5206zs03",
+          "labelFr": "Monga",
+          "labelEn": "Monga",
+          "code": "CD5206ZS03"
+        },
+        {
+          "id": "bas-uélé__cd5208zs01",
+          "labelFr": "Poko",
+          "labelEn": "Poko",
+          "code": "CD5208ZS01"
+        },
+        {
+          "id": "bas-uélé__cd5202zs02",
+          "labelFr": "Titule",
+          "labelEn": "Titule",
+          "code": "CD5202ZS02"
+        },
+        {
+          "id": "bas-uélé__cd5208zs02",
+          "labelFr": "Viadana",
+          "labelEn": "Viadana",
+          "code": "CD5208ZS02"
+        }
+      ]
+    },
+    {
+      "id": "équateur",
+      "labelFr": "Équateur",
+      "labelEn": "Équateur",
+      "zones": [
+        {
+          "id": "équateur__cd4107zs01",
+          "labelFr": "Basankusu",
+          "labelEn": "Basankusu",
+          "code": "CD4107ZS01"
+        },
+        {
+          "id": "équateur__cd4102zs01",
+          "labelFr": "Bikoro",
+          "labelEn": "Bikoro",
+          "code": "CD4102ZS01"
+        },
+        {
+          "id": "équateur__cd4101zs01",
+          "labelFr": "Bolenge",
+          "labelEn": "Bolenge",
+          "code": "CD4101ZS01"
+        },
+        {
+          "id": "équateur__cd4108zs01",
+          "labelFr": "Bolomba",
+          "labelEn": "Bolomba",
+          "code": "CD4108ZS01"
+        },
+        {
+          "id": "équateur__cd4104zs01",
+          "labelFr": "Bomongo",
+          "labelEn": "Bomongo",
+          "code": "CD4104ZS01"
+        },
+        {
+          "id": "équateur__cd4107zs02",
+          "labelFr": "Djombo",
+          "labelEn": "Djombo",
+          "code": "CD4107ZS02"
+        },
+        {
+          "id": "équateur__cd4102zs02",
+          "labelFr": "Iboko",
+          "labelEn": "Iboko",
+          "code": "CD4102ZS02"
+        },
+        {
+          "id": "équateur__cd4109zs01",
+          "labelFr": "Ingende",
+          "labelEn": "Ingende",
+          "code": "CD4109ZS01"
+        },
+        {
+          "id": "équateur__cd4103zs01",
+          "labelFr": "Irebu",
+          "labelEn": "Irebu",
+          "code": "CD4103ZS01"
+        },
+        {
+          "id": "équateur__cd4104zs02",
+          "labelFr": "Lilanga Bobangi",
+          "labelEn": "Lilanga Bobangi",
+          "code": "CD4104ZS02"
+        },
+        {
+          "id": "équateur__cd4108zs02",
+          "labelFr": "Lolanga Mampoko",
+          "labelEn": "Lolanga Mampoko",
+          "code": "CD4108ZS02"
+        },
+        {
+          "id": "équateur__cd4109zs02",
+          "labelFr": "Lotumbe",
+          "labelEn": "Lotumbe",
+          "code": "CD4109ZS02"
+        },
+        {
+          "id": "équateur__cd4103zs02",
+          "labelFr": "Lukolela",
+          "labelEn": "Lukolela",
+          "code": "CD4103ZS02"
+        },
+        {
+          "id": "équateur__cd4105zs01",
+          "labelFr": "Makanza",
+          "labelEn": "Makanza",
+          "code": "CD4105ZS01"
+        },
+        {
+          "id": "équateur__cd4101zs02",
+          "labelFr": "Mbandaka",
+          "labelEn": "Mbandaka",
+          "code": "CD4101ZS02"
+        },
+        {
+          "id": "équateur__cd4108zs03",
+          "labelFr": "Monieka",
+          "labelEn": "Monieka",
+          "code": "CD4108ZS03"
+        },
+        {
+          "id": "équateur__cd4102zs03",
+          "labelFr": "Ntondo",
+          "labelEn": "Ntondo",
+          "code": "CD4102ZS03"
+        },
+        {
+          "id": "équateur__cd4101zs03",
+          "labelFr": "Wangata",
+          "labelEn": "Wangata",
+          "code": "CD4101ZS03"
+        }
+      ]
+    },
+    {
+      "id": "haut-katanga",
+      "labelFr": "Haut-Katanga",
+      "labelEn": "Haut-Katanga",
+      "zones": [
+        {
+          "id": "haut-katanga__cd7102zs01",
+          "labelFr": "Kafubu",
+          "labelEn": "Kafubu",
+          "code": "CD7102ZS01"
+        },
+        {
+          "id": "haut-katanga__cd7101zs01",
+          "labelFr": "Kamalondo",
+          "labelEn": "Kamalondo",
+          "code": "CD7101ZS01"
+        },
+        {
+          "id": "haut-katanga__cd7105zs01",
+          "labelFr": "Kambove",
+          "labelEn": "Kambove",
+          "code": "CD7105ZS01"
+        },
+        {
+          "id": "haut-katanga__cd7101zs02",
+          "labelFr": "Kampemba",
+          "labelEn": "Kampemba",
+          "code": "CD7101ZS02"
+        },
+        {
+          "id": "haut-katanga__cd7105zs02",
+          "labelFr": "Kapolowe",
+          "labelEn": "Kapolowe",
+          "code": "CD7105ZS02"
+        },
+        {
+          "id": "haut-katanga__cd7107zs01",
+          "labelFr": "Kasenga",
+          "labelEn": "Kasenga",
+          "code": "CD7107ZS01"
+        },
+        {
+          "id": "haut-katanga__cd7107zs04",
+          "labelFr": "Kashobwe",
+          "labelEn": "Kashobwe",
+          "code": "CD7107ZS04"
+        },
+        {
+          "id": "haut-katanga__cd7101zs03",
+          "labelFr": "Katuba",
+          "labelEn": "Katuba",
+          "code": "CD7101ZS03"
+        },
+        {
+          "id": "haut-katanga__cd7101zs04",
+          "labelFr": "Kenya",
+          "labelEn": "Kenya",
+          "code": "CD7101ZS04"
+        },
+        {
+          "id": "haut-katanga__cd7107zs02",
+          "labelFr": "Kikula",
+          "labelEn": "Kikula",
+          "code": "CD7107ZS02"
+        },
+        {
+          "id": "haut-katanga__cd7105zs03",
+          "labelFr": "Kilela Balanda",
+          "labelEn": "Kilela Balanda",
+          "code": "CD7105ZS03"
+        },
+        {
+          "id": "haut-katanga__cd7109zs01",
+          "labelFr": "Kilwa",
+          "labelEn": "Kilwa",
+          "code": "CD7109ZS01"
+        },
+        {
+          "id": "haut-katanga__cd7102zs02",
+          "labelFr": "Kipushi",
+          "labelEn": "Kipushi",
+          "code": "CD7102ZS02"
+        },
+        {
+          "id": "haut-katanga__cd7101zs05",
+          "labelFr": "Kisanga",
+          "labelEn": "Kisanga",
+          "code": "CD7101ZS05"
+        },
+        {
+          "id": "haut-katanga__cd7101zs06",
+          "labelFr": "Kowe",
+          "labelEn": "Kowe",
+          "code": "CD7101ZS06"
+        },
+        {
+          "id": "haut-katanga__cd7106zs01",
+          "labelFr": "Likasi",
+          "labelEn": "Likasi",
+          "code": "CD7106ZS01"
+        },
+        {
+          "id": "haut-katanga__cd7101zs07",
+          "labelFr": "Lubumbashi",
+          "labelEn": "Lubumbashi",
+          "code": "CD7101ZS07"
+        },
+        {
+          "id": "haut-katanga__cd7107zs03",
+          "labelFr": "Lukafu",
+          "labelEn": "Lukafu",
+          "code": "CD7107ZS03"
+        },
+        {
+          "id": "haut-katanga__cd7105zs04",
+          "labelFr": "Manika",
+          "labelEn": "Manika",
+          "code": "CD7105ZS04"
+        },
+        {
+          "id": "haut-katanga__cd7108zs01",
+          "labelFr": "Mitwaba",
+          "labelEn": "Mitwaba",
+          "code": "CD7108ZS01"
+        },
+        {
+          "id": "haut-katanga__cd7108zs02",
+          "labelFr": "Mufunga Sampwe",
+          "labelEn": "Mufunga Sampwe",
+          "code": "CD7108ZS02"
+        },
+        {
+          "id": "haut-katanga__cd7101zs08",
+          "labelFr": "Mumbunda",
+          "labelEn": "Mumbunda",
+          "code": "CD7101ZS08"
+        },
+        {
+          "id": "haut-katanga__cd7105zs05",
+          "labelFr": "Panda",
+          "labelEn": "Panda",
+          "code": "CD7105ZS05"
+        },
+        {
+          "id": "haut-katanga__cd7109zs02",
+          "labelFr": "Pweto",
+          "labelEn": "Pweto",
+          "code": "CD7109ZS02"
+        },
+        {
+          "id": "haut-katanga__cd7101zs09",
+          "labelFr": "Rwashi",
+          "labelEn": "Rwashi",
+          "code": "CD7101ZS09"
+        },
+        {
+          "id": "haut-katanga__cd7104zs01",
+          "labelFr": "Sakania",
+          "labelEn": "Sakania",
+          "code": "CD7104ZS01"
+        },
+        {
+          "id": "haut-katanga__cd7101zs10",
+          "labelFr": "Tshamilemba",
+          "labelEn": "Tshamilemba",
+          "code": "CD7101ZS10"
+        },
+        {
+          "id": "haut-katanga__cd7101zs11",
+          "labelFr": "Vangu",
+          "labelEn": "Vangu",
+          "code": "CD7101ZS11"
+        }
+      ]
+    },
+    {
+      "id": "haut-lomami",
+      "labelFr": "Haut-Lomami",
+      "labelEn": "Haut-Lomami",
+      "zones": [
+        {
+          "id": "haut-lomami__cd7302zs01",
+          "labelFr": "Baka",
+          "labelEn": "Baka",
+          "code": "CD7302ZS01"
+        },
+        {
+          "id": "haut-lomami__cd7306zs01",
+          "labelFr": "Bukama",
+          "labelEn": "Bukama",
+          "code": "CD7306ZS01"
+        },
+        {
+          "id": "haut-lomami__cd7306zs02",
+          "labelFr": "Butumba",
+          "labelEn": "Butumba",
+          "code": "CD7306ZS02"
+        },
+        {
+          "id": "haut-lomami__cd7306zs03",
+          "labelFr": "Kabondo Dianda",
+          "labelEn": "Kabondo Dianda",
+          "code": "CD7306ZS03"
+        },
+        {
+          "id": "haut-lomami__cd7304zs01",
+          "labelFr": "Kabongo",
+          "labelEn": "Kabongo",
+          "code": "CD7304ZS01"
+        },
+        {
+          "id": "haut-lomami__cd7302zs02",
+          "labelFr": "Kamina",
+          "labelEn": "Kamina",
+          "code": "CD7302ZS02"
+        },
+        {
+          "id": "haut-lomami__cd7303zs01",
+          "labelFr": "Kaniama",
+          "labelEn": "Kaniama",
+          "code": "CD7303ZS01"
+        },
+        {
+          "id": "haut-lomami__cd7304zs02",
+          "labelFr": "Kayamba",
+          "labelEn": "Kayamba",
+          "code": "CD7304ZS02"
+        },
+        {
+          "id": "haut-lomami__cd7302zs03",
+          "labelFr": "Kinda",
+          "labelEn": "Kinda",
+          "code": "CD7302ZS03"
+        },
+        {
+          "id": "haut-lomami__cd7305zs01",
+          "labelFr": "Kinkondja",
+          "labelEn": "Kinkondja",
+          "code": "CD7305ZS01"
+        },
+        {
+          "id": "haut-lomami__cd7304zs03",
+          "labelFr": "Kitenge",
+          "labelEn": "Kitenge",
+          "code": "CD7304ZS03"
+        },
+        {
+          "id": "haut-lomami__cd7305zs02",
+          "labelFr": "Lwamba",
+          "labelEn": "Lwamba",
+          "code": "CD7305ZS02"
+        },
+        {
+          "id": "haut-lomami__cd7306zs04",
+          "labelFr": "Malemba",
+          "labelEn": "Malemba",
+          "code": "CD7306ZS04"
+        },
+        {
+          "id": "haut-lomami__cd7305zs03",
+          "labelFr": "Mukanga",
+          "labelEn": "Mukanga",
+          "code": "CD7305ZS03"
+        },
+        {
+          "id": "haut-lomami__cd7305zs04",
+          "labelFr": "Mulongo",
+          "labelEn": "Mulongo",
+          "code": "CD7305ZS04"
+        },
+        {
+          "id": "haut-lomami__cd7302zs04",
+          "labelFr": "Songa",
+          "labelEn": "Songa",
+          "code": "CD7302ZS04"
+        }
+      ]
+    },
+    {
+      "id": "haut-uélé",
+      "labelFr": "Haut-Uélé",
+      "labelEn": "Haut-Uélé",
+      "zones": [
+        {
+          "id": "haut-uélé__cd5307zs01",
+          "labelFr": "Aba",
+          "labelEn": "Aba",
+          "code": "CD5307ZS01"
+        },
+        {
+          "id": "haut-uélé__cd5311zs01",
+          "labelFr": "Boma-Mangbetu",
+          "labelEn": "Boma-Mangbetu",
+          "code": "CD5311ZS01"
+        },
+        {
+          "id": "haut-uélé__cd5305zs01",
+          "labelFr": "Doruma",
+          "labelEn": "Doruma",
+          "code": "CD5305ZS01"
+        },
+        {
+          "id": "haut-uélé__cd5305zs02",
+          "labelFr": "Dungu",
+          "labelEn": "Dungu",
+          "code": "CD5305ZS02"
+        },
+        {
+          "id": "haut-uélé__cd5307zs02",
+          "labelFr": "Faradje",
+          "labelEn": "Faradje",
+          "code": "CD5307ZS02"
+        },
+        {
+          "id": "haut-uélé__cd5309zs01",
+          "labelFr": "Gombari",
+          "labelEn": "Gombari",
+          "code": "CD5309ZS01"
+        },
+        {
+          "id": "haut-uélé__cd5302zs01",
+          "labelFr": "Isiro",
+          "labelEn": "Isiro",
+          "code": "CD5302ZS01"
+        },
+        {
+          "id": "haut-uélé__cd5307zs03",
+          "labelFr": "Makoro",
+          "labelEn": "Makoro",
+          "code": "CD5307ZS03"
+        },
+        {
+          "id": "haut-uélé__cd5303zs01",
+          "labelFr": "Niangara",
+          "labelEn": "Niangara",
+          "code": "CD5303ZS01"
+        },
+        {
+          "id": "haut-uélé__cd5311zs02",
+          "labelFr": "Pawa",
+          "labelEn": "Pawa",
+          "code": "CD5311ZS02"
+        },
+        {
+          "id": "haut-uélé__cd5302zs02",
+          "labelFr": "Rungu",
+          "labelEn": "Rungu",
+          "code": "CD5302ZS02"
+        },
+        {
+          "id": "haut-uélé__cd5311zs03",
+          "labelFr": "Wamba",
+          "labelEn": "Wamba",
+          "code": "CD5311ZS03"
+        },
+        {
+          "id": "haut-uélé__cd5309zs02",
+          "labelFr": "Watsa",
+          "labelEn": "Watsa",
+          "code": "CD5309ZS02"
+        }
+      ]
+    },
+    {
+      "id": "ituri",
+      "labelFr": "Ituri",
+      "labelEn": "Ituri",
+      "zones": [
+        {
+          "id": "ituri__cd5409zs01",
+          "labelFr": "Adi",
+          "labelEn": "Adi",
+          "code": "CD5409ZS01"
+        },
+        {
+          "id": "ituri__cd5409zs02",
+          "labelFr": "Adja",
+          "labelEn": "Adja",
+          "code": "CD5409ZS02"
+        },
+        {
+          "id": "ituri__cd5407zs01",
+          "labelFr": "Angumu",
+          "labelEn": "Angumu",
+          "code": "CD5407ZS01"
+        },
+        {
+          "id": "ituri__cd5409zs03",
+          "labelFr": "Ariwara",
+          "labelEn": "Ariwara",
+          "code": "CD5409ZS03"
+        },
+        {
+          "id": "ituri__cd5409zs04",
+          "labelFr": "Aru",
+          "labelEn": "Aru",
+          "code": "CD5409ZS04"
+        },
+        {
+          "id": "ituri__cd5407zs02",
+          "labelFr": "Aungba",
+          "labelEn": "Aungba",
+          "code": "CD5407ZS02"
+        },
+        {
+          "id": "ituri__cd5405zs01",
+          "labelFr": "Bambu",
+          "labelEn": "Bambu",
+          "code": "CD5405ZS01"
+        },
+        {
+          "id": "ituri__cd5409zs05",
+          "labelFr": "Biringi",
+          "labelEn": "Biringi",
+          "code": "CD5409ZS05"
+        },
+        {
+          "id": "ituri__cd5402zs01",
+          "labelFr": "Boga",
+          "labelEn": "Boga",
+          "code": "CD5402ZS01"
+        },
+        {
+          "id": "ituri__cd5402zs02",
+          "labelFr": "Bunia",
+          "labelEn": "Bunia",
+          "code": "CD5402ZS02"
+        },
+        {
+          "id": "ituri__cd5405zs02",
+          "labelFr": "Damas",
+          "labelEn": "Damas",
+          "code": "CD5405ZS02"
+        },
+        {
+          "id": "ituri__cd5405zs03",
+          "labelFr": "Drodro",
+          "labelEn": "Drodro",
+          "code": "CD5405ZS03"
+        },
+        {
+          "id": "ituri__cd5405zs04",
+          "labelFr": "Fataki",
+          "labelEn": "Fataki",
+          "code": "CD5405ZS04"
+        },
+        {
+          "id": "ituri__cd5402zs03",
+          "labelFr": "Gethy",
+          "labelEn": "Gethy",
+          "code": "CD5402ZS03"
+        },
+        {
+          "id": "ituri__cd5405zs05",
+          "labelFr": "Jiba",
+          "labelEn": "Jiba",
+          "code": "CD5405ZS05"
+        },
+        {
+          "id": "ituri__cd5407zs03",
+          "labelFr": "Kambala",
+          "labelEn": "Kambala",
+          "code": "CD5407ZS03"
+        },
+        {
+          "id": "ituri__cd5405zs06",
+          "labelFr": "Kilo",
+          "labelEn": "Kilo",
+          "code": "CD5405ZS06"
+        },
+        {
+          "id": "ituri__cd5402zs04",
+          "labelFr": "Komanda",
+          "labelEn": "Komanda",
+          "code": "CD5402ZS04"
+        },
+        {
+          "id": "ituri__cd5409zs06",
+          "labelFr": "Laybo",
+          "labelEn": "Laybo",
+          "code": "CD5409ZS06"
+        },
+        {
+          "id": "ituri__cd5405zs07",
+          "labelFr": "Linga",
+          "labelEn": "Linga",
+          "code": "CD5405ZS07"
+        },
+        {
+          "id": "ituri__cd5405zs08",
+          "labelFr": "Lita",
+          "labelEn": "Lita",
+          "code": "CD5405ZS08"
+        },
+        {
+          "id": "ituri__cd5407zs04",
+          "labelFr": "Logo",
+          "labelEn": "Logo",
+          "code": "CD5407ZS04"
+        },
+        {
+          "id": "ituri__cd5403zs01",
+          "labelFr": "Lolwa",
+          "labelEn": "Lolwa",
+          "code": "CD5403ZS01"
+        },
+        {
+          "id": "ituri__cd5407zs05",
+          "labelFr": "Mahagi",
+          "labelEn": "Mahagi",
+          "code": "CD5407ZS05"
+        },
+        {
+          "id": "ituri__cd5403zs02",
+          "labelFr": "Mambasa",
+          "labelEn": "Mambasa",
+          "code": "CD5403ZS02"
+        },
+        {
+          "id": "ituri__cd5403zs03",
+          "labelFr": "Mandima",
+          "labelEn": "Mandima",
+          "code": "CD5403ZS03"
+        },
+        {
+          "id": "ituri__cd5405zs09",
+          "labelFr": "Mangala",
+          "labelEn": "Mangala",
+          "code": "CD5405ZS09"
+        },
+        {
+          "id": "ituri__cd5405zs10",
+          "labelFr": "Mongbalu",
+          "labelEn": "Mongbalu",
+          "code": "CD5405ZS10"
+        },
+        {
+          "id": "ituri__cd5403zs04",
+          "labelFr": "Nia-Nia",
+          "labelEn": "Nia-Nia",
+          "code": "CD5403ZS04"
+        },
+        {
+          "id": "ituri__cd5405zs11",
+          "labelFr": "Nizi",
+          "labelEn": "Nizi",
+          "code": "CD5405ZS11"
+        },
+        {
+          "id": "ituri__cd5402zs05",
+          "labelFr": "Nyakunde",
+          "labelEn": "Nyakunde",
+          "code": "CD5402ZS05"
+        },
+        {
+          "id": "ituri__cd5407zs06",
+          "labelFr": "Nyarambe",
+          "labelEn": "Nyarambe",
+          "code": "CD5407ZS06"
+        },
+        {
+          "id": "ituri__cd5405zs12",
+          "labelFr": "Rethy",
+          "labelEn": "Rethy",
+          "code": "CD5405ZS12"
+        },
+        {
+          "id": "ituri__cd5407zs07",
+          "labelFr": "Rimba",
+          "labelEn": "Rimba",
+          "code": "CD5407ZS07"
+        },
+        {
+          "id": "ituri__cd5402zs06",
+          "labelFr": "Rwampara",
+          "labelEn": "Rwampara",
+          "code": "CD5402ZS06"
+        },
+        {
+          "id": "ituri__cd5405zs13",
+          "labelFr": "Tchomia",
+          "labelEn": "Tchomia",
+          "code": "CD5405ZS13"
+        }
+      ]
+    },
+    {
+      "id": "kasaï",
+      "labelFr": "Kasaï",
+      "labelEn": "Kasaï",
+      "zones": [
+        {
+          "id": "kasaï__cd9205zs01",
+          "labelFr": "Banga Lubaka",
+          "labelEn": "Banga Lubaka",
+          "code": "CD9205ZS01"
+        },
+        {
+          "id": "kasaï__cd9207zs01",
+          "labelFr": "Bulape",
+          "labelEn": "Bulape",
+          "code": "CD9207ZS01"
+        },
+        {
+          "id": "kasaï__cd9208zs01",
+          "labelFr": "Dekese",
+          "labelEn": "Dekese",
+          "code": "CD9208ZS01"
+        },
+        {
+          "id": "kasaï__cd9205zs02",
+          "labelFr": "Ilebo",
+          "labelEn": "Ilebo",
+          "code": "CD9205ZS02"
+        },
+        {
+          "id": "kasaï__cd9207zs02",
+          "labelFr": "Kakenge",
+          "labelEn": "Kakenge",
+          "code": "CD9207ZS02"
+        },
+        {
+          "id": "kasaï__cd9202zs01",
+          "labelFr": "Kalonda Ouest",
+          "labelEn": "Kalonda Ouest",
+          "code": "CD9202ZS01"
+        },
+        {
+          "id": "kasaï__cd9202zs02",
+          "labelFr": "Kamonia",
+          "labelEn": "Kamonia",
+          "code": "CD9202ZS02"
+        },
+        {
+          "id": "kasaï__cd9202zs03",
+          "labelFr": "Kamwesha",
+          "labelEn": "Kamwesha",
+          "code": "CD9202ZS03"
+        },
+        {
+          "id": "kasaï__cd9202zs04",
+          "labelFr": "Kanzala",
+          "labelEn": "Kanzala",
+          "code": "CD9202ZS04"
+        },
+        {
+          "id": "kasaï__cd9202zs05",
+          "labelFr": "Kitangwa",
+          "labelEn": "Kitangwa",
+          "code": "CD9202ZS05"
+        },
+        {
+          "id": "kasaï__cd9204zs01",
+          "labelFr": "Luebo",
+          "labelEn": "Luebo",
+          "code": "CD9204ZS01"
+        },
+        {
+          "id": "kasaï__cd9205zs03",
+          "labelFr": "Mikope",
+          "labelEn": "Mikope",
+          "code": "CD9205ZS03"
+        },
+        {
+          "id": "kasaï__cd9207zs03",
+          "labelFr": "Mushenge",
+          "labelEn": "Mushenge",
+          "code": "CD9207ZS03"
+        },
+        {
+          "id": "kasaï__cd9202zs06",
+          "labelFr": "Mutena",
+          "labelEn": "Mutena",
+          "code": "CD9202ZS06"
+        },
+        {
+          "id": "kasaï__cd9207zs04",
+          "labelFr": "Mweka",
+          "labelEn": "Mweka",
+          "code": "CD9207ZS04"
+        },
+        {
+          "id": "kasaï__cd9204zs02",
+          "labelFr": "Ndjoko-Mpunda",
+          "labelEn": "Ndjoko-Mpunda",
+          "code": "CD9204ZS02"
+        },
+        {
+          "id": "kasaï__cd9202zs07",
+          "labelFr": "Nyanga",
+          "labelEn": "Nyanga",
+          "code": "CD9202ZS07"
+        },
+        {
+          "id": "kasaï__cd9202zs08",
+          "labelFr": "Tshikapa",
+          "labelEn": "Tshikapa",
+          "code": "CD9202ZS08"
+        }
+      ]
+    },
+    {
+      "id": "kasaï-central",
+      "labelFr": "Kasaï-Central",
+      "labelEn": "Kasaï-Central",
+      "zones": [
+        {
+          "id": "kasaï-central__cd9106zs01",
+          "labelFr": "Bena Leka",
+          "labelEn": "Bena Leka",
+          "code": "CD9106ZS01"
+        },
+        {
+          "id": "kasaï-central__cd9107zs01",
+          "labelFr": "Bena Tshiadi",
+          "labelEn": "Bena Tshiadi",
+          "code": "CD9107ZS01"
+        },
+        {
+          "id": "kasaï-central__cd9105zs01",
+          "labelFr": "Bilomba",
+          "labelEn": "Bilomba",
+          "code": "CD9105ZS01"
+        },
+        {
+          "id": "kasaï-central__cd9101zs01",
+          "labelFr": "Bobozo",
+          "labelEn": "Bobozo",
+          "code": "CD9101ZS01"
+        },
+        {
+          "id": "kasaï-central__cd9102zs01",
+          "labelFr": "Bunkonde",
+          "labelEn": "Bunkonde",
+          "code": "CD9102ZS01"
+        },
+        {
+          "id": "kasaï-central__cd9106zs02",
+          "labelFr": "Demba",
+          "labelEn": "Demba",
+          "code": "CD9106ZS02"
+        },
+        {
+          "id": "kasaï-central__cd9102zs02",
+          "labelFr": "Dibaya",
+          "labelEn": "Dibaya",
+          "code": "CD9102ZS02"
+        },
+        {
+          "id": "kasaï-central__cd9105zs02",
+          "labelFr": "Kalomba",
+          "labelEn": "Kalomba",
+          "code": "CD9105ZS02"
+        },
+        {
+          "id": "kasaï-central__cd9101zs02",
+          "labelFr": "Kananga",
+          "labelEn": "Kananga",
+          "code": "CD9101ZS02"
+        },
+        {
+          "id": "kasaï-central__cd9107zs02",
+          "labelFr": "Katende",
+          "labelEn": "Katende",
+          "code": "CD9107ZS02"
+        },
+        {
+          "id": "kasaï-central__cd9101zs03",
+          "labelFr": "Katoka",
+          "labelEn": "Katoka",
+          "code": "CD9101ZS03"
+        },
+        {
+          "id": "kasaï-central__cd9104zs01",
+          "labelFr": "Luambo",
+          "labelEn": "Luambo",
+          "code": "CD9104ZS01"
+        },
+        {
+          "id": "kasaï-central__cd9102zs03",
+          "labelFr": "Lubondaie",
+          "labelEn": "Lubondaie",
+          "code": "CD9102ZS03"
+        },
+        {
+          "id": "kasaï-central__cd9107zs03",
+          "labelFr": "Lubunga",
+          "labelEn": "Lubunga",
+          "code": "CD9107ZS03"
+        },
+        {
+          "id": "kasaï-central__cd9104zs02",
+          "labelFr": "Luiza",
+          "labelEn": "Luiza",
+          "code": "CD9104ZS02"
+        },
+        {
+          "id": "kasaï-central__cd9101zs04",
+          "labelFr": "Lukonga",
+          "labelEn": "Lukonga",
+          "code": "CD9101ZS04"
+        },
+        {
+          "id": "kasaï-central__cd9104zs03",
+          "labelFr": "Masuika",
+          "labelEn": "Masuika",
+          "code": "CD9104ZS03"
+        },
+        {
+          "id": "kasaï-central__cd9105zs03",
+          "labelFr": "Mikalayi",
+          "labelEn": "Mikalayi",
+          "code": "CD9105ZS03"
+        },
+        {
+          "id": "kasaï-central__cd9107zs04",
+          "labelFr": "Muetshi",
+          "labelEn": "Muetshi",
+          "code": "CD9107ZS04"
+        },
+        {
+          "id": "kasaï-central__cd9106zs03",
+          "labelFr": "Mutoto",
+          "labelEn": "Mutoto",
+          "code": "CD9106ZS03"
+        },
+        {
+          "id": "kasaï-central__cd9105zs04",
+          "labelFr": "Ndekesha",
+          "labelEn": "Ndekesha",
+          "code": "CD9105ZS04"
+        },
+        {
+          "id": "kasaï-central__cd9101zs05",
+          "labelFr": "Ndesha",
+          "labelEn": "Ndesha",
+          "code": "CD9101ZS05"
+        },
+        {
+          "id": "kasaï-central__cd9105zs05",
+          "labelFr": "Tshibala",
+          "labelEn": "Tshibala",
+          "code": "CD9105ZS05"
+        },
+        {
+          "id": "kasaï-central__cd9101zs06",
+          "labelFr": "Tshikaji",
+          "labelEn": "Tshikaji",
+          "code": "CD9101ZS06"
+        },
+        {
+          "id": "kasaï-central__cd9102zs04",
+          "labelFr": "Tshikula",
+          "labelEn": "Tshikula",
+          "code": "CD9102ZS04"
+        },
+        {
+          "id": "kasaï-central__cd9104zs04",
+          "labelFr": "Yangala",
+          "labelEn": "Yangala",
+          "code": "CD9104ZS04"
+        }
+      ]
+    },
+    {
+      "id": "kasaï-oriental",
+      "labelFr": "Kasaï-Oriental",
+      "labelEn": "Kasaï-Oriental",
+      "zones": [
+        {
+          "id": "kasaï-oriental__cd8209zs01",
+          "labelFr": "Bibanga",
+          "labelEn": "Bibanga",
+          "code": "CD8209ZS01"
+        },
+        {
+          "id": "kasaï-oriental__cd8201zs01",
+          "labelFr": "Bipemba",
+          "labelEn": "Bipemba",
+          "code": "CD8201ZS01"
+        },
+        {
+          "id": "kasaï-oriental__cd8201zs02",
+          "labelFr": "Bonzola",
+          "labelEn": "Bonzola",
+          "code": "CD8201ZS02"
+        },
+        {
+          "id": "kasaï-oriental__cd8205zs01",
+          "labelFr": "Cilundu",
+          "labelEn": "Cilundu",
+          "code": "CD8205ZS01"
+        },
+        {
+          "id": "kasaï-oriental__cd8201zs03",
+          "labelFr": "Dibindi",
+          "labelEn": "Dibindi",
+          "code": "CD8201ZS03"
+        },
+        {
+          "id": "kasaï-oriental__cd8201zs04",
+          "labelFr": "Diulu",
+          "labelEn": "Diulu",
+          "code": "CD8201ZS04"
+        },
+        {
+          "id": "kasaï-oriental__cd8207zs01",
+          "labelFr": "Kabeya Kamuanga",
+          "labelEn": "Kabeya Kamuanga",
+          "code": "CD8207ZS01"
+        },
+        {
+          "id": "kasaï-oriental__cd8201zs05",
+          "labelFr": "Kansele",
+          "labelEn": "Kansele",
+          "code": "CD8201ZS05"
+        },
+        {
+          "id": "kasaï-oriental__cd8202zs01",
+          "labelFr": "Kasansa",
+          "labelEn": "Kasansa",
+          "code": "CD8202ZS01"
+        },
+        {
+          "id": "kasaï-oriental__cd8201zs06",
+          "labelFr": "Lubilanji",
+          "labelEn": "Lubilanji",
+          "code": "CD8201ZS06"
+        },
+        {
+          "id": "kasaï-oriental__cd8201zs07",
+          "labelFr": "Lukelenge",
+          "labelEn": "Lukelenge",
+          "code": "CD8201ZS07"
+        },
+        {
+          "id": "kasaï-oriental__cd8205zs02",
+          "labelFr": "Miabi",
+          "labelEn": "Miabi",
+          "code": "CD8205ZS02"
+        },
+        {
+          "id": "kasaï-oriental__cd8201zs08",
+          "labelFr": "Mpokolo",
+          "labelEn": "Mpokolo",
+          "code": "CD8201ZS08"
+        },
+        {
+          "id": "kasaï-oriental__cd8208zs01",
+          "labelFr": "Mukumbi",
+          "labelEn": "Mukumbi",
+          "code": "CD8208ZS01"
+        },
+        {
+          "id": "kasaï-oriental__cd8201zs09",
+          "labelFr": "Muya",
+          "labelEn": "Muya",
+          "code": "CD8201ZS09"
+        },
+        {
+          "id": "kasaï-oriental__cd8201zs10",
+          "labelFr": "Nzaba",
+          "labelEn": "Nzaba",
+          "code": "CD8201ZS10"
+        },
+        {
+          "id": "kasaï-oriental__cd8202zs02",
+          "labelFr": "Tshilenge",
+          "labelEn": "Tshilenge",
+          "code": "CD8202ZS02"
+        },
+        {
+          "id": "kasaï-oriental__cd8208zs02",
+          "labelFr": "Tshishimbi",
+          "labelEn": "Tshishimbi",
+          "code": "CD8208ZS02"
+        },
+        {
+          "id": "kasaï-oriental__cd8209zs02",
+          "labelFr": "Tshitenge",
+          "labelEn": "Tshitenge",
+          "code": "CD8209ZS02"
+        }
+      ]
+    },
+    {
+      "id": "kinshasa",
+      "labelFr": "Kinshasa",
+      "labelEn": "Kinshasa",
+      "zones": [
+        {
+          "id": "kinshasa__cd1000zs01",
+          "labelFr": "Bandalungwa",
+          "labelEn": "Bandalungwa",
+          "code": "CD1000ZS01"
+        },
+        {
+          "id": "kinshasa__cd1000zs02",
+          "labelFr": "Barumbu",
+          "labelEn": "Barumbu",
+          "code": "CD1000ZS02"
+        },
+        {
+          "id": "kinshasa__cd1000zs03",
+          "labelFr": "Binza Meteo",
+          "labelEn": "Binza Meteo",
+          "code": "CD1000ZS03"
+        },
+        {
+          "id": "kinshasa__cd1000zs04",
+          "labelFr": "Binza Ozone",
+          "labelEn": "Binza Ozone",
+          "code": "CD1000ZS04"
+        },
+        {
+          "id": "kinshasa__cd1000zs05",
+          "labelFr": "Biyela",
+          "labelEn": "Biyela",
+          "code": "CD1000ZS05"
+        },
+        {
+          "id": "kinshasa__cd1000zs06",
+          "labelFr": "Bumbu",
+          "labelEn": "Bumbu",
+          "code": "CD1000ZS06"
+        },
+        {
+          "id": "kinshasa__cd1000zs07",
+          "labelFr": "Gombe",
+          "labelEn": "Gombe",
+          "code": "CD1000ZS07"
+        },
+        {
+          "id": "kinshasa__cd1000zs08",
+          "labelFr": "Kalamu I",
+          "labelEn": "Kalamu I",
+          "code": "CD1000ZS08"
+        },
+        {
+          "id": "kinshasa__cd1000zs09",
+          "labelFr": "Kalamu II",
+          "labelEn": "Kalamu II",
+          "code": "CD1000ZS09"
+        },
+        {
+          "id": "kinshasa__cd1000zs10",
+          "labelFr": "Kasa-Vubu",
+          "labelEn": "Kasa-Vubu",
+          "code": "CD1000ZS10"
+        },
+        {
+          "id": "kinshasa__cd1000zs11",
+          "labelFr": "Kikimi",
+          "labelEn": "Kikimi",
+          "code": "CD1000ZS11"
+        },
+        {
+          "id": "kinshasa__cd1000zs12",
+          "labelFr": "Kimbanseke",
+          "labelEn": "Kimbanseke",
+          "code": "CD1000ZS12"
+        },
+        {
+          "id": "kinshasa__cd1000zs13",
+          "labelFr": "Kingabwa",
+          "labelEn": "Kingabwa",
+          "code": "CD1000ZS13"
+        },
+        {
+          "id": "kinshasa__cd1000zs14",
+          "labelFr": "Kingasani",
+          "labelEn": "Kingasani",
+          "code": "CD1000ZS14"
+        },
+        {
+          "id": "kinshasa__cd1000zs15",
+          "labelFr": "Kinshasa",
+          "labelEn": "Kinshasa",
+          "code": "CD1000ZS15"
+        },
+        {
+          "id": "kinshasa__cd1000zs16",
+          "labelFr": "Kintambo",
+          "labelEn": "Kintambo",
+          "code": "CD1000ZS16"
+        },
+        {
+          "id": "kinshasa__cd1000zs17",
+          "labelFr": "Kisenso",
+          "labelEn": "Kisenso",
+          "code": "CD1000ZS17"
+        },
+        {
+          "id": "kinshasa__cd1000zs18",
+          "labelFr": "Kokolo",
+          "labelEn": "Kokolo",
+          "code": "CD1000ZS18"
+        },
+        {
+          "id": "kinshasa__cd1000zs19",
+          "labelFr": "Lemba",
+          "labelEn": "Lemba",
+          "code": "CD1000ZS19"
+        },
+        {
+          "id": "kinshasa__cd1000zs20",
+          "labelFr": "Limete",
+          "labelEn": "Limete",
+          "code": "CD1000ZS20"
+        },
+        {
+          "id": "kinshasa__cd1000zs21",
+          "labelFr": "Lingwala",
+          "labelEn": "Lingwala",
+          "code": "CD1000ZS21"
+        },
+        {
+          "id": "kinshasa__cd1000zs22",
+          "labelFr": "Makala",
+          "labelEn": "Makala",
+          "code": "CD1000ZS22"
+        },
+        {
+          "id": "kinshasa__cd1000zs23",
+          "labelFr": "Maluku I",
+          "labelEn": "Maluku I",
+          "code": "CD1000ZS23"
+        },
+        {
+          "id": "kinshasa__cd1000zs24",
+          "labelFr": "Maluku II",
+          "labelEn": "Maluku II",
+          "code": "CD1000ZS24"
+        },
+        {
+          "id": "kinshasa__cd1000zs25",
+          "labelFr": "Masina I",
+          "labelEn": "Masina I",
+          "code": "CD1000ZS25"
+        },
+        {
+          "id": "kinshasa__cd1000zs26",
+          "labelFr": "Masina II",
+          "labelEn": "Masina II",
+          "code": "CD1000ZS26"
+        },
+        {
+          "id": "kinshasa__cd1000zs27",
+          "labelFr": "Matete",
+          "labelEn": "Matete",
+          "code": "CD1000ZS27"
+        },
+        {
+          "id": "kinshasa__cd1000zs28",
+          "labelFr": "Mont Ngafula I",
+          "labelEn": "Mont Ngafula I",
+          "code": "CD1000ZS28"
+        },
+        {
+          "id": "kinshasa__cd1000zs29",
+          "labelFr": "Mont Ngafula II",
+          "labelEn": "Mont Ngafula II",
+          "code": "CD1000ZS29"
+        },
+        {
+          "id": "kinshasa__cd1000zs30",
+          "labelFr": "Ndjili",
+          "labelEn": "Ndjili",
+          "code": "CD1000ZS30"
+        },
+        {
+          "id": "kinshasa__cd1000zs31",
+          "labelFr": "Ngaba",
+          "labelEn": "Ngaba",
+          "code": "CD1000ZS31"
+        },
+        {
+          "id": "kinshasa__cd1000zs32",
+          "labelFr": "Ngiri-Ngiri",
+          "labelEn": "Ngiri-Ngiri",
+          "code": "CD1000ZS32"
+        },
+        {
+          "id": "kinshasa__cd1000zs33",
+          "labelFr": "Nsele",
+          "labelEn": "Nsele",
+          "code": "CD1000ZS33"
+        },
+        {
+          "id": "kinshasa__cd1000zs34",
+          "labelFr": "Police",
+          "labelEn": "Police",
+          "code": "CD1000ZS34"
+        },
+        {
+          "id": "kinshasa__cd1000zs35",
+          "labelFr": "Selembao",
+          "labelEn": "Selembao",
+          "code": "CD1000ZS35"
+        }
+      ]
+    },
+    {
+      "id": "kongo-central",
+      "labelFr": "Kongo Central",
+      "labelEn": "Kongo Central",
+      "zones": [
+        {
+          "id": "kongo-central__cd2013zs01",
+          "labelFr": "Boko-Kivulu",
+          "labelEn": "Boko-Kivulu",
+          "code": "CD2013ZS01"
+        },
+        {
+          "id": "kongo-central__cd2002zs01",
+          "labelFr": "Boma",
+          "labelEn": "Boma",
+          "code": "CD2002ZS01"
+        },
+        {
+          "id": "kongo-central__cd2003zs01",
+          "labelFr": "Boma Bungu",
+          "labelEn": "Boma Bungu",
+          "code": "CD2003ZS01"
+        },
+        {
+          "id": "kongo-central__cd2013zs02",
+          "labelFr": "Gombe-Matadi",
+          "labelEn": "Gombe-Matadi",
+          "code": "CD2013ZS02"
+        },
+        {
+          "id": "kongo-central__cd2009zs01",
+          "labelFr": "Inga",
+          "labelEn": "Inga",
+          "code": "CD2009ZS01"
+        },
+        {
+          "id": "kongo-central__cd2005zs01",
+          "labelFr": "Kangu",
+          "labelEn": "Kangu",
+          "code": "CD2005ZS01"
+        },
+        {
+          "id": "kongo-central__cd2010zs01",
+          "labelFr": "Kibunzi",
+          "labelEn": "Kibunzi",
+          "code": "CD2010ZS01"
+        },
+        {
+          "id": "kongo-central__cd2013zs03",
+          "labelFr": "Kimpangu",
+          "labelEn": "Kimpangu",
+          "code": "CD2013ZS03"
+        },
+        {
+          "id": "kongo-central__cd2011zs01",
+          "labelFr": "Kimpese",
+          "labelEn": "Kimpese",
+          "code": "CD2011ZS01"
+        },
+        {
+          "id": "kongo-central__cd2019zs01",
+          "labelFr": "Kimvula",
+          "labelEn": "Kimvula",
+          "code": "CD2019ZS01"
+        },
+        {
+          "id": "kongo-central__cd2007zs01",
+          "labelFr": "Kinkonzi",
+          "labelEn": "Kinkonzi",
+          "code": "CD2007ZS01"
+        },
+        {
+          "id": "kongo-central__cd2017zs01",
+          "labelFr": "Kisantu",
+          "labelEn": "Kisantu",
+          "code": "CD2017ZS01"
+        },
+        {
+          "id": "kongo-central__cd2003zs02",
+          "labelFr": "Kitona",
+          "labelEn": "Kitona",
+          "code": "CD2003ZS02"
+        },
+        {
+          "id": "kongo-central__cd2007zs02",
+          "labelFr": "Kizu",
+          "labelEn": "Kizu",
+          "code": "CD2007ZS02"
+        },
+        {
+          "id": "kongo-central__cd2007zs03",
+          "labelFr": "Kuimba",
+          "labelEn": "Kuimba",
+          "code": "CD2007ZS03"
+        },
+        {
+          "id": "kongo-central__cd2013zs04",
+          "labelFr": "Kwilu-Ngongo",
+          "labelEn": "Kwilu-Ngongo",
+          "code": "CD2013ZS04"
+        },
+        {
+          "id": "kongo-central__cd2005zs02",
+          "labelFr": "Lukula",
+          "labelEn": "Lukula",
+          "code": "CD2005ZS02"
+        },
+        {
+          "id": "kongo-central__cd2010zs02",
+          "labelFr": "Luozi",
+          "labelEn": "Luozi",
+          "code": "CD2010ZS02"
+        },
+        {
+          "id": "kongo-central__cd2010zs03",
+          "labelFr": "Mangembo",
+          "labelEn": "Mangembo",
+          "code": "CD2010ZS03"
+        },
+        {
+          "id": "kongo-central__cd2015zs01",
+          "labelFr": "Masa",
+          "labelEn": "Masa",
+          "code": "CD2015ZS01"
+        },
+        {
+          "id": "kongo-central__cd2001zs01",
+          "labelFr": "Matadi",
+          "labelEn": "Matadi",
+          "code": "CD2001ZS01"
+        },
+        {
+          "id": "kongo-central__cd2013zs05",
+          "labelFr": "Mbanza-Ngungu",
+          "labelEn": "Mbanza-Ngungu",
+          "code": "CD2013ZS05"
+        },
+        {
+          "id": "kongo-central__cd2003zs03",
+          "labelFr": "Moanda",
+          "labelEn": "Moanda",
+          "code": "CD2003ZS03"
+        },
+        {
+          "id": "kongo-central__cd2017zs02",
+          "labelFr": "Ngidinga",
+          "labelEn": "Ngidinga",
+          "code": "CD2017ZS02"
+        },
+        {
+          "id": "kongo-central__cd2017zs03",
+          "labelFr": "Nselo",
+          "labelEn": "Nselo",
+          "code": "CD2017ZS03"
+        },
+        {
+          "id": "kongo-central__cd2011zs02",
+          "labelFr": "Nsona-Mpangu",
+          "labelEn": "Nsona-Mpangu",
+          "code": "CD2011ZS02"
+        },
+        {
+          "id": "kongo-central__cd2001zs02",
+          "labelFr": "Nzanza",
+          "labelEn": "Nzanza",
+          "code": "CD2001ZS02"
+        },
+        {
+          "id": "kongo-central__cd2009zs02",
+          "labelFr": "Seke-Banza",
+          "labelEn": "Seke-Banza",
+          "code": "CD2009ZS02"
+        },
+        {
+          "id": "kongo-central__cd2015zs02",
+          "labelFr": "Sona-Bata",
+          "labelEn": "Sona-Bata",
+          "code": "CD2015ZS02"
+        },
+        {
+          "id": "kongo-central__cd2007zs04",
+          "labelFr": "Tshela",
+          "labelEn": "Tshela",
+          "code": "CD2007ZS04"
+        },
+        {
+          "id": "kongo-central__cd2007zs05",
+          "labelFr": "Vaku",
+          "labelEn": "Vaku",
+          "code": "CD2007ZS05"
+        }
+      ]
+    },
+    {
+      "id": "kwango",
+      "labelFr": "Kwango",
+      "labelEn": "Kwango",
+      "zones": [
+        {
+          "id": "kwango__cd3102zs01",
+          "labelFr": "Boko",
+          "labelEn": "Boko",
+          "code": "CD3102ZS01"
+        },
+        {
+          "id": "kwango__cd3103zs01",
+          "labelFr": "Feshi",
+          "labelEn": "Feshi",
+          "code": "CD3103ZS01"
+        },
+        {
+          "id": "kwango__cd3105zs01",
+          "labelFr": "Kahemba",
+          "labelEn": "Kahemba",
+          "code": "CD3105ZS01"
+        },
+        {
+          "id": "kwango__cd3105zs02",
+          "labelFr": "Kajiji",
+          "labelEn": "Kajiji",
+          "code": "CD3105ZS02"
+        },
+        {
+          "id": "kwango__cd3106zs01",
+          "labelFr": "Kasongo Lunda",
+          "labelEn": "Kasongo Lunda",
+          "code": "CD3106ZS01"
+        },
+        {
+          "id": "kwango__cd3102zs02",
+          "labelFr": "Kenge",
+          "labelEn": "Kenge",
+          "code": "CD3102ZS02"
+        },
+        {
+          "id": "kwango__cd3102zs03",
+          "labelFr": "Kimbau",
+          "labelEn": "Kimbau",
+          "code": "CD3102ZS03"
+        },
+        {
+          "id": "kwango__cd3103zs02",
+          "labelFr": "Kisanji",
+          "labelEn": "Kisanji",
+          "code": "CD3103ZS02"
+        },
+        {
+          "id": "kwango__cd3106zs02",
+          "labelFr": "Kitenda",
+          "labelEn": "Kitenda",
+          "code": "CD3106ZS02"
+        },
+        {
+          "id": "kwango__cd3103zs03",
+          "labelFr": "Mwela Lembwa",
+          "labelEn": "Mwela Lembwa",
+          "code": "CD3103ZS03"
+        },
+        {
+          "id": "kwango__cd3106zs03",
+          "labelFr": "Panzi",
+          "labelEn": "Panzi",
+          "code": "CD3106ZS03"
+        },
+        {
+          "id": "kwango__cd3108zs01",
+          "labelFr": "Popokabaka",
+          "labelEn": "Popokabaka",
+          "code": "CD3108ZS01"
+        },
+        {
+          "id": "kwango__cd3106zs04",
+          "labelFr": "Tembo",
+          "labelEn": "Tembo",
+          "code": "CD3106ZS04"
+        },
+        {
+          "id": "kwango__cd3106zs05",
+          "labelFr": "Wamba Lwadi",
+          "labelEn": "Wamba Lwadi",
+          "code": "CD3106ZS05"
+        }
+      ]
+    },
+    {
+      "id": "kwilu",
+      "labelFr": "Kwilu",
+      "labelEn": "Kwilu",
+      "zones": [
+        {
+          "id": "kwilu__cd3202zs01",
+          "labelFr": "Bagata",
+          "labelEn": "Bagata",
+          "code": "CD3202ZS01"
+        },
+        {
+          "id": "kwilu__cd3201zs01",
+          "labelFr": "Bandundu",
+          "labelEn": "Bandundu",
+          "code": "CD3201ZS01"
+        },
+        {
+          "id": "kwilu__cd3204zs01",
+          "labelFr": "Bulungu",
+          "labelEn": "Bulungu",
+          "code": "CD3204ZS01"
+        },
+        {
+          "id": "kwilu__cd3204zs02",
+          "labelFr": "Djuma",
+          "labelEn": "Djuma",
+          "code": "CD3204ZS02"
+        },
+        {
+          "id": "kwilu__cd3210zs01",
+          "labelFr": "Gungu",
+          "labelEn": "Gungu",
+          "code": "CD3210ZS01"
+        },
+        {
+          "id": "kwilu__cd3206zs01",
+          "labelFr": "Idiofa",
+          "labelEn": "Idiofa",
+          "code": "CD3206ZS01"
+        },
+        {
+          "id": "kwilu__cd3206zs02",
+          "labelFr": "Ipamu",
+          "labelEn": "Ipamu",
+          "code": "CD3206ZS02"
+        },
+        {
+          "id": "kwilu__cd3202zs02",
+          "labelFr": "Kikongo",
+          "labelEn": "Kikongo",
+          "code": "CD3202ZS02"
+        },
+        {
+          "id": "kwilu__cd3203zs01",
+          "labelFr": "Kikwit-Nord",
+          "labelEn": "Kikwit-Nord",
+          "code": "CD3203ZS01"
+        },
+        {
+          "id": "kwilu__cd3203zs02",
+          "labelFr": "Kikwit-Sud",
+          "labelEn": "Kikwit-Sud",
+          "code": "CD3203ZS02"
+        },
+        {
+          "id": "kwilu__cd3206zs03",
+          "labelFr": "Kimputu",
+          "labelEn": "Kimputu",
+          "code": "CD3206ZS03"
+        },
+        {
+          "id": "kwilu__cd3210zs02",
+          "labelFr": "Kingandu",
+          "labelEn": "Kingandu",
+          "code": "CD3210ZS02"
+        },
+        {
+          "id": "kwilu__cd3206zs04",
+          "labelFr": "Koshibanda",
+          "labelEn": "Koshibanda",
+          "code": "CD3206ZS04"
+        },
+        {
+          "id": "kwilu__cd3204zs03",
+          "labelFr": "Lusanga",
+          "labelEn": "Lusanga",
+          "code": "CD3204ZS03"
+        },
+        {
+          "id": "kwilu__cd3212zs01",
+          "labelFr": "Masi-Manimba",
+          "labelEn": "Masi-Manimba",
+          "code": "CD3212ZS01"
+        },
+        {
+          "id": "kwilu__cd3212zs02",
+          "labelFr": "Moanza",
+          "labelEn": "Moanza",
+          "code": "CD3212ZS02"
+        },
+        {
+          "id": "kwilu__cd3206zs05",
+          "labelFr": "Mokala",
+          "labelEn": "Mokala",
+          "code": "CD3206ZS05"
+        },
+        {
+          "id": "kwilu__cd3212zs03",
+          "labelFr": "Mosango",
+          "labelEn": "Mosango",
+          "code": "CD3212ZS03"
+        },
+        {
+          "id": "kwilu__cd3210zs03",
+          "labelFr": "Mukedi",
+          "labelEn": "Mukedi",
+          "code": "CD3210ZS03"
+        },
+        {
+          "id": "kwilu__cd3206zs06",
+          "labelFr": "Mungindu",
+          "labelEn": "Mungindu",
+          "code": "CD3206ZS06"
+        },
+        {
+          "id": "kwilu__cd3204zs04",
+          "labelFr": "Pay Kongila",
+          "labelEn": "Pay Kongila",
+          "code": "CD3204ZS04"
+        },
+        {
+          "id": "kwilu__cd3202zs03",
+          "labelFr": "Sia",
+          "labelEn": "Sia",
+          "code": "CD3202ZS03"
+        },
+        {
+          "id": "kwilu__cd3204zs05",
+          "labelFr": "Vanga",
+          "labelEn": "Vanga",
+          "code": "CD3204ZS05"
+        },
+        {
+          "id": "kwilu__cd3212zs04",
+          "labelFr": "Yasa-Bonga",
+          "labelEn": "Yasa-Bonga",
+          "code": "CD3212ZS04"
+        }
+      ]
+    },
+    {
+      "id": "lomami",
+      "labelFr": "Lomami",
+      "labelEn": "Lomami",
+      "zones": [
+        {
+          "id": "lomami__cd8102zs01",
+          "labelFr": "Kabinda",
+          "labelEn": "Kabinda",
+          "code": "CD8102ZS01"
+        },
+        {
+          "id": "lomami__cd8106zs01",
+          "labelFr": "Kalambayi Kabanga",
+          "labelEn": "Kalambayi Kabanga",
+          "code": "CD8106ZS01"
+        },
+        {
+          "id": "lomami__cd8104zs01",
+          "labelFr": "Kalenda",
+          "labelEn": "Kalenda",
+          "code": "CD8104ZS01"
+        },
+        {
+          "id": "lomami__cd8102zs02",
+          "labelFr": "Kalonda Est",
+          "labelEn": "Kalonda Est",
+          "code": "CD8102ZS02"
+        },
+        {
+          "id": "lomami__cd8108zs01",
+          "labelFr": "Kamana",
+          "labelEn": "Kamana",
+          "code": "CD8108ZS01"
+        },
+        {
+          "id": "lomami__cd8105zs01",
+          "labelFr": "Kamiji",
+          "labelEn": "Kamiji",
+          "code": "CD8105ZS01"
+        },
+        {
+          "id": "lomami__cd8104zs02",
+          "labelFr": "Kanda Kanda",
+          "labelEn": "Kanda Kanda",
+          "code": "CD8104ZS02"
+        },
+        {
+          "id": "lomami__cd8108zs02",
+          "labelFr": "Lubao",
+          "labelEn": "Lubao",
+          "code": "CD8108ZS02"
+        },
+        {
+          "id": "lomami__cd8102zs03",
+          "labelFr": "Ludimbi Lukula",
+          "labelEn": "Ludimbi Lukula",
+          "code": "CD8102ZS03"
+        },
+        {
+          "id": "lomami__cd8104zs03",
+          "labelFr": "Luputa",
+          "labelEn": "Luputa",
+          "code": "CD8104ZS03"
+        },
+        {
+          "id": "lomami__cd8103zs01",
+          "labelFr": "Makota",
+          "labelEn": "Makota",
+          "code": "CD8103ZS01"
+        },
+        {
+          "id": "lomami__cd8106zs02",
+          "labelFr": "Mulumba",
+          "labelEn": "Mulumba",
+          "code": "CD8106ZS02"
+        },
+        {
+          "id": "lomami__cd8103zs02",
+          "labelFr": "Mwene Ditu",
+          "labelEn": "Mwene Ditu",
+          "code": "CD8103ZS02"
+        },
+        {
+          "id": "lomami__cd8106zs03",
+          "labelFr": "Ngandajika",
+          "labelEn": "Ngandajika",
+          "code": "CD8106ZS03"
+        },
+        {
+          "id": "lomami__cd8108zs03",
+          "labelFr": "Tshofa",
+          "labelEn": "Tshofa",
+          "code": "CD8108ZS03"
+        },
+        {
+          "id": "lomami__cd8104zs04",
+          "labelFr": "Wikong",
+          "labelEn": "Wikong",
+          "code": "CD8104ZS04"
+        }
+      ]
+    },
+    {
+      "id": "lualaba",
+      "labelFr": "Lualaba",
+      "labelEn": "Lualaba",
+      "zones": [
+        {
+          "id": "lualaba__cd7203zs01",
+          "labelFr": "Bunkeya",
+          "labelEn": "Bunkeya",
+          "code": "CD7203ZS01"
+        },
+        {
+          "id": "lualaba__cd7202zs01",
+          "labelFr": "Dilala",
+          "labelEn": "Dilala",
+          "code": "CD7202ZS01"
+        },
+        {
+          "id": "lualaba__cd7205zs01",
+          "labelFr": "Dilolo",
+          "labelEn": "Dilolo",
+          "code": "CD7205ZS01"
+        },
+        {
+          "id": "lualaba__cd7203zs02",
+          "labelFr": "Fungurume",
+          "labelEn": "Fungurume",
+          "code": "CD7203ZS02"
+        },
+        {
+          "id": "lualaba__cd7206zs01",
+          "labelFr": "Kafakumba",
+          "labelEn": "Kafakumba",
+          "code": "CD7206ZS01"
+        },
+        {
+          "id": "lualaba__cd7207zs01",
+          "labelFr": "Kalamba",
+          "labelEn": "Kalamba",
+          "code": "CD7207ZS01"
+        },
+        {
+          "id": "lualaba__cd7203zs03",
+          "labelFr": "Kanzenze",
+          "labelEn": "Kanzenze",
+          "code": "CD7203ZS03"
+        },
+        {
+          "id": "lualaba__cd7207zs02",
+          "labelFr": "Kapanga",
+          "labelEn": "Kapanga",
+          "code": "CD7207ZS02"
+        },
+        {
+          "id": "lualaba__cd7205zs02",
+          "labelFr": "Kasaji",
+          "labelEn": "Kasaji",
+          "code": "CD7205ZS02"
+        },
+        {
+          "id": "lualaba__cd7202zs02",
+          "labelFr": "Lualaba",
+          "labelEn": "Lualaba",
+          "code": "CD7202ZS02"
+        },
+        {
+          "id": "lualaba__cd7203zs04",
+          "labelFr": "Lubudi",
+          "labelEn": "Lubudi",
+          "code": "CD7203ZS04"
+        },
+        {
+          "id": "lualaba__cd7202zs03",
+          "labelFr": "Mutshatsha",
+          "labelEn": "Mutshatsha",
+          "code": "CD7202ZS03"
+        },
+        {
+          "id": "lualaba__cd7206zs02",
+          "labelFr": "Sandoa",
+          "labelEn": "Sandoa",
+          "code": "CD7206ZS02"
+        }
+      ]
+    },
+    {
+      "id": "maï-ndombe",
+      "labelFr": "Mai-Ndombe",
+      "labelEn": "Mai-Ndombe",
+      "zones": [
+        {
+          "id": "maï-ndombe__cd3302zs01",
+          "labelFr": "Banjow Moke",
+          "labelEn": "Banjow Moke",
+          "code": "CD3302ZS01"
+        },
+        {
+          "id": "maï-ndombe__cd3306zs01",
+          "labelFr": "Bokoro",
+          "labelEn": "Bokoro",
+          "code": "CD3306ZS01"
+        },
+        {
+          "id": "maï-ndombe__cd3308zs01",
+          "labelFr": "Bolobo",
+          "labelEn": "Bolobo",
+          "code": "CD3308ZS01"
+        },
+        {
+          "id": "maï-ndombe__cd3304zs01",
+          "labelFr": "Bosobe",
+          "labelEn": "Bosobe",
+          "code": "CD3304ZS01"
+        },
+        {
+          "id": "maï-ndombe__cd3302zs02",
+          "labelFr": "Inongo",
+          "labelEn": "Inongo",
+          "code": "CD3302ZS02"
+        },
+        {
+          "id": "maï-ndombe__cd3303zs01",
+          "labelFr": "Kiri",
+          "labelEn": "Kiri",
+          "code": "CD3303ZS01"
+        },
+        {
+          "id": "maï-ndombe__cd3307zs01",
+          "labelFr": "Kwamouth",
+          "labelEn": "Kwamouth",
+          "code": "CD3307ZS01"
+        },
+        {
+          "id": "maï-ndombe__cd3304zs02",
+          "labelFr": "Mimia",
+          "labelEn": "Mimia",
+          "code": "CD3304ZS02"
+        },
+        {
+          "id": "maï-ndombe__cd3311zs01",
+          "labelFr": "Mushie",
+          "labelEn": "Mushie",
+          "code": "CD3311ZS01"
+        },
+        {
+          "id": "maï-ndombe__cd3306zs02",
+          "labelFr": "Nioki",
+          "labelEn": "Nioki",
+          "code": "CD3306ZS02"
+        },
+        {
+          "id": "maï-ndombe__cd3302zs03",
+          "labelFr": "Ntandembelo",
+          "labelEn": "Ntandembelo",
+          "code": "CD3302ZS03"
+        },
+        {
+          "id": "maï-ndombe__cd3304zs03",
+          "labelFr": "Oshwe",
+          "labelEn": "Oshwe",
+          "code": "CD3304ZS03"
+        },
+        {
+          "id": "maï-ndombe__cd3303zs02",
+          "labelFr": "Penjwa",
+          "labelEn": "Penjwa",
+          "code": "CD3303ZS02"
+        },
+        {
+          "id": "maï-ndombe__cd3310zs01",
+          "labelFr": "Yumbi",
+          "labelEn": "Yumbi",
+          "code": "CD3310ZS01"
+        }
+      ]
+    },
+    {
+      "id": "maniema",
+      "labelFr": "Maniema",
+      "labelEn": "Maniema",
+      "zones": [
+        {
+          "id": "maniema__cd6301zs01",
+          "labelFr": "Alunguli",
+          "labelEn": "Alunguli",
+          "code": "CD6301ZS01"
+        },
+        {
+          "id": "maniema__cd6303zs01",
+          "labelFr": "Ferekeni",
+          "labelEn": "Ferekeni",
+          "code": "CD6303ZS01"
+        },
+        {
+          "id": "maniema__cd6309zs01",
+          "labelFr": "Kabambare",
+          "labelEn": "Kabambare",
+          "code": "CD6309ZS01"
+        },
+        {
+          "id": "maniema__cd6302zs01",
+          "labelFr": "Kailo",
+          "labelEn": "Kailo",
+          "code": "CD6302ZS01"
+        },
+        {
+          "id": "maniema__cd6307zs01",
+          "labelFr": "Kalima",
+          "labelEn": "Kalima",
+          "code": "CD6307ZS01"
+        },
+        {
+          "id": "maniema__cd6307zs02",
+          "labelFr": "Kampene",
+          "labelEn": "Kampene",
+          "code": "CD6307ZS02"
+        },
+        {
+          "id": "maniema__cd6311zs01",
+          "labelFr": "Kasongo",
+          "labelEn": "Kasongo",
+          "code": "CD6311ZS01"
+        },
+        {
+          "id": "maniema__cd6313zs01",
+          "labelFr": "Kibombo",
+          "labelEn": "Kibombo",
+          "code": "CD6313ZS01"
+        },
+        {
+          "id": "maniema__cd6301zs02",
+          "labelFr": "Kindu",
+          "labelEn": "Kindu",
+          "code": "CD6301ZS02"
+        },
+        {
+          "id": "maniema__cd6311zs02",
+          "labelFr": "Kunda",
+          "labelEn": "Kunda",
+          "code": "CD6311ZS02"
+        },
+        {
+          "id": "maniema__cd6305zs01",
+          "labelFr": "Lubutu",
+          "labelEn": "Lubutu",
+          "code": "CD6305ZS01"
+        },
+        {
+          "id": "maniema__cd6309zs02",
+          "labelFr": "Lusangi",
+          "labelEn": "Lusangi",
+          "code": "CD6309ZS02"
+        },
+        {
+          "id": "maniema__cd6305zs02",
+          "labelFr": "Obokote",
+          "labelEn": "Obokote",
+          "code": "CD6305ZS02"
+        },
+        {
+          "id": "maniema__cd6307zs03",
+          "labelFr": "Pangi",
+          "labelEn": "Pangi",
+          "code": "CD6307ZS03"
+        },
+        {
+          "id": "maniema__cd6303zs02",
+          "labelFr": "Punia",
+          "labelEn": "Punia",
+          "code": "CD6303ZS02"
+        },
+        {
+          "id": "maniema__cd6311zs03",
+          "labelFr": "Samba",
+          "labelEn": "Samba",
+          "code": "CD6311ZS03"
+        },
+        {
+          "id": "maniema__cd6309zs03",
+          "labelFr": "Saramabila",
+          "labelEn": "Saramabila",
+          "code": "CD6309ZS03"
+        },
+        {
+          "id": "maniema__cd6313zs02",
+          "labelFr": "Tunda",
+          "labelEn": "Tunda",
+          "code": "CD6313ZS02"
+        }
+      ]
+    },
+    {
+      "id": "mongala",
+      "labelFr": "Mongala",
+      "labelEn": "Mongala",
+      "zones": [
+        {
+          "id": "mongala__cd4402zs01",
+          "labelFr": "Binga",
+          "labelEn": "Binga",
+          "code": "CD4402ZS01"
+        },
+        {
+          "id": "mongala__cd4405zs01",
+          "labelFr": "Bongandanga",
+          "labelEn": "Bongandanga",
+          "code": "CD4405ZS01"
+        },
+        {
+          "id": "mongala__cd4402zs02",
+          "labelFr": "Boso Manzi",
+          "labelEn": "Boso Manzi",
+          "code": "CD4402ZS02"
+        },
+        {
+          "id": "mongala__cd4405zs02",
+          "labelFr": "Boso Mondanda",
+          "labelEn": "Boso Mondanda",
+          "code": "CD4405ZS02"
+        },
+        {
+          "id": "mongala__cd4405zs03",
+          "labelFr": "Bosondjo",
+          "labelEn": "Bosondjo",
+          "code": "CD4405ZS03"
+        },
+        {
+          "id": "mongala__cd4404zs01",
+          "labelFr": "Bumba",
+          "labelEn": "Bumba",
+          "code": "CD4404ZS01"
+        },
+        {
+          "id": "mongala__cd4402zs03",
+          "labelFr": "Lisala",
+          "labelEn": "Lisala",
+          "code": "CD4402ZS03"
+        },
+        {
+          "id": "mongala__cd4404zs02",
+          "labelFr": "Lolo",
+          "labelEn": "Lolo",
+          "code": "CD4404ZS02"
+        },
+        {
+          "id": "mongala__cd4405zs04",
+          "labelFr": "Pimu",
+          "labelEn": "Pimu",
+          "code": "CD4405ZS04"
+        },
+        {
+          "id": "mongala__cd4404zs03",
+          "labelFr": "Yamaluka",
+          "labelEn": "Yamaluka",
+          "code": "CD4404ZS03"
+        },
+        {
+          "id": "mongala__cd4404zs04",
+          "labelFr": "Yambuku",
+          "labelEn": "Yambuku",
+          "code": "CD4404ZS04"
+        },
+        {
+          "id": "mongala__cd4404zs05",
+          "labelFr": "Yamongili",
+          "labelEn": "Yamongili",
+          "code": "CD4404ZS05"
+        }
+      ]
+    },
+    {
+      "id": "nord-kivu",
+      "labelFr": "Nord-Kivu",
+      "labelEn": "North Kivu",
+      "zones": [
+        {
+          "id": "nord-kivu__cd6105zs01",
+          "labelFr": "Alimbongo",
+          "labelEn": "Alimbongo",
+          "code": "CD6105ZS01"
+        },
+        {
+          "id": "nord-kivu__cd6111zs01",
+          "labelFr": "Bambo",
+          "labelEn": "Bambo",
+          "code": "CD6111ZS01"
+        },
+        {
+          "id": "nord-kivu__cd6109zs01",
+          "labelFr": "Beni",
+          "labelEn": "Beni",
+          "code": "CD6109ZS01"
+        },
+        {
+          "id": "nord-kivu__cd6105zs02",
+          "labelFr": "Biena",
+          "labelEn": "Biena",
+          "code": "CD6105ZS02"
+        },
+        {
+          "id": "nord-kivu__cd6111zs02",
+          "labelFr": "Binza",
+          "labelEn": "Binza",
+          "code": "CD6111ZS02"
+        },
+        {
+          "id": "nord-kivu__cd6111zs03",
+          "labelFr": "Birambizo",
+          "labelEn": "Birambizo",
+          "code": "CD6111ZS03"
+        },
+        {
+          "id": "nord-kivu__cd6110zs01",
+          "labelFr": "Butembo",
+          "labelEn": "Butembo",
+          "code": "CD6110ZS01"
+        },
+        {
+          "id": "nord-kivu__cd6101zs01",
+          "labelFr": "Goma",
+          "labelEn": "Goma",
+          "code": "CD6101ZS01"
+        },
+        {
+          "id": "nord-kivu__cd6104zs01",
+          "labelFr": "Itebero",
+          "labelEn": "Itebero",
+          "code": "CD6104ZS01"
+        },
+        {
+          "id": "nord-kivu__cd6107zs01",
+          "labelFr": "Kalunguta",
+          "labelEn": "Kalunguta",
+          "code": "CD6107ZS01"
+        },
+        {
+          "id": "nord-kivu__cd6107zs02",
+          "labelFr": "Kamango",
+          "labelEn": "Kamango",
+          "code": "CD6107ZS02"
+        },
+        {
+          "id": "nord-kivu__cd6101zs02",
+          "labelFr": "Karisimbi",
+          "labelEn": "Karisimbi",
+          "code": "CD6101ZS02"
+        },
+        {
+          "id": "nord-kivu__cd6103zs01",
+          "labelFr": "Katoyi",
+          "labelEn": "Katoyi",
+          "code": "CD6103ZS01"
+        },
+        {
+          "id": "nord-kivu__cd6110zs02",
+          "labelFr": "Katwa",
+          "labelEn": "Katwa",
+          "code": "CD6110ZS02"
+        },
+        {
+          "id": "nord-kivu__cd6105zs03",
+          "labelFr": "Kayna",
+          "labelEn": "Kayna",
+          "code": "CD6105ZS03"
+        },
+        {
+          "id": "nord-kivu__cd6111zs04",
+          "labelFr": "Kibirizi",
+          "labelEn": "Kibirizi",
+          "code": "CD6111ZS04"
+        },
+        {
+          "id": "nord-kivu__cd6104zs02",
+          "labelFr": "Kibua",
+          "labelEn": "Kibua",
+          "code": "CD6104ZS02"
+        },
+        {
+          "id": "nord-kivu__cd6103zs02",
+          "labelFr": "Kirotshe",
+          "labelEn": "Kirotshe",
+          "code": "CD6103ZS02"
+        },
+        {
+          "id": "nord-kivu__cd6107zs03",
+          "labelFr": "Kyondo",
+          "labelEn": "Kyondo",
+          "code": "CD6107ZS03"
+        },
+        {
+          "id": "nord-kivu__cd6105zs04",
+          "labelFr": "Lubero",
+          "labelEn": "Lubero",
+          "code": "CD6105ZS04"
+        },
+        {
+          "id": "nord-kivu__cd6107zs04",
+          "labelFr": "Mabalako",
+          "labelEn": "Mabalako",
+          "code": "CD6107ZS04"
+        },
+        {
+          "id": "nord-kivu__cd6105zs05",
+          "labelFr": "Manguredjipa",
+          "labelEn": "Manguredjipa",
+          "code": "CD6105ZS05"
+        },
+        {
+          "id": "nord-kivu__cd6105zs06",
+          "labelFr": "Masereka",
+          "labelEn": "Masereka",
+          "code": "CD6105ZS06"
+        },
+        {
+          "id": "nord-kivu__cd6103zs03",
+          "labelFr": "Masisi",
+          "labelEn": "Masisi",
+          "code": "CD6103ZS03"
+        },
+        {
+          "id": "nord-kivu__cd6105zs07",
+          "labelFr": "Musienene",
+          "labelEn": "Musienene",
+          "code": "CD6105ZS07"
+        },
+        {
+          "id": "nord-kivu__cd6107zs05",
+          "labelFr": "Mutwanga",
+          "labelEn": "Mutwanga",
+          "code": "CD6107ZS05"
+        },
+        {
+          "id": "nord-kivu__cd6103zs04",
+          "labelFr": "Mweso",
+          "labelEn": "Mweso",
+          "code": "CD6103ZS04"
+        },
+        {
+          "id": "nord-kivu__cd6102zs01",
+          "labelFr": "Nyiragongo",
+          "labelEn": "Nyiragongo",
+          "code": "CD6102ZS01"
+        },
+        {
+          "id": "nord-kivu__cd6107zs06",
+          "labelFr": "Oicha",
+          "labelEn": "Oicha",
+          "code": "CD6107ZS06"
+        },
+        {
+          "id": "nord-kivu__cd6104zs03",
+          "labelFr": "Pinga",
+          "labelEn": "Pinga",
+          "code": "CD6104ZS03"
+        },
+        {
+          "id": "nord-kivu__cd6111zs05",
+          "labelFr": "Rutshuru",
+          "labelEn": "Rutshuru",
+          "code": "CD6111ZS05"
+        },
+        {
+          "id": "nord-kivu__cd6111zs06",
+          "labelFr": "Rwanguba",
+          "labelEn": "Rwanguba",
+          "code": "CD6111ZS06"
+        },
+        {
+          "id": "nord-kivu__cd6107zs07",
+          "labelFr": "Vuhovi",
+          "labelEn": "Vuhovi",
+          "code": "CD6107ZS07"
+        },
+        {
+          "id": "nord-kivu__cd6104zs04",
+          "labelFr": "Walikale",
+          "labelEn": "Walikale",
+          "code": "CD6104ZS04"
+        }
+      ]
+    },
+    {
+      "id": "nord-ubangi",
+      "labelFr": "Nord-Ubangi",
+      "labelEn": "Nord-Ubangi",
+      "zones": [
+        {
+          "id": "nord-ubangi__cd4304zs01",
+          "labelFr": "Abuzi",
+          "labelEn": "Abuzi",
+          "code": "CD4304ZS01"
+        },
+        {
+          "id": "nord-ubangi__cd4306zs01",
+          "labelFr": "Bili",
+          "labelEn": "Bili",
+          "code": "CD4306ZS01"
+        },
+        {
+          "id": "nord-ubangi__cd4306zs02",
+          "labelFr": "Bosobolo",
+          "labelEn": "Bosobolo",
+          "code": "CD4306ZS02"
+        },
+        {
+          "id": "nord-ubangi__cd4305zs01",
+          "labelFr": "Businga",
+          "labelEn": "Businga",
+          "code": "CD4305ZS01"
+        },
+        {
+          "id": "nord-ubangi__cd4301zs01",
+          "labelFr": "Gbadolite",
+          "labelEn": "Gbadolite",
+          "code": "CD4301ZS01"
+        },
+        {
+          "id": "nord-ubangi__cd4305zs02",
+          "labelFr": "Karawa",
+          "labelEn": "Karawa",
+          "code": "CD4305ZS02"
+        },
+        {
+          "id": "nord-ubangi__cd4305zs03",
+          "labelFr": "Loko",
+          "labelEn": "Loko",
+          "code": "CD4305ZS03"
+        },
+        {
+          "id": "nord-ubangi__cd4302zs01",
+          "labelFr": "Mobayi Mbongo",
+          "labelEn": "Mobayi Mbongo",
+          "code": "CD4302ZS01"
+        },
+        {
+          "id": "nord-ubangi__cd4304zs02",
+          "labelFr": "Wapinda",
+          "labelEn": "Wapinda",
+          "code": "CD4304ZS02"
+        },
+        {
+          "id": "nord-ubangi__cd4304zs03",
+          "labelFr": "Wasolo",
+          "labelEn": "Wasolo",
+          "code": "CD4304ZS03"
+        },
+        {
+          "id": "nord-ubangi__cd4304zs04",
+          "labelFr": "Yakoma",
+          "labelEn": "Yakoma",
+          "code": "CD4304ZS04"
+        }
+      ]
+    },
+    {
+      "id": "sankuru",
+      "labelFr": "Sankuru",
+      "labelEn": "Sankuru",
+      "zones": [
+        {
+          "id": "sankuru__cd8306zs01",
+          "labelFr": "Bena Dibele",
+          "labelEn": "Bena Dibele",
+          "code": "CD8306ZS01"
+        },
+        {
+          "id": "sankuru__cd8309zs01",
+          "labelFr": "Dikungu",
+          "labelEn": "Dikungu",
+          "code": "CD8309ZS01"
+        },
+        {
+          "id": "sankuru__cd8308zs01",
+          "labelFr": "Djalo Djeka",
+          "labelEn": "Djalo Djeka",
+          "code": "CD8308ZS01"
+        },
+        {
+          "id": "sankuru__cd8308zs02",
+          "labelFr": "Katako Kombe",
+          "labelEn": "Katako Kombe",
+          "code": "CD8308ZS02"
+        },
+        {
+          "id": "sankuru__cd8306zs02",
+          "labelFr": "Kole",
+          "labelEn": "Kole",
+          "code": "CD8306ZS02"
+        },
+        {
+          "id": "sankuru__cd8303zs01",
+          "labelFr": "Lodja",
+          "labelEn": "Lodja",
+          "code": "CD8303ZS01"
+        },
+        {
+          "id": "sankuru__cd8307zs01",
+          "labelFr": "Lomela",
+          "labelEn": "Lomela",
+          "code": "CD8307ZS01"
+        },
+        {
+          "id": "sankuru__cd8302zs01",
+          "labelFr": "Lusambo",
+          "labelEn": "Lusambo",
+          "code": "CD8302ZS01"
+        },
+        {
+          "id": "sankuru__cd8309zs02",
+          "labelFr": "Minga",
+          "labelEn": "Minga",
+          "code": "CD8309ZS02"
+        },
+        {
+          "id": "sankuru__cd8303zs02",
+          "labelFr": "Omendjadi",
+          "labelEn": "Omendjadi",
+          "code": "CD8303ZS02"
+        },
+        {
+          "id": "sankuru__cd8302zs02",
+          "labelFr": "Ototo",
+          "labelEn": "Ototo",
+          "code": "CD8302ZS02"
+        },
+        {
+          "id": "sankuru__cd8302zs03",
+          "labelFr": "Pania Mutombo",
+          "labelEn": "Pania Mutombo",
+          "code": "CD8302ZS03"
+        },
+        {
+          "id": "sankuru__cd8307zs02",
+          "labelFr": "Tshudi Loto",
+          "labelEn": "Tshudi Loto",
+          "code": "CD8307ZS02"
+        },
+        {
+          "id": "sankuru__cd8309zs03",
+          "labelFr": "Tshumbe",
+          "labelEn": "Tshumbe",
+          "code": "CD8309ZS03"
+        },
+        {
+          "id": "sankuru__cd8303zs03",
+          "labelFr": "Vanga Kete",
+          "labelEn": "Vanga Kete",
+          "code": "CD8303ZS03"
+        },
+        {
+          "id": "sankuru__cd8308zs03",
+          "labelFr": "Wembo Nyama",
+          "labelEn": "Wembo Nyama",
+          "code": "CD8308ZS03"
+        }
+      ]
+    },
+    {
+      "id": "sud-kivu",
+      "labelFr": "Sud-Kivu",
+      "labelEn": "South Kivu",
+      "zones": [
+        {
+          "id": "sud-kivu__cd6201zs01",
+          "labelFr": "Bagira",
+          "labelEn": "Bagira",
+          "code": "CD6201ZS01"
+        },
+        {
+          "id": "sud-kivu__cd6205zs01",
+          "labelFr": "Bunyakiri",
+          "labelEn": "Bunyakiri",
+          "code": "CD6205ZS01"
+        },
+        {
+          "id": "sud-kivu__cd6210zs01",
+          "labelFr": "Fizi",
+          "labelEn": "Fizi",
+          "code": "CD6210ZS01"
+        },
+        {
+          "id": "sud-kivu__cd6208zs01",
+          "labelFr": "Hauts-Plateaux",
+          "labelEn": "Hauts-Plateaux",
+          "code": "CD6208ZS01"
+        },
+        {
+          "id": "sud-kivu__cd6201zs02",
+          "labelFr": "Ibanda",
+          "labelEn": "Ibanda",
+          "code": "CD6201ZS02"
+        },
+        {
+          "id": "sud-kivu__cd6206zs01",
+          "labelFr": "Idjwi",
+          "labelEn": "Idjwi",
+          "code": "CD6206ZS01"
+        },
+        {
+          "id": "sud-kivu__cd6212zs01",
+          "labelFr": "Itombwe",
+          "labelEn": "Itombwe",
+          "code": "CD6212ZS01"
+        },
+        {
+          "id": "sud-kivu__cd6202zs01",
+          "labelFr": "Kabare",
+          "labelEn": "Kabare",
+          "code": "CD6202ZS01"
+        },
+        {
+          "id": "sud-kivu__cd6201zs03",
+          "labelFr": "Kadutu",
+          "labelEn": "Kadutu",
+          "code": "CD6201ZS03"
+        },
+        {
+          "id": "sud-kivu__cd6205zs02",
+          "labelFr": "Kalehe",
+          "labelEn": "Kalehe",
+          "code": "CD6205ZS02"
+        },
+        {
+          "id": "sud-kivu__cd6203zs01",
+          "labelFr": "Kalole",
+          "labelEn": "Kalole",
+          "code": "CD6203ZS01"
+        },
+        {
+          "id": "sud-kivu__cd6205zs03",
+          "labelFr": "Kalonge",
+          "labelEn": "Kalonge",
+          "code": "CD6205ZS03"
+        },
+        {
+          "id": "sud-kivu__cd6212zs02",
+          "labelFr": "Kamituga",
+          "labelEn": "Kamituga",
+          "code": "CD6212ZS02"
+        },
+        {
+          "id": "sud-kivu__cd6202zs02",
+          "labelFr": "Kaniola",
+          "labelEn": "Kaniola",
+          "code": "CD6202ZS02"
+        },
+        {
+          "id": "sud-kivu__cd6202zs03",
+          "labelFr": "Katana",
+          "labelEn": "Katana",
+          "code": "CD6202ZS03"
+        },
+        {
+          "id": "sud-kivu__cd6207zs01",
+          "labelFr": "Kaziba",
+          "labelEn": "Kaziba",
+          "code": "CD6207ZS01"
+        },
+        {
+          "id": "sud-kivu__cd6210zs02",
+          "labelFr": "Kimbi Lulenge",
+          "labelEn": "Kimbi Lulenge",
+          "code": "CD6210ZS02"
+        },
+        {
+          "id": "sud-kivu__cd6212zs03",
+          "labelFr": "Kitutu",
+          "labelEn": "Kitutu",
+          "code": "CD6212ZS03"
+        },
+        {
+          "id": "sud-kivu__cd6208zs02",
+          "labelFr": "Lemera",
+          "labelEn": "Lemera",
+          "code": "CD6208ZS02"
+        },
+        {
+          "id": "sud-kivu__cd6203zs02",
+          "labelFr": "Lulingu",
+          "labelEn": "Lulingu",
+          "code": "CD6203ZS02"
+        },
+        {
+          "id": "sud-kivu__cd6210zs03",
+          "labelFr": "Minembwe",
+          "labelEn": "Minembwe",
+          "code": "CD6210ZS03"
+        },
+        {
+          "id": "sud-kivu__cd6205zs04",
+          "labelFr": "Minova",
+          "labelEn": "Minova",
+          "code": "CD6205ZS04"
+        },
+        {
+          "id": "sud-kivu__cd6202zs04",
+          "labelFr": "Miti-Murhesa",
+          "labelEn": "Miti-Murhesa",
+          "code": "CD6202ZS04"
+        },
+        {
+          "id": "sud-kivu__cd6207zs02",
+          "labelFr": "Mubumbano",
+          "labelEn": "Mubumbano",
+          "code": "CD6207ZS02"
+        },
+        {
+          "id": "sud-kivu__cd6203zs03",
+          "labelFr": "Mulungu",
+          "labelEn": "Mulungu",
+          "code": "CD6203ZS03"
+        },
+        {
+          "id": "sud-kivu__cd6212zs04",
+          "labelFr": "Mwana",
+          "labelEn": "Mwana",
+          "code": "CD6212ZS04"
+        },
+        {
+          "id": "sud-kivu__cd6212zs05",
+          "labelFr": "Mwenga",
+          "labelEn": "Mwenga",
+          "code": "CD6212ZS05"
+        },
+        {
+          "id": "sud-kivu__cd6210zs04",
+          "labelFr": "Nundu",
+          "labelEn": "Nundu",
+          "code": "CD6210ZS04"
+        },
+        {
+          "id": "sud-kivu__cd6207zs03",
+          "labelFr": "Nyangezi",
+          "labelEn": "Nyangezi",
+          "code": "CD6207ZS03"
+        },
+        {
+          "id": "sud-kivu__cd6202zs05",
+          "labelFr": "Nyantende",
+          "labelEn": "Nyantende",
+          "code": "CD6202ZS05"
+        },
+        {
+          "id": "sud-kivu__cd6208zs03",
+          "labelFr": "Ruzizi",
+          "labelEn": "Ruzizi",
+          "code": "CD6208ZS03"
+        },
+        {
+          "id": "sud-kivu__cd6203zs04",
+          "labelFr": "Shabunda",
+          "labelEn": "Shabunda",
+          "code": "CD6203ZS04"
+        },
+        {
+          "id": "sud-kivu__cd6208zs04",
+          "labelFr": "Uvira",
+          "labelEn": "Uvira",
+          "code": "CD6208ZS04"
+        },
+        {
+          "id": "sud-kivu__cd6207zs04",
+          "labelFr": "Walungu",
+          "labelEn": "Walungu",
+          "code": "CD6207ZS04"
+        }
+      ]
+    },
+    {
+      "id": "sud-ubangi",
+      "labelFr": "Sud-Ubangi",
+      "labelEn": "Sud-Ubangi",
+      "zones": [
+        {
+          "id": "sud-ubangi__cd4203zs01",
+          "labelFr": "Bangabola",
+          "labelEn": "Bangabola",
+          "code": "CD4203ZS01"
+        },
+        {
+          "id": "sud-ubangi__cd4202zs01",
+          "labelFr": "Bogosenubia",
+          "labelEn": "Bogosenubia",
+          "code": "CD4202ZS01"
+        },
+        {
+          "id": "sud-ubangi__cd4204zs01",
+          "labelFr": "Bokonzi",
+          "labelEn": "Bokonzi",
+          "code": "CD4204ZS01"
+        },
+        {
+          "id": "sud-ubangi__cd4202zs02",
+          "labelFr": "Bominenge",
+          "labelEn": "Bominenge",
+          "code": "CD4202ZS02"
+        },
+        {
+          "id": "sud-ubangi__cd4204zs02",
+          "labelFr": "Boto",
+          "labelEn": "Boto",
+          "code": "CD4204ZS02"
+        },
+        {
+          "id": "sud-ubangi__cd4203zs02",
+          "labelFr": "Budjala",
+          "labelEn": "Budjala",
+          "code": "CD4203ZS02"
+        },
+        {
+          "id": "sud-ubangi__cd4203zs03",
+          "labelFr": "Bulu",
+          "labelEn": "Bulu",
+          "code": "CD4203ZS03"
+        },
+        {
+          "id": "sud-ubangi__cd4202zs03",
+          "labelFr": "Bwamanda",
+          "labelEn": "Bwamanda",
+          "code": "CD4202ZS03"
+        },
+        {
+          "id": "sud-ubangi__cd4202zs04",
+          "labelFr": "Gemena",
+          "labelEn": "Gemena",
+          "code": "CD4202ZS04"
+        },
+        {
+          "id": "sud-ubangi__cd4204zs03",
+          "labelFr": "Kungu",
+          "labelEn": "Kungu",
+          "code": "CD4204ZS03"
+        },
+        {
+          "id": "sud-ubangi__cd4205zs01",
+          "labelFr": "Libenge",
+          "labelEn": "Libenge",
+          "code": "CD4205ZS01"
+        },
+        {
+          "id": "sud-ubangi__cd4205zs02",
+          "labelFr": "Mawuya",
+          "labelEn": "Mawuya",
+          "code": "CD4205ZS02"
+        },
+        {
+          "id": "sud-ubangi__cd4203zs04",
+          "labelFr": "Mbaya",
+          "labelEn": "Mbaya",
+          "code": "CD4203ZS04"
+        },
+        {
+          "id": "sud-ubangi__cd4203zs05",
+          "labelFr": "Ndage",
+          "labelEn": "Ndage",
+          "code": "CD4203ZS05"
+        },
+        {
+          "id": "sud-ubangi__cd4202zs05",
+          "labelFr": "Tandala",
+          "labelEn": "Tandala",
+          "code": "CD4202ZS05"
+        },
+        {
+          "id": "sud-ubangi__cd4206zs01",
+          "labelFr": "Zongo",
+          "labelEn": "Zongo",
+          "code": "CD4206ZS01"
+        }
+      ]
+    },
+    {
+      "id": "tanganyika",
+      "labelFr": "Tanganyika",
+      "labelEn": "Tanganyika",
+      "zones": [
+        {
+          "id": "tanganyika__cd7406zs01",
+          "labelFr": "Ankoro",
+          "labelEn": "Ankoro",
+          "code": "CD7406ZS01"
+        },
+        {
+          "id": "tanganyika__cd7407zs01",
+          "labelFr": "Kabalo",
+          "labelEn": "Kabalo",
+          "code": "CD7407ZS01"
+        },
+        {
+          "id": "tanganyika__cd7402zs01",
+          "labelFr": "Kalemie",
+          "labelEn": "Kalemie",
+          "code": "CD7402ZS01"
+        },
+        {
+          "id": "tanganyika__cd7404zs01",
+          "labelFr": "Kansimba",
+          "labelEn": "Kansimba",
+          "code": "CD7404ZS01"
+        },
+        {
+          "id": "tanganyika__cd7406zs02",
+          "labelFr": "Kiyambi",
+          "labelEn": "Kiyambi",
+          "code": "CD7406ZS02"
+        },
+        {
+          "id": "tanganyika__cd7409zs01",
+          "labelFr": "Kongolo",
+          "labelEn": "Kongolo",
+          "code": "CD7409ZS01"
+        },
+        {
+          "id": "tanganyika__cd7406zs03",
+          "labelFr": "Manono",
+          "labelEn": "Manono",
+          "code": "CD7406ZS03"
+        },
+        {
+          "id": "tanganyika__cd7409zs02",
+          "labelFr": "Mbulula",
+          "labelEn": "Mbulula",
+          "code": "CD7409ZS02"
+        },
+        {
+          "id": "tanganyika__cd7404zs02",
+          "labelFr": "Moba",
+          "labelEn": "Moba",
+          "code": "CD7404ZS02"
+        },
+        {
+          "id": "tanganyika__cd7402zs02",
+          "labelFr": "Nyemba",
+          "labelEn": "Nyemba",
+          "code": "CD7402ZS02"
+        },
+        {
+          "id": "tanganyika__cd7410zs01",
+          "labelFr": "Nyunzu",
+          "labelEn": "Nyunzu",
+          "code": "CD7410ZS01"
+        }
+      ]
+    },
+    {
+      "id": "tshopo",
+      "labelFr": "Tshopo",
+      "labelEn": "Tshopo",
+      "zones": [
+        {
+          "id": "tshopo__cd5111zs01",
+          "labelFr": "Bafwagbogbo",
+          "labelEn": "Bafwagbogbo",
+          "code": "CD5111ZS01"
+        },
+        {
+          "id": "tshopo__cd5111zs02",
+          "labelFr": "Bafwasende",
+          "labelEn": "Bafwasende",
+          "code": "CD5111ZS02"
+        },
+        {
+          "id": "tshopo__cd5110zs01",
+          "labelFr": "Banalia",
+          "labelEn": "Banalia",
+          "code": "CD5110ZS01"
+        },
+        {
+          "id": "tshopo__cd5109zs01",
+          "labelFr": "Basali",
+          "labelEn": "Basali",
+          "code": "CD5109ZS01"
+        },
+        {
+          "id": "tshopo__cd5109zs02",
+          "labelFr": "Basoko",
+          "labelEn": "Basoko",
+          "code": "CD5109ZS02"
+        },
+        {
+          "id": "tshopo__cd5110zs02",
+          "labelFr": "Bengamisa",
+          "labelEn": "Bengamisa",
+          "code": "CD5110ZS02"
+        },
+        {
+          "id": "tshopo__cd5105zs01",
+          "labelFr": "Isangi",
+          "labelEn": "Isangi",
+          "code": "CD5105ZS01"
+        },
+        {
+          "id": "tshopo__cd5101zs01",
+          "labelFr": "Kabondo",
+          "labelEn": "Kabondo",
+          "code": "CD5101ZS01"
+        },
+        {
+          "id": "tshopo__cd5102zs01",
+          "labelFr": "Lowa",
+          "labelEn": "Lowa",
+          "code": "CD5102ZS01"
+        },
+        {
+          "id": "tshopo__cd5101zs02",
+          "labelFr": "Lubunga",
+          "labelEn": "Lubunga",
+          "code": "CD5101ZS02"
+        },
+        {
+          "id": "tshopo__cd5101zs03",
+          "labelFr": "Makiso-Kisangani",
+          "labelEn": "Makiso-Kisangani",
+          "code": "CD5101ZS03"
+        },
+        {
+          "id": "tshopo__cd5101zs04",
+          "labelFr": "Mangobo",
+          "labelEn": "Mangobo",
+          "code": "CD5101ZS04"
+        },
+        {
+          "id": "tshopo__cd5103zs01",
+          "labelFr": "Opala",
+          "labelEn": "Opala",
+          "code": "CD5103ZS01"
+        },
+        {
+          "id": "tshopo__cd5111zs03",
+          "labelFr": "Opienge",
+          "labelEn": "Opienge",
+          "code": "CD5111ZS03"
+        },
+        {
+          "id": "tshopo__cd5101zs05",
+          "labelFr": "Tshopo",
+          "labelEn": "Tshopo",
+          "code": "CD5101ZS05"
+        },
+        {
+          "id": "tshopo__cd5102zs02",
+          "labelFr": "Ubundu",
+          "labelEn": "Ubundu",
+          "code": "CD5102ZS02"
+        },
+        {
+          "id": "tshopo__cd5102zs03",
+          "labelFr": "Wanierukula",
+          "labelEn": "Wanierukula",
+          "code": "CD5102ZS03"
+        },
+        {
+          "id": "tshopo__cd5105zs02",
+          "labelFr": "Yabaondo",
+          "labelEn": "Yabaondo",
+          "code": "CD5105ZS02"
+        },
+        {
+          "id": "tshopo__cd5105zs03",
+          "labelFr": "Yahisuli",
+          "labelEn": "Yahisuli",
+          "code": "CD5105ZS03"
+        },
+        {
+          "id": "tshopo__cd5107zs01",
+          "labelFr": "Yahuma",
+          "labelEn": "Yahuma",
+          "code": "CD5107ZS01"
+        },
+        {
+          "id": "tshopo__cd5105zs04",
+          "labelFr": "Yakusu",
+          "labelEn": "Yakusu",
+          "code": "CD5105ZS04"
+        },
+        {
+          "id": "tshopo__cd5103zs02",
+          "labelFr": "Yaleko",
+          "labelEn": "Yaleko",
+          "code": "CD5103ZS02"
+        },
+        {
+          "id": "tshopo__cd5109zs03",
+          "labelFr": "Yalimbongo",
+          "labelEn": "Yalimbongo",
+          "code": "CD5109ZS03"
+        }
+      ]
+    },
+    {
+      "id": "tshuapa",
+      "labelFr": "Tshuapa",
+      "labelEn": "Tshuapa",
+      "zones": [
+        {
+          "id": "tshuapa__cd4503zs01",
+          "labelFr": "Befale",
+          "labelEn": "Befale",
+          "code": "CD4503ZS01"
+        },
+        {
+          "id": "tshuapa__cd4502zs01",
+          "labelFr": "Boende",
+          "labelEn": "Boende",
+          "code": "CD4502ZS01"
+        },
+        {
+          "id": "tshuapa__cd4506zs01",
+          "labelFr": "Bokungu",
+          "labelEn": "Bokungu",
+          "code": "CD4506ZS01"
+        },
+        {
+          "id": "tshuapa__cd4506zs02",
+          "labelFr": "Bosanga",
+          "labelEn": "Bosanga",
+          "code": "CD4506ZS02"
+        },
+        {
+          "id": "tshuapa__cd4504zs01",
+          "labelFr": "Djolu",
+          "labelEn": "Djolu",
+          "code": "CD4504ZS01"
+        },
+        {
+          "id": "tshuapa__cd4505zs01",
+          "labelFr": "Ikela",
+          "labelEn": "Ikela",
+          "code": "CD4505ZS01"
+        },
+        {
+          "id": "tshuapa__cd4504zs02",
+          "labelFr": "Lingomo",
+          "labelEn": "Lingomo",
+          "code": "CD4504ZS02"
+        },
+        {
+          "id": "tshuapa__cd4503zs02",
+          "labelFr": "Mompono",
+          "labelEn": "Mompono",
+          "code": "CD4503ZS02"
+        },
+        {
+          "id": "tshuapa__cd4505zs02",
+          "labelFr": "Mondombe",
+          "labelEn": "Mondombe",
+          "code": "CD4505ZS02"
+        },
+        {
+          "id": "tshuapa__cd4507zs01",
+          "labelFr": "Monkoto",
+          "labelEn": "Monkoto",
+          "code": "CD4507ZS01"
+        },
+        {
+          "id": "tshuapa__cd4502zs02",
+          "labelFr": "Wema",
+          "labelEn": "Wema",
+          "code": "CD4502ZS02"
+        },
+        {
+          "id": "tshuapa__cd4506zs03",
+          "labelFr": "Yalifafo",
+          "labelEn": "Yalifafo",
+          "code": "CD4506ZS03"
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "provinceCount": 26,
+    "zoneCount": 519
+  }
+}

@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "convex:dev": "convex dev",
     "seed": "convex run seed:seedDemo",
+    "build:territories": "node scripts/build-rdc-territories.mjs",
     "check:i18n": "node scripts/check-i18n.mjs",
     "icons": "node scripts/generate-icons.mjs"
   },

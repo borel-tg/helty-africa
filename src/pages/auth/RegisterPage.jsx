@@ -5,16 +5,21 @@ import { useQuery, useMutation } from "convex/react";
 import { Eye, EyeOff, CheckCircle } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
 import { Button } from "../../components/ui/Button";
-import { Input, Select } from "../../components/ui/Input";
+import { Input } from "../../components/ui/Input";
 import { useAuth } from "../../hooks/useAuth";
 import { AuthLayout } from "../../components/auth/AuthLayout";
-import { LEARNER_CATEGORIES } from "../../lib/learnerCategories";
+import { LearnerTerritoryFields } from "../../components/auth/LearnerTerritoryFields";
+import { validateLearnerTerritoryFields } from "../../lib/validateLearnerTerritory";
 import {
   DRC_COUNTRY_CODE,
   formatDrcPhoneInput,
   isValidDrcPhone,
   normalizeDrcPhone,
 } from "../../lib/phoneDrc";
+import {
+  clearFormFieldError,
+  clearFormFieldErrors,
+} from "../../lib/formErrors";
 
 export default function RegisterPage() {
   const { t } = useTranslation();
@@ -31,6 +36,8 @@ export default function RegisterPage() {
     lastName: "",
     phone: DRC_COUNTRY_CODE + " ",
     learnerCategoryKey: "",
+    learnerProvinceId: "",
+    learnerHealthZoneId: "",
     password: "",
     confirmPassword: "",
   });
@@ -47,18 +54,34 @@ export default function RegisterPage() {
       return;
     }
     if (invitation === undefined) return;
-    if (invitation.status === "valid") setStep("register");
-    else setStep("invalid");
+    if (invitation.status === "valid") {
+      setStep("register");
+      if (
+        invitation.role === "learner" ||
+        invitation.role === "lead"
+      ) {
+        setForm((prev) => ({
+          ...prev,
+          learnerCategoryKey: prev.learnerCategoryKey || "zonal",
+        }));
+      }
+    } else setStep("invalid");
   }, [token, invitation]);
 
-  const update = (field) => (e) =>
+  const update = (field) => (e) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
+    clearFormFieldError(setErrors, field);
+    if (field === "password") {
+      clearFormFieldError(setErrors, "confirmPassword");
+    }
+  };
 
   const handlePhoneChange = (e) => {
     setForm((prev) => ({
       ...prev,
       phone: formatDrcPhoneInput(e.target.value),
     }));
+    clearFormFieldError(setErrors, "phone");
   };
 
   const validate = () => {
@@ -66,8 +89,21 @@ export default function RegisterPage() {
     if (!form.firstName.trim()) errs.firstName = t("auth.firstNameRequired");
     if (!form.lastName.trim()) errs.lastName = t("auth.lastNameRequired");
     if (!isValidDrcPhone(form.phone)) errs.phone = t("auth.phoneInvalidDrc");
-    if (invitation?.role === "learner" && !form.learnerCategoryKey) {
-      errs.learnerCategoryKey = t("auth.categoryRequired");
+    if (invitation?.role === "learner" || invitation?.role === "lead") {
+      const territoryErrs = validateLearnerTerritoryFields(
+        form.learnerCategoryKey,
+        form.learnerProvinceId,
+        form.learnerHealthZoneId
+      );
+      if (territoryErrs.learnerCategoryKey) {
+        errs.learnerCategoryKey = t("auth.categoryRequired");
+      }
+      if (territoryErrs.learnerProvinceId) {
+        errs.learnerProvinceId = t("auth.provinceRequired");
+      }
+      if (territoryErrs.learnerHealthZoneId) {
+        errs.learnerHealthZoneId = t("auth.healthZoneRequired");
+      }
     }
     if (!form.password) errs.password = t("auth.passwordRequired");
     else if (form.password.length < 8) errs.password = t("auth.passwordMin");
@@ -95,8 +131,18 @@ export default function RegisterPage() {
         phone: phone ?? form.phone.trim(),
         password: form.password,
         learnerCategoryKey:
-          invitation?.role === "learner"
+          invitation?.role === "learner" || invitation?.role === "lead"
             ? form.learnerCategoryKey
+            : undefined,
+        learnerProvinceId:
+          (invitation?.role === "learner" || invitation?.role === "lead") &&
+          form.learnerProvinceId
+            ? form.learnerProvinceId
+            : undefined,
+        learnerHealthZoneId:
+          (invitation?.role === "learner" || invitation?.role === "lead") &&
+          form.learnerHealthZoneId
+            ? form.learnerHealthZoneId
             : undefined,
       });
 
@@ -169,7 +215,8 @@ export default function RegisterPage() {
     );
   }
 
-  const isLearner = invitation?.role === "learner";
+  const showTerritoryFields =
+    invitation?.role === "learner" || invitation?.role === "lead";
 
   return (
     <AuthLayout
@@ -220,23 +267,37 @@ export default function RegisterPage() {
           className="rounded-xl"
         />
 
-        {isLearner && (
-          <Select
-            label={`${t("auth.learnerCategory")} *`}
-            value={form.learnerCategoryKey}
-            onChange={update("learnerCategoryKey")}
-            error={errors.learnerCategoryKey}
-            required
-          >
-            <option value="" disabled>
-              {t("auth.selectCategory")}
-            </option>
-            {LEARNER_CATEGORIES.map((c) => (
-              <option key={c.key} value={c.key}>
-                {c.labelFr}
-              </option>
-            ))}
-          </Select>
+        {showTerritoryFields && (
+          <div className="space-y-4">
+            <LearnerTerritoryFields
+              categoryKey={form.learnerCategoryKey}
+              provinceId={form.learnerProvinceId}
+              healthZoneId={form.learnerHealthZoneId}
+              onCategoryChange={(v) => {
+                setForm((prev) => ({ ...prev, learnerCategoryKey: v }));
+                clearFormFieldErrors(setErrors, [
+                  "learnerCategoryKey",
+                  "learnerProvinceId",
+                  "learnerHealthZoneId",
+                ]);
+              }}
+              onProvinceChange={(v) => {
+                setForm((prev) => ({ ...prev, learnerProvinceId: v }));
+                clearFormFieldErrors(setErrors, [
+                  "learnerProvinceId",
+                  "learnerHealthZoneId",
+                ]);
+              }}
+              onHealthZoneChange={(v) => {
+                setForm((prev) => ({ ...prev, learnerHealthZoneId: v }));
+                clearFormFieldError(setErrors, "learnerHealthZoneId");
+              }}
+              errors={errors}
+            />
+            <p className="text-xs text-text-secondary">
+              {t("learner.profileCategoryHint")}
+            </p>
+          </div>
         )}
 
         <Input

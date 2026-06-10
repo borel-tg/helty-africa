@@ -18,6 +18,7 @@ import { RoleBadge } from "../../components/ui/Badge";
 import { useToast } from "../../components/ui/Toast";
 import { useConvexSession } from "../../hooks/useConvexSession";
 import { getLearnerCategoryLabel } from "../../lib/learnerCategories";
+import { getLearnerTerritoryLabels } from "../../lib/rdcTerritories";
 import { formatDate, formatTimeAgo, formatDuration } from "../../lib/utils";
 
 export default function EmployeeDetailPage() {
@@ -261,6 +262,11 @@ function BackLink({ onBack, label }) {
 }
 
 function LearnerHeader({ emp, t, i18n }) {
+  const lang = i18n.language;
+  const { provinceLabel, healthZoneLabel } = getLearnerTerritoryLabels(emp, lang);
+  const showTerritory =
+    emp.learnerCategoryKey || provinceLabel || healthZoneLabel;
+
   return (
     <div className="bg-white rounded-card shadow-card p-5 mb-4">
       <div className="flex items-start gap-4">
@@ -282,13 +288,13 @@ function LearnerHeader({ emp, t, i18n }) {
             >
               {t(`status.${emp.status}`)}
             </span>
-            {emp.role === "learner" && emp.learnerCategoryKey && (
+            {emp.learnerCategoryKey && (
               <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-700">
-                {getLearnerCategoryLabel(emp.learnerCategoryKey, i18n.language)}
+                {getLearnerCategoryLabel(emp.learnerCategoryKey, lang)}
               </span>
             )}
           </div>
-          <div className="flex flex-wrap gap-4 text-sm text-text-secondary">
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-text-secondary">
             {emp.email && <span>{emp.email}</span>}
             {emp.phone && <span>{emp.phone}</span>}
             <span>
@@ -298,6 +304,22 @@ function LearnerHeader({ emp, t, i18n }) {
               {t("admin.lastLogin")} {formatTimeAgo(emp.lastLoginAt)}
             </span>
           </div>
+          {showTerritory && (provinceLabel || healthZoneLabel) && (
+            <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-sm">
+              {provinceLabel && (
+                <span>
+                  <span className="text-text-secondary">{t("auth.province")}: </span>
+                  <span className="font-medium text-text-primary">{provinceLabel}</span>
+                </span>
+              )}
+              {healthZoneLabel && (
+                <span>
+                  <span className="text-text-secondary">{t("auth.healthZone")}: </span>
+                  <span className="font-medium text-text-primary">{healthZoneLabel}</span>
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

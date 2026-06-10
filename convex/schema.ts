@@ -48,6 +48,10 @@ export default defineSchema({
     status: v.union(v.literal("active"), v.literal("inactive")),
     leadId: v.optional(v.id("users")),
     learnerCategoryKey: v.optional(learnerCategoryKeyValidator),
+    /** RDC province id from rdcTerritories.json (provincial / zonal learners). */
+    learnerProvinceId: v.optional(v.string()),
+    /** RDC health zone id from rdcTerritories.json (zonal learners). */
+    learnerHealthZoneId: v.optional(v.string()),
     passwordHash: v.optional(v.string()),
     mustChangePassword: v.optional(v.boolean()),
     lastLoginAt: v.optional(v.number()),

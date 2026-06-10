@@ -8,6 +8,10 @@ import { Input } from "../../components/ui/Input";
 import { useToast } from "../../components/ui/Toast";
 import { AuthLayout } from "../../components/auth/AuthLayout";
 import { DemoAccountsPanel } from "../../components/auth/DemoAccountsPanel";
+import {
+  clearFormFieldError,
+  clearFormFieldErrors,
+} from "../../lib/formErrors";
 
 export default function LoginPage() {
   const { t } = useTranslation();
@@ -59,7 +63,10 @@ export default function LoginPage() {
           type="email"
           placeholder={t("auth.emailPlaceholder")}
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            clearFormFieldError(setErrors, "email");
+          }}
           error={errors.email}
           autoComplete="email"
           className="rounded-xl"
@@ -70,7 +77,10 @@ export default function LoginPage() {
           type={showPassword ? "text" : "password"}
           placeholder={t("auth.passwordPlaceholder")}
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            clearFormFieldError(setErrors, "password");
+          }}
           error={errors.password}
           autoComplete="current-password"
           className="rounded-xl"
@@ -110,6 +120,7 @@ export default function LoginPage() {
         onSelect={(demoEmail, demoPassword) => {
           setEmail(demoEmail);
           setPassword(demoPassword);
+          clearFormFieldErrors(setErrors, ["email", "password"]);
         }}
       />
     </AuthLayout>

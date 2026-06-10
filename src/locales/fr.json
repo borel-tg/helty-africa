@@ -76,7 +76,9 @@
     "trainingShort": "Formation",
     "dashboardShort": "Tableau",
     "evaluation": "Évaluation",
-    "programs": "Programmes"
+    "programs": "Programmes",
+    "profile": "Profil",
+    "profileShort": "Profil"
   },
   "evaluation": {
     "programLabel": "Programme de formation",
@@ -240,6 +242,7 @@
     "myTrainings": "Mes formations",
     "programHub": "Programme de formation",
     "myCertificates": "Mes certificats",
+    "myProfile": "Mon profil",
     "evaluation": "Évaluation",
     "adminOverview": "Vue d'ensemble admin",
     "programs": "Programmes de formation",
@@ -407,6 +410,17 @@
     "learnerCategory": "Catégorie",
     "selectCategory": "Choisir une catégorie",
     "categoryRequired": "La catégorie est obligatoire",
+    "province": "Province",
+    "selectProvince": "Choisir une province",
+    "searchProvince": "Rechercher une province…",
+    "noProvinceMatch": "Aucune province trouvée",
+    "provinceRequired": "La province est obligatoire",
+    "healthZone": "Zone de santé",
+    "selectHealthZone": "Choisir une zone de santé",
+    "selectProvinceFirst": "Sélectionnez d'abord une province",
+    "searchHealthZone": "Rechercher une zone…",
+    "noHealthZoneMatch": "Aucune zone trouvée",
+    "healthZoneRequired": "La zone de santé est obligatoire",
     "invitedToOrg": "Invitation pour {{org}}",
     "invitationUsed": "Cette invitation a déjà été utilisée. Connectez-vous ou demandez un nouveau lien.",
     "invitationExpired": "Cette invitation a expiré. Demandez à votre administrateur un nouveau lien.",
@@ -419,6 +433,10 @@
     "linkExpires": "Le lien expire dans 7 jours."
   },
   "learner": {
+    "profileTitle": "Mon profil",
+    "profileSubtitle": "Mettez à jour vos coordonnées et votre catégorie d'apprenant.",
+    "profileSaved": "Profil enregistré.",
+    "profileCategoryHint": "National, provincial ou zonal — selon votre niveau dans le programme de vaccination.",
     "dashboardTitle": "Ma formation",
     "modules": "Modules",
     "completed": "Terminés",

@@ -19,6 +19,7 @@ import ExamPage from "./pages/learner/ExamPage";
 import ExamResultsPage from "./pages/learner/ExamResultsPage";
 import CertificatePage from "./pages/learner/CertificatePage";
 import MyCertificatesPage from "./pages/learner/MyCertificatesPage";
+import LearnerProfilePage from "./pages/learner/LearnerProfilePage";
 import ProgramHubPage from "./pages/learner/ProgramHubPage";
 import ProgramEvaluationPage from "./pages/learner/ProgramEvaluationPage";
 import GeneralExamPage from "./pages/learner/GeneralExamPage";
@@ -98,6 +99,7 @@ export default function App() {
             >
               <Route path="/learn" element={<LearnerDashboard />} />
               <Route path="/learn/certificates" element={<MyCertificatesPage />} />
+              <Route path="/learn/profile" element={<LearnerProfilePage />} />
               <Route
                 path="/learn/program/:programId/evaluation"
                 element={<ProgramEvaluationPage />}

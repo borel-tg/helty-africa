@@ -7,6 +7,7 @@ import { TopBar } from "./TopBar";
 const ROUTE_TITLE_KEYS = {
   "/learn": "routes.myTrainings",
   "/learn/certificates": "routes.myCertificates",
+  "/learn/profile": "routes.myProfile",
   "/learn/program": "routes.programHub",
   "/admin": "routes.adminOverview",
   "/admin/programs": "routes.programs",

@@ -14,7 +14,12 @@ import { Modal, ConfirmModal } from "../../components/ui/Modal";
 import { useToast } from "../../components/ui/Toast";
 import { useConvexSession } from "../../hooks/useConvexSession";
 import { formatTimeAgo } from "../../lib/utils";
-import { LEARNER_CATEGORIES } from "../../lib/learnerCategories";
+import { LearnerTerritoryFields } from "../../components/auth/LearnerTerritoryFields";
+import { validateLearnerTerritoryFields } from "../../lib/validateLearnerTerritory";
+import {
+  clearFormFieldError,
+  clearFormFieldErrors,
+} from "../../lib/formErrors";
 import {
   DRC_COUNTRY_CODE,
   formatDrcPhoneInput,
@@ -28,6 +33,8 @@ const MANUAL_CREATE_INITIAL = {
   phone: DRC_COUNTRY_CODE + " ",
   role: "learner",
   learnerCategoryKey: "zonal",
+  learnerProvinceId: "",
+  learnerHealthZoneId: "",
   tempPassword: "",
 };
 function InviteModal({ open, onClose, organizationId }) {
@@ -84,7 +91,10 @@ function CreateManualModal({ open, onClose, organizationId }) {
   const [form, setForm] = useState(MANUAL_CREATE_INITIAL);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const update = (f) => (e) => setForm((p) => ({ ...p, [f]: e.target.value }));
+  const update = (f) => (e) => {
+    setForm((p) => ({ ...p, [f]: e.target.value }));
+    clearFormFieldError(setErrors, f);
+  };
 
   useEffect(() => {
     if (open) {
@@ -98,6 +108,7 @@ function CreateManualModal({ open, onClose, organizationId }) {
       ...prev,
       phone: formatDrcPhoneInput(e.target.value),
     }));
+    clearFormFieldError(setErrors, "phone");
   };
 
   const handleCreate = async () => {
@@ -109,6 +120,22 @@ function CreateManualModal({ open, onClose, organizationId }) {
     }
     if (!isValidDrcPhone(form.phone)) {
       nextErrors.phone = t("auth.phoneInvalidDrc");
+    }
+    if (form.role === "learner") {
+      const territoryErrs = validateLearnerTerritoryFields(
+        form.learnerCategoryKey,
+        form.learnerProvinceId,
+        form.learnerHealthZoneId
+      );
+      if (territoryErrs.learnerCategoryKey) {
+        nextErrors.learnerCategoryKey = t("auth.categoryRequired");
+      }
+      if (territoryErrs.learnerProvinceId) {
+        nextErrors.learnerProvinceId = t("auth.provinceRequired");
+      }
+      if (territoryErrs.learnerHealthZoneId) {
+        nextErrors.learnerHealthZoneId = t("auth.healthZoneRequired");
+      }
     }
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
@@ -126,6 +153,14 @@ function CreateManualModal({ open, onClose, organizationId }) {
         role: form.role,
         learnerCategoryKey:
           form.role === "learner" ? form.learnerCategoryKey || undefined : undefined,
+        learnerProvinceId:
+          form.role === "learner" && form.learnerProvinceId
+            ? form.learnerProvinceId
+            : undefined,
+        learnerHealthZoneId:
+          form.role === "learner" && form.learnerHealthZoneId
+            ? form.learnerHealthZoneId
+            : undefined,
         password: form.tempPassword || "demo1234",
       });
       toast.success(
@@ -173,23 +208,52 @@ function CreateManualModal({ open, onClose, organizationId }) {
           autoComplete="tel"
           leftIcon={<Phone size={16} />}
         />
-        <Select label={t("admin.role")} value={form.role} onChange={update("role")}>
+        <Select
+          label={t("admin.role")}
+          value={form.role}
+          onChange={(e) => {
+            const role = e.target.value;
+            setForm((p) => ({ ...p, role }));
+            clearFormFieldError(setErrors, "role");
+            if (role !== "learner") {
+              clearFormFieldErrors(setErrors, [
+                "learnerCategoryKey",
+                "learnerProvinceId",
+                "learnerHealthZoneId",
+              ]);
+            }
+          }}
+        >
           <option value="learner">{t("roles.learner")}</option>
           <option value="lead">{t("roles.lead")}</option>
           <option value="admin">{t("roles.admin")}</option>
         </Select>
         {form.role === "learner" && (
-          <Select
-            label={t("auth.learnerCategory")}
-            value={form.learnerCategoryKey}
-            onChange={update("learnerCategoryKey")}
-          >
-            {LEARNER_CATEGORIES.map((c) => (
-              <option key={c.key} value={c.key}>
-                {c.labelFr}
-              </option>
-            ))}
-          </Select>
+          <LearnerTerritoryFields
+            categoryKey={form.learnerCategoryKey}
+            provinceId={form.learnerProvinceId}
+            healthZoneId={form.learnerHealthZoneId}
+            onCategoryChange={(v) => {
+              setForm((p) => ({ ...p, learnerCategoryKey: v }));
+              clearFormFieldErrors(setErrors, [
+                "learnerCategoryKey",
+                "learnerProvinceId",
+                "learnerHealthZoneId",
+              ]);
+            }}
+            onProvinceChange={(v) => {
+              setForm((p) => ({ ...p, learnerProvinceId: v }));
+              clearFormFieldErrors(setErrors, [
+                "learnerProvinceId",
+                "learnerHealthZoneId",
+              ]);
+            }}
+            onHealthZoneChange={(v) => {
+              setForm((p) => ({ ...p, learnerHealthZoneId: v }));
+              clearFormFieldError(setErrors, "learnerHealthZoneId");
+            }}
+            errors={errors}
+          />
         )}
         <Input label={`${t("admin.tempPassword")} *`} type="password" placeholder={t("admin.tempPasswordPlaceholder")} value={form.tempPassword} onChange={update("tempPassword")} />
         <p className="text-xs text-text-secondary">{t("admin.changePasswordHint")}</p>

@@ -7,6 +7,7 @@ import {
   BarChart2,
   Award,
   Bell,
+  User,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useAuth } from "../../hooks/useAuth";
@@ -15,6 +16,7 @@ const MOBILE_NAV = {
   learner: [
     { to: "/learn", icon: LayoutDashboard, labelKey: "nav.trainingShort" },
     { to: "/learn/certificates", icon: Award, labelKey: "nav.certsShort" },
+    { to: "/learn/profile", icon: User, labelKey: "nav.profileShort" },
   ],
   lead: [
     { to: "/lead/learners", icon: Users, labelKey: "nav.learners" },

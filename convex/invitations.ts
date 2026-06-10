@@ -12,6 +12,7 @@ import {
   isLearnerCategoryKey,
   learnerCategoryKeyValidator,
 } from "./lib/learnerCategories";
+import { resolveLearnerTerritory } from "./lib/validateLearnerTerritory";
 import { assertOrgAdmin } from "./lib/requireAuth";
 
 export const listByOrg = adminQuery({
@@ -159,6 +160,8 @@ export const completeRegistration = publicMutation({
     phone: v.string(),
     password: v.string(),
     learnerCategoryKey: v.optional(learnerCategoryKeyValidator),
+    learnerProvinceId: v.optional(v.string()),
+    learnerHealthZoneId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const invitation = await ctx.db
@@ -181,7 +184,7 @@ export const completeRegistration = publicMutation({
       throw new Error("Un compte existe déjà avec cette adresse e-mail.");
     }
 
-    if (invitation.role === "learner") {
+    if (invitation.role === "learner" || invitation.role === "lead") {
       if (!args.learnerCategoryKey || !isLearnerCategoryKey(args.learnerCategoryKey)) {
         throw new Error("Veuillez sélectionner une catégorie.");
       }
@@ -203,6 +206,20 @@ export const completeRegistration = publicMutation({
     const passwordHash = await hashPassword(args.password);
     const now = Date.now();
 
+    let learnerTerritory: {
+      learnerProvinceId?: string;
+      learnerHealthZoneId?: string;
+    } = {};
+    const needsTerritory =
+      invitation.role === "learner" || invitation.role === "lead";
+    if (needsTerritory && args.learnerCategoryKey) {
+      learnerTerritory = resolveLearnerTerritory(
+        args.learnerCategoryKey,
+        args.learnerProvinceId,
+        args.learnerHealthZoneId
+      );
+    }
+
     const userId = await ctx.db.insert("users", {
       organizationId: invitation.organizationId,
       name: `${firstName} ${lastName}`,
@@ -210,8 +227,8 @@ export const completeRegistration = publicMutation({
       phone,
       role: invitation.role,
       status: "active",
-      learnerCategoryKey:
-        invitation.role === "learner" ? args.learnerCategoryKey : undefined,
+      learnerCategoryKey: needsTerritory ? args.learnerCategoryKey : undefined,
+      ...learnerTerritory,
       passwordHash,
       mustChangePassword: false,
       createdAt: now,

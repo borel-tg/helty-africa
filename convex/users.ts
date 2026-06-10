@@ -1,6 +1,7 @@
 import {
   adminMutation,
   adminQuery,
+  authedMutation,
   authedQuery,
   leadOrAdminQuery,
 } from "./lib/functions";
@@ -8,6 +9,7 @@ import { v } from "convex/values";
 import { internal } from "./_generated/api";
 import { hashPassword } from "./lib/password";
 import { learnerCategoryKeyValidator } from "./lib/learnerCategories";
+import { resolveLearnerTerritory } from "./lib/validateLearnerTerritory";
 import { ensurePasswordAccount } from "./lib/passwordAccount";
 import {
   assertOrgAdmin,
@@ -119,6 +121,8 @@ export const createManualAccount = adminMutation({
     role: userRoleValidator,
     password: v.string(),
     learnerCategoryKey: v.optional(learnerCategoryKeyValidator),
+    learnerProvinceId: v.optional(v.string()),
+    learnerHealthZoneId: v.optional(v.string()),
     leadId: v.optional(v.id("users")),
   },
   handler: async (ctx, args) => {
@@ -140,6 +144,21 @@ export const createManualAccount = adminMutation({
     const passwordHash = await hashPassword(args.password);
     const now = Date.now();
 
+    let learnerTerritory: {
+      learnerProvinceId?: string;
+      learnerHealthZoneId?: string;
+    } = {};
+    if (args.role === "learner") {
+      if (!args.learnerCategoryKey) {
+        throw new Error("Veuillez sélectionner une catégorie.");
+      }
+      learnerTerritory = resolveLearnerTerritory(
+        args.learnerCategoryKey,
+        args.learnerProvinceId,
+        args.learnerHealthZoneId
+      );
+    }
+
     const userId = await ctx.db.insert("users", {
       organizationId: args.organizationId,
       name: args.name.trim(),
@@ -148,6 +167,7 @@ export const createManualAccount = adminMutation({
       role: args.role,
       learnerCategoryKey:
         args.role === "learner" ? args.learnerCategoryKey : undefined,
+      ...learnerTerritory,
       leadId: args.leadId,
       passwordHash,
       mustChangePassword: true,
@@ -169,6 +189,48 @@ export const createManualAccount = adminMutation({
   },
 });
 
+/** Learner self-service profile update (name, phone, category). */
+export const updateMyProfile = authedMutation({
+  args: {
+    firstName: v.string(),
+    lastName: v.string(),
+    phone: v.string(),
+    learnerCategoryKey: learnerCategoryKeyValidator,
+    learnerProvinceId: v.optional(v.string()),
+    learnerHealthZoneId: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const user = ctx.user;
+    if (user.role !== "learner") {
+      throw new Error("Non autorisé");
+    }
+
+    const firstName = args.firstName.trim();
+    const lastName = args.lastName.trim();
+    if (!firstName || !lastName) {
+      throw new Error("Le prénom et le nom sont obligatoires.");
+    }
+
+    const phone = args.phone.trim();
+    if (!phone) {
+      throw new Error("Le numéro de téléphone est obligatoire.");
+    }
+
+    const territory = resolveLearnerTerritory(
+      args.learnerCategoryKey,
+      args.learnerProvinceId,
+      args.learnerHealthZoneId
+    );
+
+    await ctx.db.patch(user._id, {
+      name: `${firstName} ${lastName}`,
+      phone,
+      learnerCategoryKey: args.learnerCategoryKey,
+      ...territory,
+    });
+  },
+});
+
 export const update = adminMutation({
   args: {
     userId: v.id("users"),
@@ -177,6 +239,8 @@ export const update = adminMutation({
     role: v.optional(userRoleValidator),
     leadId: v.optional(v.id("users")),
     learnerCategoryKey: v.optional(learnerCategoryKeyValidator),
+    learnerProvinceId: v.optional(v.string()),
+    learnerHealthZoneId: v.optional(v.string()),
     status: v.optional(v.union(v.literal("active"), v.literal("inactive"))),
     passwordHash: v.optional(v.string()),
     mustChangePassword: v.optional(v.boolean()),

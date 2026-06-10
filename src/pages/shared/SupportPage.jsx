@@ -18,6 +18,7 @@ import {
   phoneToTelUrl,
   phoneToWhatsAppUrl,
 } from "../../lib/supportConfig";
+import { clearFormFieldError } from "../../lib/formErrors";
 
 export default function SupportPage() {
   const { t } = useTranslation();
@@ -165,14 +166,20 @@ export default function SupportPage() {
                   label={t("support.subject")}
                   placeholder={t("support.subjectPlaceholder")}
                   value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
+                  onChange={(e) => {
+                    setSubject(e.target.value);
+                    clearFormFieldError(setErrors, "subject");
+                  }}
                   error={errors.subject}
                 />
                 <Textarea
                   label={t("support.message")}
                   placeholder={t("support.messagePlaceholder")}
                   value={message}
-                  onChange={(e) => setMessage(e.target.value)}
+                  onChange={(e) => {
+                    setMessage(e.target.value);
+                    clearFormFieldError(setErrors, "message");
+                  }}
                   error={errors.message}
                   rows={5}
                 />
