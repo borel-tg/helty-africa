@@ -57,7 +57,7 @@ export default function CertificatePage() {
   const template = mergeTemplate(savedTemplate);
   const learnerName = currentUser?.name ?? "—";
   const programTitle =
-    convexProgram?.program?.title ?? "Training program";
+    convexProgram?.program?.title ?? t("learner.trainingProgramFallback");
   const score = certificate?.score ?? scoreFromState ?? null;
   const issuedAt = certificate?.issuedAt ?? Date.now();
   const certificateNumber = certificate?.certificateNumber;

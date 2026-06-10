@@ -23,7 +23,7 @@ export function LessonPreviewModal({ open, onClose, lesson }) {
       <div className="space-y-4 overflow-y-auto max-h-[60vh] px-1">
         <div>
           <p className="text-xs text-text-secondary capitalize mb-1">
-            {lesson.type}
+            {t(`lessonTypes.${lesson.type === "video" ? "videoYoutube" : lesson.type}`)}
           </p>
           <h3 className="text-lg font-semibold text-text-primary">{lesson.title}</h3>
           {lesson.description && (

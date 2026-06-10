@@ -201,14 +201,14 @@ export default function CertificateTemplatePage() {
               label={t("certificate.programSubtitle")}
               value={form.programSubtitle}
               onChange={update("programSubtitle")}
-              placeholder="Employee Training Programme"
+              placeholder={t("certificate.programNamePlaceholder")}
             />
           </div>
 
           {/* ── Header logos ── */}
           <div className="space-y-3">
             <p className="text-sm font-semibold text-text-primary border-b pb-1">
-              {t("certificate.headerLogos", "Header Logos")}
+              {t("certificate.headerLogos")}
             </p>
             <FileUpload
               preset="logo"
@@ -224,7 +224,7 @@ export default function CertificateTemplatePage() {
             />
             <FileUpload
               preset="logo"
-              label={t("certificate.secondLogo", "Second logo (right)")}
+              label={t("certificate.secondLogo")}
               value={form.secondLogoUrl}
               onUploaded={(result) =>
                 setForm((p) => ({
@@ -239,23 +239,23 @@ export default function CertificateTemplatePage() {
           {/* ── Signatures ── */}
           <div className="space-y-4">
             <p className="text-sm font-semibold text-text-primary border-b pb-1">
-              {t("certificate.signatures", "Signatures")}
+              {t("certificate.signatures")}
             </p>
 
             {/* Signature 1 */}
             <div className="space-y-3 p-3 rounded-lg bg-gray-50 border border-gray-100">
               <p className="text-xs font-medium text-text-secondary uppercase tracking-wide">
-                {t("certificate.signature1", "Signature 1")}
+                {t("certificate.signature1")}
               </p>
               <Input
                 label={t("certificate.signatureLine")}
                 value={form.signatureLine}
                 onChange={update("signatureLine")}
-                placeholder="Dr. Jane Smith, Training Director"
+                placeholder={t("certificate.signatory1Placeholder")}
               />
               <FileUpload
                 preset="logo"
-                label={t("certificate.signatureImage", "Signature image")}
+                label={t("certificate.signatureImage")}
                 value={form.signatureImageUrl}
                 onUploaded={(result) =>
                   setForm((p) => ({
@@ -270,20 +270,20 @@ export default function CertificateTemplatePage() {
             {/* Signature 2 (optional) */}
             <div className="space-y-3 p-3 rounded-lg bg-gray-50 border border-gray-100">
               <p className="text-xs font-medium text-text-secondary uppercase tracking-wide">
-                {t("certificate.signature2", "Signature 2")}{" "}
+                {t("certificate.signature2")}{" "}
                 <span className="normal-case font-normal text-text-secondary">
-                  ({t("common.optional", "optional")})
+                  ({t("common.optional")})
                 </span>
               </p>
               <Input
                 label={t("certificate.signatureLine")}
                 value={form.signature2Line}
                 onChange={update("signature2Line")}
-                placeholder="Dr. John Doe, Medical Director"
+                placeholder={t("certificate.signatory2Placeholder")}
               />
               <FileUpload
                 preset="logo"
-                label={t("certificate.signatureImage", "Signature image")}
+                label={t("certificate.signatureImage")}
                 value={form.signature2ImageUrl}
                 onUploaded={(result) =>
                   setForm((p) => ({
@@ -299,7 +299,7 @@ export default function CertificateTemplatePage() {
           {/* ── Colours ── */}
           <div className="space-y-4">
             <p className="text-sm font-semibold text-text-primary border-b pb-1">
-              {t("certificate.colours", "Colours")}
+              {t("certificate.colours")}
             </p>
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium text-text-primary">

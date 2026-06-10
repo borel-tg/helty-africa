@@ -281,7 +281,7 @@ export default function TrainingProgramEditorPage() {
               <div className="flex items-center gap-2 min-w-0">
                 <span className="truncate">{m.title}</span>
                 <Badge variant={m.status === "published" ? "success" : "default"}>
-                  {m.status}
+                  {t(`status.${m.status}`)}
                 </Badge>
               </div>
               {m.linkId && (

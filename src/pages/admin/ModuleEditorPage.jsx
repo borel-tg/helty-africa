@@ -37,6 +37,7 @@ function extractYoutubeId(url) {
 const TYPE_ICONS = { text: BookOpen, video: Video, document: FileText };
 
 function AddLessonModal({ open, onClose, onAdd }) {
+  const { t } = useTranslation();
   const toast = useToast();
   const [type, setType] = useState("text");
   const [title, setTitle] = useState("");
@@ -52,15 +53,15 @@ function AddLessonModal({ open, onClose, onAdd }) {
     if (!title.trim()) return;
     if (type === "document") {
       if (documentSource === "upload" && !document?.url) {
-        toast.error("Please upload a PDF, PowerPoint, or Word file.");
+        toast.error(t("admin.uploadPdfPptWord"));
         return;
       }
       if (documentSource === "url" && !documentUrl.trim()) {
-        toast.error("Please add a valid online file URL.");
+        toast.error(t("admin.validUrlRequired"));
         return;
       }
       if (documentSource === "url" && !isValidUrl(documentUrl)) {
-        toast.error("The file URL is not valid.");
+        toast.error(t("admin.invalidUrl"));
         return;
       }
     }
@@ -98,10 +99,10 @@ function AddLessonModal({ open, onClose, onAdd }) {
   };
 
   return (
-    <Modal open={open} onClose={onClose} title="Add Lesson"
+    <Modal open={open} onClose={onClose} title={t("admin.addLesson")}
       footer={
         <>
-          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button variant="ghost" onClick={onClose}>{t("common.cancel")}</Button>
           <Button
             onClick={handleAdd}
             disabled={
@@ -110,21 +111,21 @@ function AddLessonModal({ open, onClose, onAdd }) {
                 (documentSource === "url" && !documentUrl.trim()))
             }
           >
-            Add Lesson
+            {t("admin.addLesson")}
           </Button>
         </>
       }
     >
       <div className="space-y-4">
-        <Select label="Lesson Type" value={type} onChange={(e) => setType(e.target.value)}>
-          <option value="text">Text</option>
-          <option value="video">Video (YouTube)</option>
-          <option value="document">Document (PDF/PPT/Word)</option>
+        <Select label={t("admin.lessonType")} value={type} onChange={(e) => setType(e.target.value)}>
+          <option value="text">{t("lessonTypes.text")}</option>
+          <option value="video">{t("lessonTypes.videoYoutube")}</option>
+          <option value="document">{t("lessonTypes.document")}</option>
         </Select>
-        <Input label="Lesson Title *" placeholder="e.g. Introduction to Polio Eradication" value={title} onChange={(e) => setTitle(e.target.value)} />
-        <Textarea label="Description" placeholder="Brief description (optional)" value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
+        <Input label={t("admin.lessonTitle")} placeholder={t("admin.lessonTitlePlaceholder")} value={title} onChange={(e) => setTitle(e.target.value)} />
+        <Textarea label={t("admin.lessonDescription")} placeholder={t("admin.lessonDescriptionPlaceholder")} value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
         {type === "video" && (
-          <Input label="YouTube URL" placeholder="https://www.youtube.com/watch?v=..." value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} />
+          <Input label={t("admin.youtubeUrl")} placeholder={t("admin.youtubePlaceholder")} value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} />
         )}
         {type === "document" && (
           <div className="space-y-3">
@@ -138,7 +139,7 @@ function AddLessonModal({ open, onClose, onAdd }) {
                     : "bg-gray-100 text-text-secondary"
                 }`}
               >
-                Upload File
+                {t("admin.uploadFile")}
               </button>
               <button
                 type="button"
@@ -149,14 +150,14 @@ function AddLessonModal({ open, onClose, onAdd }) {
                     : "bg-gray-100 text-text-secondary"
                 }`}
               >
-                Online URL
+                {t("admin.onlineUrl")}
               </button>
             </div>
 
             {documentSource === "upload" ? (
               <FileUpload
                 preset="document"
-                label="Lesson document"
+                label={t("admin.lessonDocument")}
                 value={document?.url}
                 fileName={document?.fileName}
                 onUploaded={setDocument}
@@ -164,23 +165,23 @@ function AddLessonModal({ open, onClose, onAdd }) {
             ) : (
               <>
                 <Input
-                  label="Document URL"
-                  placeholder="https://docs.google.com/document/d/.../edit"
+                  label={t("admin.documentUrl")}
+                  placeholder={t("admin.resourceUrlPlaceholder")}
                   value={documentUrl}
                   onChange={(e) => setDocumentUrl(e.target.value)}
                   onBlur={() =>
                     handleDocumentUrlBlur(documentUrl, setDocumentUrl, setDocumentFormat)
                   }
-                  helperText="Google Docs, Drive, PDF, PowerPoint, Word, or image links. Format is auto-detected when possible."
+                  helperText={t("admin.documentUrlHelperExtended")}
                 />
                 <Select
-                  label="Document format"
+                  label={t("admin.documentFormat")}
                   value={documentFormat}
                   onChange={(e) => setDocumentFormat(e.target.value)}
                 >
-                  <option value="pdf">PDF</option>
-                  <option value="ppt">PowerPoint (PPT / PPTX)</option>
-                  <option value="doc">Word (DOC / DOCX)</option>
+                  <option value="pdf">{t("documentFormats.pdf")}</option>
+                  <option value="ppt">{t("documentFormats.ppt")}</option>
+                  <option value="doc">{t("documentFormats.doc")}</option>
                 </Select>
               </>
             )}
@@ -188,7 +189,7 @@ function AddLessonModal({ open, onClose, onAdd }) {
         )}
         {type === "text" && (
           <RichTextEditor
-            label="Lesson Content"
+            label={t("admin.lessonContent")}
             value={content}
             onChange={setContent}
           />
@@ -199,6 +200,7 @@ function AddLessonModal({ open, onClose, onAdd }) {
 }
 
 function EditLessonModal({ open, onClose, onUpdate, initialLesson }) {
+  const { t } = useTranslation();
   const toast = useToast();
   const [type, setType] = useState("text");
   const [title, setTitle] = useState("");
@@ -235,16 +237,16 @@ function EditLessonModal({ open, onClose, onUpdate, initialLesson }) {
 
   const handleSave = () => {
     if (!title.trim()) {
-      toast.error("Lesson title is required.");
+      toast.error(t("admin.lessonTitleRequired"));
       return;
     }
     if (type === "document") {
       if (documentSource === "upload" && !document?.url && !documentUrl) {
-        toast.error("Please upload a file or provide a document URL.");
+        toast.error(t("admin.documentFileOrUrlRequired"));
         return;
       }
       if (documentSource === "url" && !documentUrl.trim()) {
-        toast.error("Please add a valid document URL.");
+        toast.error(t("admin.documentUrlRequired"));
         return;
       }
     }
@@ -287,42 +289,42 @@ function EditLessonModal({ open, onClose, onUpdate, initialLesson }) {
     <Modal
       open={open}
       onClose={onClose}
-      title="Edit Lesson"
+      title={t("admin.editLesson")}
       footer={
         <>
-          <Button variant="ghost" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleSave}>Save Changes</Button>
+          <Button variant="ghost" onClick={onClose}>{t("common.cancel")}</Button>
+          <Button onClick={handleSave}>{t("common.saveChanges")}</Button>
         </>
       }
     >
       <div className="space-y-4">
-        <Select label="Lesson Type" value={type} onChange={(e) => setType(e.target.value)}>
-          <option value="text">Text</option>
-          <option value="video">Video (YouTube)</option>
-          <option value="document">Document (PDF/PPT/Word)</option>
+        <Select label={t("admin.lessonType")} value={type} onChange={(e) => setType(e.target.value)}>
+          <option value="text">{t("lessonTypes.text")}</option>
+          <option value="video">{t("lessonTypes.videoYoutube")}</option>
+          <option value="document">{t("lessonTypes.document")}</option>
         </Select>
         <Input
-          label="Title *"
+          label={t("admin.lessonTitle")}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
         <Textarea
-          label="Description"
+          label={t("admin.lessonDescription")}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={2}
         />
         {type === "text" && (
           <RichTextEditor
-            label="Lesson Content"
+            label={t("admin.lessonContent")}
             value={content}
             onChange={setContent}
           />
         )}
         {type === "video" && (
           <Input
-            label="Video URL"
-            placeholder="https://www.youtube.com/watch?v=..."
+            label={t("admin.videoUrl")}
+            placeholder={t("admin.youtubePlaceholder")}
             value={videoUrl}
             onChange={(e) => setVideoUrl(e.target.value)}
           />
@@ -339,7 +341,7 @@ function EditLessonModal({ open, onClose, onUpdate, initialLesson }) {
                     : "bg-gray-100 text-text-secondary"
                 }`}
               >
-                Online URL
+                {t("admin.onlineUrl")}
               </button>
               <button
                 type="button"
@@ -350,35 +352,35 @@ function EditLessonModal({ open, onClose, onUpdate, initialLesson }) {
                     : "bg-gray-100 text-text-secondary"
                 }`}
               >
-                Upload file
+                {t("admin.uploadFile")}
               </button>
             </div>
             {documentSource === "url" ? (
               <>
                 <Input
-                  label="Document URL"
-                  placeholder="https://docs.google.com/document/d/.../edit"
+                  label={t("admin.documentUrl")}
+                  placeholder={t("admin.resourceUrlPlaceholder")}
                   value={documentUrl}
                   onChange={(e) => setDocumentUrl(e.target.value)}
                   onBlur={() =>
                     handleDocumentUrlBlur(documentUrl, setDocumentUrl, setDocumentFormat)
                   }
-                  helperText="Google Docs, Drive, PDF, PowerPoint, Word, or image links. Format is auto-detected when possible."
+                  helperText={t("admin.documentUrlHelperExtended")}
                 />
                 <Select
-                  label="Document format"
+                  label={t("admin.documentFormat")}
                   value={documentFormat}
                   onChange={(e) => setDocumentFormat(e.target.value)}
                 >
-                  <option value="pdf">PDF</option>
-                  <option value="ppt">PowerPoint (PPT / PPTX)</option>
-                  <option value="doc">Word (DOC / DOCX)</option>
+                  <option value="pdf">{t("documentFormats.pdf")}</option>
+                  <option value="ppt">{t("documentFormats.ppt")}</option>
+                  <option value="doc">{t("documentFormats.doc")}</option>
                 </Select>
               </>
             ) : (
               <FileUpload
                 preset="document"
-                label="Replace document file"
+                label={t("admin.replaceDocument")}
                 value={document?.url}
                 onUploaded={setDocument}
               />
@@ -435,6 +437,7 @@ function inferFileTypeFromName(name) {
 }
 
 function AddQuestionModal({ open, onClose, onAdd, onUpdate, initialQuestion }) {
+  const { t } = useTranslation();
   const [questionText, setQuestionText] = useState("");
   const [options, setOptions] = useState([
     { id: "a", text: "" }, { id: "b", text: "" },
@@ -482,32 +485,32 @@ function AddQuestionModal({ open, onClose, onAdd, onUpdate, initialQuestion }) {
   };
 
   return (
-    <Modal open={open} onClose={onClose} title={isEdit ? "Edit Exam Question" : "Add Exam Question"}
+    <Modal open={open} onClose={onClose} title={isEdit ? t("admin.editQuestion") : t("admin.addQuestion")}
       footer={
         <>
-          <Button variant="ghost" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleAdd}>{isEdit ? "Save Changes" : "Add Question"}</Button>
+          <Button variant="ghost" onClick={onClose}>{t("common.cancel")}</Button>
+          <Button onClick={handleAdd}>{isEdit ? t("common.saveChanges") : t("admin.addQuestion")}</Button>
         </>
       }
     >
       <div className="space-y-4">
-        <Textarea label="Question Text *" placeholder="Enter the question..." value={questionText} onChange={(e) => setQuestionText(e.target.value)} rows={3} />
+        <Textarea label={t("admin.questionText")} placeholder={t("admin.questionPlaceholder")} value={questionText} onChange={(e) => setQuestionText(e.target.value)} rows={3} />
         <div className="space-y-2">
-          <label className="text-sm font-medium text-text-primary">Answer Options</label>
+          <label className="text-sm font-medium text-text-primary">{t("evaluation.answerOptions")}</label>
           {options.map((opt) => (
             <div key={opt.id} className="flex items-center gap-2">
               <input type="radio" name="correct" checked={correctId === opt.id}
                 onChange={() => setCorrectId(opt.id)} className="accent-primary w-4 h-4 shrink-0" />
               <input
                 type="text"
-                placeholder={`Option ${opt.id.toUpperCase()}`}
+                placeholder={t("evaluation.optionPlaceholder", { letter: opt.id.toUpperCase() })}
                 value={opt.text}
                 onChange={(e) => updateOption(opt.id, e.target.value)}
                 className="flex-1 border border-gray-200 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
           ))}
-          <p className="text-xs text-text-secondary">Select the radio button for the correct answer.</p>
+          <p className="text-xs text-text-secondary">{t("evaluation.correctAnswerHint")}</p>
         </div>
       </div>
     </Modal>
@@ -515,6 +518,7 @@ function AddQuestionModal({ open, onClose, onAdd, onUpdate, initialQuestion }) {
 }
 
 function AddResourceModal({ open, onClose, onAdd }) {
+  const { t } = useTranslation();
   const toast = useToast();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -526,15 +530,15 @@ function AddResourceModal({ open, onClose, onAdd }) {
 
   const handleAdd = () => {
     if (!title.trim()) {
-      toast.error("Resource title is required.");
+      toast.error(t("admin.resourceTitleRequired"));
       return;
     }
     if (resourceSource === "url" && !resourceUrl.trim()) {
-      toast.error("Resource URL is required.");
+      toast.error(t("admin.resourceUrlRequired"));
       return;
     }
     if (resourceSource === "upload" && !resourceFile?.url) {
-      toast.error("Upload a resource file first.");
+      toast.error(t("admin.resourceFileRequired"));
       return;
     }
 
@@ -561,38 +565,38 @@ function AddResourceModal({ open, onClose, onAdd }) {
     <Modal
       open={open}
       onClose={onClose}
-      title="Add Module Resource"
+      title={t("admin.addModuleResource")}
       footer={
         <>
-          <Button variant="ghost" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleAdd}>Add Resource</Button>
+          <Button variant="ghost" onClick={onClose}>{t("common.cancel")}</Button>
+          <Button onClick={handleAdd}>{t("admin.addResource")}</Button>
         </>
       }
     >
       <div className="space-y-4">
         <Input
-          label="Resource title *"
-          placeholder="e.g. Cold Chain Checklist"
+          label={t("admin.resourceTitle")}
+          placeholder={t("admin.resourceTitlePlaceholder")}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
         <Textarea
-          label="Description"
-          placeholder="Short description (optional)"
+          label={t("admin.resourceDescription")}
+          placeholder={t("admin.resourceDescriptionPlaceholder")}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           rows={2}
         />
         <Select
-          label="Resource type"
+          label={t("admin.resourceType")}
           value={resourceType}
           onChange={(e) => setResourceType(e.target.value)}
         >
-          <option value="link">External link</option>
-          <option value="video">Video link</option>
-          <option value="pdf">PDF</option>
-          <option value="ppt">PowerPoint</option>
-          <option value="image">Image</option>
+          <option value="link">{t("resourceTypes.link")}</option>
+          <option value="video">{t("resourceTypes.video")}</option>
+          <option value="pdf">{t("resourceTypes.pdf")}</option>
+          <option value="ppt">{t("resourceTypes.ppt")}</option>
+          <option value="image">{t("resourceTypes.image")}</option>
         </Select>
 
         <div className="flex items-center gap-2">
@@ -605,7 +609,7 @@ function AddResourceModal({ open, onClose, onAdd }) {
                 : "bg-gray-100 text-text-secondary"
             }`}
           >
-            Online URL
+            {t("admin.onlineUrl")}
           </button>
           <button
             type="button"
@@ -616,21 +620,21 @@ function AddResourceModal({ open, onClose, onAdd }) {
                 : "bg-gray-100 text-text-secondary"
             }`}
           >
-            Upload file
+            {t("admin.uploadFile")}
           </button>
         </div>
 
         {resourceSource === "url" ? (
           <Input
-            label="Resource URL"
-            placeholder="https://..."
+            label={t("admin.resourceUrl")}
+            placeholder={t("admin.resourceUrlPlaceholder")}
             value={resourceUrl}
             onChange={(e) => setResourceUrl(e.target.value)}
           />
         ) : (
           <FileUpload
             preset={resourceType === "image" ? "thumbnail" : "document"}
-            label="Upload resource file"
+            label={t("admin.uploadResource")}
             value={resourceFile?.url}
             fileName={resourceFile?.fileName}
             onUploaded={setResourceFile}
@@ -644,7 +648,7 @@ function AddResourceModal({ open, onClose, onAdd }) {
             onChange={(e) => setDownloadable(e.target.checked)}
             className="accent-primary w-4 h-4"
           />
-          Mark as downloadable resource
+          {t("admin.markDownloadable")}
         </label>
       </div>
     </Modal>
@@ -737,7 +741,7 @@ export default function ModuleEditorPage() {
 
   const openLessonPreview = (lesson) => {
     if (!lesson) {
-      toast.error(t("admin.noLessonsToPreview", { defaultValue: "Add a lesson before previewing." }));
+      toast.error(t("admin.noLessonsToPreview"));
       return;
     }
     setPreviewLesson(lesson);
@@ -746,7 +750,7 @@ export default function ModuleEditorPage() {
   const previewModule = () => {
     const list = lessons ?? [];
     if (list.length === 0) {
-      toast.error(t("admin.noLessonsToPreview", { defaultValue: "Add a lesson before previewing." }));
+      toast.error(t("admin.noLessonsToPreview"));
       return;
     }
     setPreviewLesson(list[0]);
@@ -800,7 +804,7 @@ export default function ModuleEditorPage() {
         fileName: data.fileName,
         fileType: data.fileType,
       });
-      toast.success(t("admin.lessonUpdated", { defaultValue: "Lesson updated!" }));
+      toast.success(t("admin.lessonUpdated"));
       setEditingLesson(null);
     } catch (err) {
       toast.error(err.message ?? t("common.error"));
@@ -934,7 +938,7 @@ export default function ModuleEditorPage() {
   return (
     <div className="p-4 md:p-6 w-full">
       <button onClick={() => navigate("/admin/modules")} className="flex items-center gap-2 text-sm text-text-secondary hover:text-primary mb-4 transition-colors">
-        <ArrowLeft size={16} /> Back to Modules
+        <ArrowLeft size={16} /> {t("admin.backToModules")}
       </button>
 
       {/* Module header */}
@@ -943,13 +947,13 @@ export default function ModuleEditorPage() {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <h1 className="text-xl font-semibold text-text-primary">{module.title}</h1>
-              <Badge variant={module.status === "published" ? "success" : "default"}>{module.status}</Badge>
+              <Badge variant={module.status === "published" ? "success" : "default"}>{t(`status.${module.status}`)}</Badge>
             </div>
             <p className="text-sm text-text-secondary">{module.description}</p>
           </div>
           <div className="flex gap-2 shrink-0">
             <Button variant="outline" size="sm" onClick={previewModule}>
-              <Eye size={14} /> {t("admin.preview", { defaultValue: "Preview" })}
+              <Eye size={14} /> {t("admin.preview")}
             </Button>
             <Button size="sm" onClick={togglePublish}>
               {module.status === "published" ? t("common.unpublish") : t("common.publish")}
@@ -975,13 +979,13 @@ export default function ModuleEditorPage() {
         <div className="space-y-3">
           <div className="flex justify-end">
             <Button size="sm" onClick={() => setShowAddLesson(true)}>
-              <Plus size={14} /> Add Lesson
+              <Plus size={14} /> {t("admin.addLesson")}
             </Button>
           </div>
           {lessonList.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-card shadow-card">
               <BookOpen size={40} className="text-gray-300 mx-auto mb-3" />
-              <p className="text-text-secondary">No lessons yet. Add your first lesson.</p>
+              <p className="text-text-secondary">{t("admin.noLessonsYet")}</p>
             </div>
           ) : (
             lessonList.map((lesson, idx) => {
@@ -994,12 +998,14 @@ export default function ModuleEditorPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-text-primary truncate">{idx + 1}. {lesson.title}</p>
-                    <p className="text-xs text-text-secondary capitalize">{lesson.type}</p>
+                    <p className="text-xs text-text-secondary">
+                      {t(`lessonTypes.${lesson.type === "video" ? "videoYoutube" : lesson.type}`)}
+                    </p>
                   </div>
                   <div className="flex gap-1">
                     <button
                       onClick={() => openLessonPreview(lesson)}
-                      title={t("admin.lessonPreview", { defaultValue: "Preview lesson" })}
+                      title={t("admin.lessonPreview")}
                       className="p-2 text-gray-400 hover:text-primary min-h-[44px] min-w-[44px] flex items-center justify-center"
                     >
                       <Eye size={15} />
@@ -1025,13 +1031,13 @@ export default function ModuleEditorPage() {
         <div className="space-y-3">
           <div className="flex justify-end">
             <Button size="sm" onClick={() => setShowAddQuestion(true)}>
-              <Plus size={14} /> Add Question
+              <Plus size={14} /> {t("admin.addQuestion")}
             </Button>
           </div>
           {questionList.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-card shadow-card">
               <HelpCircle size={40} className="text-gray-300 mx-auto mb-3" />
-              <p className="text-text-secondary">No questions yet. Add exam questions.</p>
+              <p className="text-text-secondary">{t("admin.noQuestionsYet")}</p>
             </div>
           ) : (
             questionList.map((q, idx) => (
@@ -1047,14 +1053,14 @@ export default function ModuleEditorPage() {
                         setShowAddQuestion(true);
                       }}
                       className="p-1.5 text-gray-400 hover:text-primary"
-                      title="Edit question"
+                      title={t("admin.editQuestionTooltip")}
                     >
                       <Edit size={14} />
                     </button>
                     <button
                       onClick={() => setDeleteQuestion(q)}
                       className="p-1.5 text-gray-400 hover:text-red-500"
-                      title="Delete question"
+                      title={t("admin.deleteQuestionTooltip")}
                     >
                       <Trash2 size={14} />
                     </button>
@@ -1079,13 +1085,13 @@ export default function ModuleEditorPage() {
         <div className="space-y-3">
           <div className="flex justify-end">
             <Button size="sm" onClick={() => setShowAddResource(true)}>
-              <Plus size={14} /> Add Resource
+              <Plus size={14} /> {t("admin.addResource")}
             </Button>
           </div>
           {resourceList.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-card shadow-card">
               <Link2 size={40} className="text-gray-300 mx-auto mb-3" />
-              <p className="text-text-secondary">No resources yet. Add module resources.</p>
+              <p className="text-text-secondary">{t("admin.noResourcesYetAdmin")}</p>
             </div>
           ) : (
             resourceList.map((resource) => (
@@ -1103,7 +1109,7 @@ export default function ModuleEditorPage() {
                     <p className="text-xs text-text-secondary truncate">{resource.description}</p>
                   )}
                   <p className="text-[10px] text-text-secondary uppercase mt-0.5">
-                    {resource.type}
+                    {t(`resourceTypes.${resource.type}`)}
                   </p>
                 </div>
                 <a
@@ -1111,14 +1117,14 @@ export default function ModuleEditorPage() {
                   target="_blank"
                   rel="noreferrer"
                   className="p-2 text-gray-400 hover:text-primary min-h-[44px] min-w-[44px] flex items-center justify-center"
-                  title="Open resource"
+                  title={t("admin.openResource")}
                 >
                   <ExternalLink size={15} />
                 </a>
                 <button
                   onClick={() => setDeleteResource(resource)}
                   className="p-2 text-gray-400 hover:text-red-500 min-h-[44px] min-w-[44px] flex items-center justify-center"
-                  title="Delete resource"
+                  title={t("admin.deleteResourceTooltip")}
                 >
                   <Trash2 size={15} />
                 </button>
@@ -1131,7 +1137,7 @@ export default function ModuleEditorPage() {
       {/* Settings tab */}
       {activeTab === "settings" && (
         <div className="bg-white rounded-card shadow-card p-5 space-y-4">
-          <h3 className="text-base font-semibold text-text-primary">Module Settings</h3>
+          <h3 className="text-base font-semibold text-text-primary">{t("admin.moduleSettings")}</h3>
           <Input
             label={t("admin.moduleTitle")}
             value={settings.title}
@@ -1191,11 +1197,17 @@ export default function ModuleEditorPage() {
       />
       <AddResourceModal open={showAddResource} onClose={() => setShowAddResource(false)} onAdd={addResource} />
       <ConfirmModal open={!!deleteLesson} onClose={() => setDeleteLesson(null)} onConfirm={removeLesson}
-        title="Delete Lesson" message={`Delete "${deleteLesson?.title}"? This cannot be undone.`} confirmLabel="Delete" />
+        title={t("admin.deleteLesson")}
+        message={t("admin.deleteLessonConfirm", { title: deleteLesson?.title, cannotUndo: t("common.cannotUndo") })}
+        confirmLabel={t("common.delete")} />
       <ConfirmModal open={!!deleteResource} onClose={() => setDeleteResource(null)} onConfirm={removeResource}
-        title="Delete Resource" message={`Delete "${deleteResource?.title}"? This cannot be undone.`} confirmLabel="Delete" />
+        title={t("admin.deleteResource")}
+        message={t("admin.deleteResourceConfirm", { title: deleteResource?.title, cannotUndo: t("common.cannotUndo") })}
+        confirmLabel={t("common.delete")} />
       <ConfirmModal open={!!deleteQuestion} onClose={() => setDeleteQuestion(null)} onConfirm={removeQuestion}
-        title="Delete Question" message={`Delete this question? This cannot be undone.`} confirmLabel="Delete" />
+        title={t("admin.deleteQuestion")}
+        message={t("admin.deleteQuestionConfirm", { cannotUndo: t("common.cannotUndo") })}
+        confirmLabel={t("common.delete")} />
     </div>
   );
 }

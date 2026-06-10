@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "convex/react";
 import { Users, CheckCircle, Clock, XCircle, ChevronRight, Search } from "lucide-react";
 import { api } from "../../../convex/_generated/api";
@@ -8,25 +9,26 @@ import { useConvexSession } from "../../hooks/useConvexSession";
 import { ProgressBar } from "../../components/ui/Progress";
 import { formatTimeAgo } from "../../lib/utils";
 
-const STATUS_FILTERS = [
-  { id: "all", label: "All" },
-  { id: "not_started", label: "Not Started" },
-  { id: "in_progress", label: "In Progress" },
-  { id: "completed", label: "Completed" },
-];
-
-const STATUS_ICON = {
-  completed: <CheckCircle size={14} className="text-green-500" />,
-  in_progress: <Clock size={14} className="text-blue-500" />,
-  not_started: <XCircle size={14} className="text-gray-300" />,
-};
-
 export default function LeadDashboard() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const { convexUser } = useConvexSession();
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
+
+  const STATUS_FILTERS = [
+    { id: "all", labelKey: "lead.filterAll" },
+    { id: "not_started", labelKey: "lead.filterNotStarted" },
+    { id: "in_progress", labelKey: "lead.filterInProgress" },
+    { id: "completed", labelKey: "lead.filterCompleted" },
+  ];
+
+  const STATUS_ICON = {
+    completed: <CheckCircle size={14} className="text-green-500" />,
+    in_progress: <Clock size={14} className="text-blue-500" />,
+    not_started: <XCircle size={14} className="text-gray-300" />,
+  };
 
   const teamData = useQuery(
     api.stats.getLeadTeamOverview,
@@ -71,45 +73,47 @@ export default function LeadDashboard() {
 
   if (!teamData) {
     return (
-      <div className="p-6 text-center text-text-secondary">Loading…</div>
+      <div className="p-6 text-center text-text-secondary">{t("common.loading")}</div>
     );
   }
+
+  const statCards = [
+    {
+      labelKey: "lead.teamLearners",
+      value: learners.length,
+      icon: Users,
+      color: "text-blue-500",
+      bg: "bg-blue-50",
+    },
+    {
+      labelKey: "lead.teamCompleted",
+      value: completedCount,
+      icon: CheckCircle,
+      color: "text-green-500",
+      bg: "bg-green-50",
+    },
+    {
+      labelKey: "lead.teamInProgress",
+      value: inProgressCount,
+      icon: Clock,
+      color: "text-secondary",
+      bg: "bg-secondary-50",
+    },
+  ];
 
   return (
     <div className="p-4 md:p-6 w-full">
       <div className="mb-6">
         <h2 className="text-xl font-semibold text-text-primary">
-          Hello, {currentUser?.name?.split(" ")[0]} 👋
+          {t("learner.hello", { name: currentUser?.name?.split(" ")[0] ?? "" })}
         </h2>
-        <p className="text-text-secondary mt-1">Your team&apos;s training progress</p>
+        <p className="text-text-secondary mt-1">{t("lead.teamProgressSubtitle")}</p>
       </div>
 
       <div className="grid grid-cols-3 gap-3 mb-6">
-        {[
-          {
-            label: "Total Learners",
-            value: learners.length,
-            icon: Users,
-            color: "text-blue-500",
-            bg: "bg-blue-50",
-          },
-          {
-            label: "Completed All",
-            value: completedCount,
-            icon: CheckCircle,
-            color: "text-green-500",
-            bg: "bg-green-50",
-          },
-          {
-            label: "In Progress",
-            value: inProgressCount,
-            icon: Clock,
-            color: "text-secondary",
-            bg: "bg-secondary-50",
-          },
-        ].map((s) => (
+        {statCards.map((s) => (
           <div
-            key={s.label}
+            key={s.labelKey}
             className="bg-white rounded-card shadow-card p-4 text-center"
           >
             <div
@@ -118,7 +122,7 @@ export default function LeadDashboard() {
               <s.icon size={18} className={s.color} />
             </div>
             <p className="text-2xl font-bold text-text-primary">{s.value}</p>
-            <p className="text-xs text-text-secondary mt-0.5">{s.label}</p>
+            <p className="text-xs text-text-secondary mt-0.5">{t(s.labelKey)}</p>
           </div>
         ))}
       </div>
@@ -131,7 +135,7 @@ export default function LeadDashboard() {
           />
           <input
             type="text"
-            placeholder="Search learners…"
+            placeholder={t("lead.searchLearnersPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-input text-sm focus:outline-none focus:ring-2 focus:ring-primary"
@@ -148,7 +152,7 @@ export default function LeadDashboard() {
                   : "text-text-secondary"
               }`}
             >
-              {f.label}
+              {t(f.labelKey)}
             </button>
           ))}
         </div>
@@ -158,7 +162,7 @@ export default function LeadDashboard() {
         {filtered.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-card shadow-card">
             <Users size={40} className="text-gray-300 mx-auto mb-3" />
-            <p className="text-text-secondary">No learners match your filters.</p>
+            <p className="text-text-secondary">{t("lead.noLearnersMatch")}</p>
           </div>
         ) : (
           filtered.map((learner) => (
@@ -178,14 +182,16 @@ export default function LeadDashboard() {
                     {learner.name}
                   </p>
                   <p className="text-xs text-text-secondary">
-                    Last active {formatTimeAgo(learner.lastLoginAt)}
+                    {t("lead.lastActive", {
+                      time: formatTimeAgo(learner.lastLoginAt),
+                    })}
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="text-lg font-bold text-primary">
                     {learner.overallPct}%
                   </p>
-                  <p className="text-[10px] text-text-secondary">overall</p>
+                  <p className="text-[10px] text-text-secondary">{t("lead.overall")}</p>
                 </div>
                 <ChevronRight size={16} className="text-gray-300 shrink-0" />
               </div>
@@ -198,7 +204,7 @@ export default function LeadDashboard() {
                   return (
                     <div key={mod._id} className="flex items-center gap-1">
                       {STATUS_ICON[status]}
-                      <span className="text-xs text-text-secondary truncate max-w-[120px]">
+                      <span className="text-[10px] text-text-secondary truncate max-w-[80px]">
                         {mod.title}
                       </span>
                     </div>

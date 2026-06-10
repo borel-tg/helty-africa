@@ -97,7 +97,7 @@ export default function LessonPage() {
         <div className="flex items-center gap-2 text-xs text-text-secondary mb-1">
           <span>{t("learner.lessonOf", { current: lessonIndex + 1, total: lessons.length })}</span>
           <span>·</span>
-          <span className="capitalize">{lesson.type}</span>
+          <span>{t(`lessonTypes.${lesson.type === "video" ? "videoYoutube" : lesson.type}`)}</span>
         </div>
         <div className="flex items-center justify-between gap-4">
           <h1 className="text-xl md:text-2xl font-semibold text-text-primary">

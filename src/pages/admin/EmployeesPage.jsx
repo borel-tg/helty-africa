@@ -205,7 +205,7 @@ function InvitationRow({ inv, onResend, resending }) {
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-text-primary truncate">{inv.email}</p>
         <p className="text-xs text-text-secondary">
-          Invited {formatTimeAgo(inv.invitedAt)}
+          {t("admin.invitedAt", { time: formatTimeAgo(inv.invitedAt) })}
         </p>
       </div>
       <span
@@ -416,18 +416,18 @@ export default function EmployeesPage() {
       <div className="bg-white rounded-card shadow-card overflow-hidden">
         {/* Desktop table header */}
         <div className="hidden md:grid grid-cols-[2fr_1.5fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 border-b border-gray-100 bg-gray-50 text-xs font-medium text-text-secondary uppercase tracking-wide">
-          <span>Learner</span>
-          <span>Contact</span>
-          <span>Role</span>
-          <span>Lead</span>
-          <span>Last Login</span>
+          <span>{t("admin.learnerCol")}</span>
+          <span>{t("admin.contactCol")}</span>
+          <span>{t("admin.role")}</span>
+          <span>{t("admin.leadCol")}</span>
+          <span>{t("admin.lastLoginCol")}</span>
           <span></span>
         </div>
 
         <div className="divide-y divide-gray-50">
           {filtered.length === 0 && (
             <div className="px-5 py-10 text-center text-text-secondary">
-              No learners match your filters.
+              {t("admin.noLearnersMatch")}
             </div>
           )}
           {filtered.map((emp) => (
@@ -443,7 +443,11 @@ export default function EmployeesPage() {
                 <div className="min-w-0">
                   <p className={`text-sm font-medium truncate ${emp.status === "inactive" ? "text-text-secondary" : "text-text-primary"}`}>
                     {emp.name}
-                    {emp.status === "inactive" && <span className="ml-1 text-xs text-gray-400">(inactive)</span>}
+                    {emp.status === "inactive" && (
+                      <span className="ml-1 text-xs text-gray-400">
+                        {t("admin.inactiveSuffix")}
+                      </span>
+                    )}
                   </p>
                   <p className="text-xs text-text-secondary truncate md:hidden">{emp.email}</p>
                 </div>
@@ -500,10 +504,10 @@ export default function EmployeesPage() {
                       <button onClick={() => { setDeactivateTarget(emp); setOpenMenu(null); }}
                         className={`flex items-center gap-2 w-full px-3 py-2.5 text-sm hover:bg-gray-50 ${emp.status === "active" ? "text-amber-600" : "text-green-600"}`}>
                         {emp.status === "active" ? <UserX size={14} /> : <UserCheck size={14} />}
-                        {emp.status === "active" ? "Deactivate" : "Reactivate"}
+                        {emp.status === "active" ? t("admin.deactivate") : t("admin.reactivate")}
                       </button>
                       <button className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-red-500 hover:bg-red-50">
-                        <Trash2 size={14} /> Delete
+                        <Trash2 size={14} /> {t("common.delete")}
                       </button>
                     </div>
                   )}
@@ -517,7 +521,7 @@ export default function EmployeesPage() {
       {/* Invitations pipeline */}
       <div className="bg-white rounded-card shadow-card overflow-hidden mt-4">
         <div className="px-5 py-3 border-b border-gray-100">
-          <h3 className="text-base font-semibold text-text-primary">Invitations</h3>
+          <h3 className="text-base font-semibold text-text-primary">{t("admin.invitations")}</h3>
         </div>
         <div className="divide-y divide-gray-50">
           {invitationList.map((inv) => (
@@ -545,11 +549,21 @@ export default function EmployeesPage() {
         open={!!deactivateTarget}
         onClose={() => setDeactivateTarget(null)}
         onConfirm={() => toggleStatus(deactivateTarget)}
-        title={deactivateTarget?.status === "active" ? "Deactivate Learner" : "Reactivate Learner"}
-        message={deactivateTarget?.status === "active"
-          ? `Deactivate ${deactivateTarget?.name}? They will lose access immediately but their data is retained.`
-          : `Reactivate ${deactivateTarget?.name}? They will regain access to the platform.`}
-        confirmLabel={deactivateTarget?.status === "active" ? "Deactivate" : "Reactivate"}
+        title={
+          deactivateTarget?.status === "active"
+            ? t("admin.deactivateLearner")
+            : t("admin.reactivateLearner")
+        }
+        message={
+          deactivateTarget?.status === "active"
+            ? t("admin.deactivateLearnerDetail", { name: deactivateTarget?.name })
+            : t("admin.reactivateLearnerDetail", { name: deactivateTarget?.name })
+        }
+        confirmLabel={
+          deactivateTarget?.status === "active"
+            ? t("admin.deactivate")
+            : t("admin.reactivate")
+        }
         confirmVariant={deactivateTarget?.status === "active" ? "danger" : "primary"}
       />
     </div>

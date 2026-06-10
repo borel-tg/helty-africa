@@ -180,7 +180,7 @@ export default function ModulesPage() {
                   {mod.title}
                 </h3>
                 <Badge variant={mod.status === "published" ? "success" : "default"}>
-                  {mod.status}
+                  {t(`status.${mod.status}`)}
                 </Badge>
               </div>
               <p className="text-xs text-text-secondary line-clamp-1 mb-1">

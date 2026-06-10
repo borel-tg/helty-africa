@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useConvexSession } from "../../hooks/useConvexSession";
@@ -5,6 +6,7 @@ import { formatTimeAgo } from "../../lib/utils";
 import { cn } from "../../lib/utils";
 
 export default function NotificationsPage() {
+  const { t } = useTranslation();
   const { convexUser } = useConvexSession();
   const markRead = useMutation(api.notifications.markRead);
   const markAllRead = useMutation(api.notifications.markAllRead);
@@ -15,25 +17,31 @@ export default function NotificationsPage() {
   );
 
   if (!notifications) {
-    return <div className="p-6 text-center text-text-secondary">Loading…</div>;
+    return (
+      <div className="p-6 text-center text-text-secondary">{t("common.loading")}</div>
+    );
   }
 
   return (
     <div className="p-4 md:p-6 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-text-primary">Notifications</h2>
+        <h2 className="text-xl font-semibold text-text-primary">
+          {t("common.notifications")}
+        </h2>
         <button
           type="button"
           onClick={() => convexUser?._id && markAllRead({})}
           className="text-sm text-primary hover:underline"
         >
-          Mark all read
+          {t("common.markAllRead")}
         </button>
       </div>
 
       <div className="bg-white rounded-card shadow-card divide-y divide-gray-50">
         {notifications.length === 0 ? (
-          <p className="p-8 text-center text-text-secondary">No notifications yet.</p>
+          <p className="p-8 text-center text-text-secondary">
+            {t("common.noNotifications")}
+          </p>
         ) : (
           notifications.map((n) => (
             <button
@@ -46,7 +54,11 @@ export default function NotificationsPage() {
               )}
             >
               <p className="text-sm text-text-primary">
-                {n.learnerName} passed {n.moduleName} with {n.score}%
+                {t("notifications.passedExam", {
+                  name: n.learnerName,
+                  module: n.moduleName,
+                  score: n.score,
+                })}
               </p>
               <p className="text-xs text-text-secondary mt-0.5">
                 {formatTimeAgo(n.createdAt)}

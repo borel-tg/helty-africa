@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
+import i18n from "../i18n";
 import { useConvex, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import {
@@ -38,13 +39,16 @@ export function useFileUpload(preset = "thumbnail") {
       try {
         const isImage =
           file.type.startsWith("image/") && file.type !== "image/svg+xml";
-        setProgress(isImage ? "Compressing image…" : "Uploading…");
+        setProgress(
+          isImage ? i18n.t("upload.compressing") : i18n.t("upload.uploading")
+        );
 
         const result = await uploadService.upload(file, presetConfig);
-        setProgress("Done");
+        setProgress(i18n.t("common.saved"));
         return result;
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Upload failed";
+        const message =
+          err instanceof Error ? err.message : i18n.t("upload.uploadFailed");
         setError(message);
         throw err;
       } finally {

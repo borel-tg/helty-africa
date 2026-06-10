@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Upload, X, FileText, Loader2, Image as ImageIcon } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useFileUpload } from "../../hooks/useFileUpload";
@@ -22,6 +23,7 @@ export function FileUpload({
   className,
   disabled = false,
 }) {
+  const { t } = useTranslation();
   const inputRef = useRef(null);
   const toast = useToast();
   const { upload, uploading, progress, error, reset, preset: presetConfig } =
@@ -43,7 +45,7 @@ export function FileUpload({
     if (!file || disabled) return;
 
     if (presetConfig.accept && !fileMatchesAccept(file, presetConfig.accept)) {
-      toast.error("This file type is not allowed.");
+      toast.error(t("upload.fileTypeNotAllowed"));
       return;
     }
 
@@ -55,12 +57,12 @@ export function FileUpload({
 
       if (result.originalSize && result.originalSize > result.size) {
         const saved = ((1 - result.size / result.originalSize) * 100).toFixed(0);
-        toast.success(`Uploaded (${saved}% smaller after compression)`);
+        toast.success(t("upload.uploadedCompressed", { saved }));
       } else {
-        toast.success("File uploaded");
+        toast.success(t("upload.fileUploaded"));
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Upload failed");
+      toast.error(err instanceof Error ? err.message : t("upload.uploadFailed"));
     }
   };
 
@@ -122,14 +124,14 @@ export function FileUpload({
           <div className="relative inline-block">
             <img
               src={preview}
-              alt="Upload preview"
+              alt={t("upload.uploadPreview")}
               className="max-h-24 mx-auto rounded object-contain"
             />
             <button
               type="button"
               onClick={clear}
               className="absolute -top-2 -right-2 p-1 bg-white rounded-full shadow border border-gray-200 text-gray-500 hover:text-red-500"
-              aria-label="Remove"
+              aria-label={t("upload.remove")}
             >
               <X size={14} />
             </button>
@@ -138,13 +140,13 @@ export function FileUpload({
           <div className="flex items-center justify-center gap-2">
             <FileText size={24} className="text-primary shrink-0" />
             <p className="text-sm text-text-primary truncate max-w-[200px]">
-              {localName || "Uploaded file"}
+              {localName || t("upload.uploadedFile")}
             </p>
             <button
               type="button"
               onClick={clear}
               className="p-1 text-gray-400 hover:text-red-500"
-              aria-label="Remove"
+              aria-label={t("upload.remove")}
             >
               <X size={16} />
             </button>
@@ -157,7 +159,7 @@ export function FileUpload({
               <Upload size={24} className="text-gray-300 mx-auto mb-2" />
             )}
             <p className="text-sm text-text-secondary">
-              {isImagePreset ? "Click to upload image" : "Click to upload file"}
+              {isImagePreset ? t("upload.clickUploadImage") : t("upload.clickUploadFile")}
             </p>
             <p className="text-xs text-gray-400 mt-1">{presetConfig.hint}</p>
           </>

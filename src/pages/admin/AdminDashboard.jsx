@@ -16,6 +16,7 @@ import { useConvexSession } from "../../hooks/useConvexSession";
 import { Card } from "../../components/ui/Card";
 import { ProgressBar } from "../../components/ui/Progress";
 import { Button } from "../../components/ui/Button";
+import { RoleBadge, StatusBadge } from "../../components/ui/Badge";
 
 function StatCard({ label, value, icon: Icon, color, sub }) {
   return (
@@ -169,14 +170,14 @@ export default function AdminDashboard() {
       <Card>
         <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
           <h2 className="text-base font-semibold text-text-primary">
-            Recent Learners
+            {t("admin.recentLearners")}
           </h2>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => navigate("/admin/learners")}
           >
-            View All <ChevronRight size={14} />
+            {t("admin.viewAll")} <ChevronRight size={14} />
           </Button>
         </div>
         <div className="divide-y divide-gray-50">
@@ -195,19 +196,9 @@ export default function AdminDashboard() {
                 <p className="text-sm font-medium text-text-primary truncate">
                   {emp.name}
                 </p>
-                <p className="text-xs text-text-secondary capitalize">
-                  {emp.role.replace("_", " ")}
-                </p>
+                <RoleBadge role={emp.role} />
               </div>
-              <span
-                className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                  emp.status === "active"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-gray-100 text-gray-500"
-                }`}
-              >
-                {emp.status}
-              </span>
+              <StatusBadge status={emp.status} />
             </div>
           ))}
         </div>

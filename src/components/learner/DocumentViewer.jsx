@@ -36,10 +36,12 @@ const PDF_ZOOM_STEP = 0.15;
 
 /** Single entry: picks embed / pdf.js / image from URL + metadata. */
 export function DocumentViewer({ fileUrl, fileName, fileType }) {
+  const { t } = useTranslation();
   const media = useMemo(
     () => detectDocumentMedia(fileUrl, fileName, fileType),
     [fileUrl, fileName, fileType]
   );
+  const docTitle = fileName || t("learner.documentTitle");
 
   if (media.kind === "none") return null;
   if (media.kind === "blocked") {
@@ -55,7 +57,7 @@ export function DocumentViewer({ fileUrl, fileName, fileType }) {
       <EmbeddedDocumentFrame
         src={media.embedSrc}
         fileName={fileName}
-        title={fileName || "Document"}
+        title={docTitle}
         supportsSlideNav={media.supportsSlideNav}
       />
     );
@@ -81,6 +83,7 @@ export function PptDocumentViewer({ lesson }) {
 }
 
 function ImageDocumentFrame({ src, fileName }) {
+  const { t } = useTranslation();
   const containerRef = useRef(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -119,7 +122,7 @@ function ImageDocumentFrame({ src, fileName }) {
       >
         <img
           src={src}
-          alt={fileName || "Lesson image"}
+          alt={fileName || t("learner.lessonImageAlt")}
           className="max-w-full max-h-[78dvh] object-contain shadow-md rounded"
           draggable={false}
           onContextMenu={(e) => e.preventDefault()}
@@ -154,9 +157,11 @@ function BlockedDocumentFrame({ fileName }) {
 function EmbeddedDocumentFrame({
   src,
   fileName,
-  title = "Document",
+  title,
   supportsSlideNav = false,
 }) {
+  const { t } = useTranslation();
+  const iframeTitle = title ?? fileName ?? t("learner.documentTitle");
   const containerRef = useRef(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [slideIndex, setSlideIndex] = useState(1);
@@ -198,7 +203,7 @@ function EmbeddedDocumentFrame({
         onToggleReaderMode={toggleReaderMode}
       />
       <iframe
-        title={title}
+        title={iframeTitle}
         src={iframeSrc}
         className={cn(
           "w-full h-[78dvh] min-h-[420px] bg-white border-0",
@@ -222,6 +227,8 @@ function EmbeddedDocumentFrame({
 }
 
 export function PdfDocumentViewer({ fileUrl, fileName, pdfSrc }) {
+  const { t } = useTranslation();
+  const docTitle = fileName || t("learner.documentTitle");
   const media = useMemo(
     () => detectDocumentMedia(fileUrl, fileName, "pdf"),
     [fileUrl, fileName]
@@ -232,7 +239,7 @@ export function PdfDocumentViewer({ fileUrl, fileName, pdfSrc }) {
       <EmbeddedDocumentFrame
         src={media.embedSrc}
         fileName={fileName}
-        title={fileName || "Document"}
+        title={docTitle}
         supportsSlideNav={media.supportsSlideNav}
       />
     );
@@ -318,7 +325,7 @@ function PdfJsDocumentViewer({ fileUrl, fileName, normalizedFileUrl }) {
       <EmbeddedDocumentFrame
         src={embedFallback}
         fileName={fileName}
-        title={fileName || "Document"}
+        title={fileName || t("learner.documentTitle")}
       />
     );
   }
@@ -441,18 +448,19 @@ function MobileZoomControls({
   canZoomIn,
   canZoomOut,
 }) {
+  const { t } = useTranslation();
   return (
     <div
       className="md:hidden absolute bottom-4 right-3 z-10 flex flex-col gap-2"
       role="group"
-      aria-label="Zoom controls"
+      aria-label={t("learner.zoomControls")}
     >
       <button
         type="button"
         onClick={onZoomIn}
         disabled={!canZoomIn}
         className="min-h-[44px] min-w-[44px] rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center disabled:opacity-40"
-        aria-label="Zoom in"
+        aria-label={t("learner.zoomIn")}
       >
         <ZoomIn size={20} />
       </button>
@@ -460,7 +468,7 @@ function MobileZoomControls({
         type="button"
         onClick={onReset}
         className="min-h-[36px] min-w-[44px] rounded-full bg-white/95 shadow-md border border-gray-200 text-xs font-medium text-text-secondary tabular-nums"
-        aria-label="Reset zoom"
+        aria-label={t("learner.resetZoom")}
       >
         {Math.round(scale * 100)}%
       </button>
@@ -469,7 +477,7 @@ function MobileZoomControls({
         onClick={onZoomOut}
         disabled={!canZoomOut}
         className="min-h-[44px] min-w-[44px] rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center disabled:opacity-40"
-        aria-label="Zoom out"
+        aria-label={t("learner.zoomOut")}
       >
         <ZoomOut size={20} />
       </button>
@@ -490,11 +498,12 @@ function DocumentToolbar({
   isFullscreen = false,
   onToggleReaderMode,
 }) {
+  const { t } = useTranslation();
   return (
     <div className="bg-gray-50 border-b border-gray-100 px-4 py-2.5 flex flex-wrap items-center gap-3">
       <FileText size={16} className="text-text-secondary shrink-0" />
       <span className="text-sm text-text-secondary truncate flex-1 min-w-0">
-        {fileName || "document"}
+        {fileName || t("learner.documentLabel")}
       </span>
       {numPages > 0 && (
         <div className="flex items-center gap-1">
@@ -503,7 +512,7 @@ function DocumentToolbar({
             onClick={onPrev}
             disabled={page <= 1}
             className="p-2 rounded hover:bg-gray-200 disabled:opacity-40 min-h-[36px] min-w-[36px] flex items-center justify-center"
-            aria-label="Previous page"
+            aria-label={t("common.previous")}
           >
             <ChevronLeft size={16} />
           </button>
@@ -515,7 +524,7 @@ function DocumentToolbar({
             onClick={onNext}
             disabled={page >= numPages}
             className="p-2 rounded hover:bg-gray-200 disabled:opacity-40 min-h-[36px] min-w-[36px] flex items-center justify-center"
-            aria-label="Next page"
+            aria-label={t("common.next")}
           >
             <ChevronRight size={16} />
           </button>
@@ -527,7 +536,7 @@ function DocumentToolbar({
                 "p-2 rounded hover:bg-gray-200 min-h-[36px] min-w-[36px] flex items-center justify-center",
                 hideZoomOnMobile && "hidden md:flex"
               )}
-              aria-label="Zoom out"
+              aria-label={t("learner.zoomOut")}
             >
               <ZoomOut size={16} />
             </button>
@@ -540,7 +549,7 @@ function DocumentToolbar({
                 "p-2 rounded hover:bg-gray-200 min-h-[36px] min-w-[36px] flex items-center justify-center",
                 hideZoomOnMobile && "hidden md:flex"
               )}
-              aria-label="Zoom in"
+              aria-label={t("learner.zoomIn")}
             >
               <ZoomIn size={16} />
             </button>
@@ -561,13 +570,13 @@ function DocumentToolbar({
         type="button"
         onClick={onToggleReaderMode}
         className="p-2 rounded hover:bg-gray-200 min-h-[36px] min-w-[36px] flex items-center justify-center"
-        aria-label={isFullscreen ? "Exit reader mode" : "Enter reader mode"}
-        title={isFullscreen ? "Exit reader mode" : "Reader mode"}
+        aria-label={isFullscreen ? t("learner.exitReader") : t("learner.readerMode")}
+        title={isFullscreen ? t("learner.exitReader") : t("learner.readerMode")}
       >
         {isFullscreen ? <Minimize size={16} /> : <Expand size={16} />}
       </button>
       <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded font-medium shrink-0">
-        View Only
+        {t("learner.viewOnly")}
       </span>
     </div>
   );
@@ -581,6 +590,7 @@ function DocumentBottomNav({
   isFullscreen = false,
   onToggleReaderMode,
 }) {
+  const { t } = useTranslation();
   return (
     <div className="bg-gray-50 border-t border-gray-100 px-4 py-2.5">
       <div className="flex items-center justify-between gap-3">
@@ -589,8 +599,8 @@ function DocumentBottomNav({
           onClick={onPrev}
           disabled={numPages > 0 ? page <= 1 : !onPrev}
           className="p-2 rounded hover:bg-gray-200 disabled:opacity-40 min-h-[44px] min-w-[44px] flex items-center justify-center"
-          aria-label="Previous page"
-          title="Previous"
+          aria-label={t("common.previous")}
+          title={t("common.previous")}
         >
           <ChevronLeft size={18} />
         </button>
@@ -599,8 +609,8 @@ function DocumentBottomNav({
           type="button"
           onClick={onToggleReaderMode}
           className="p-2 rounded hover:bg-gray-200 min-h-[44px] min-w-[44px] flex items-center justify-center"
-          aria-label={isFullscreen ? "Exit reader mode" : "Enter reader mode"}
-          title={isFullscreen ? "Exit reader mode" : "Reader mode"}
+          aria-label={isFullscreen ? t("learner.exitReader") : t("learner.readerMode")}
+          title={isFullscreen ? t("learner.exitReader") : t("learner.readerMode")}
         >
           {isFullscreen ? <Minimize size={18} /> : <Expand size={18} />}
         </button>
@@ -610,8 +620,8 @@ function DocumentBottomNav({
           onClick={onNext}
           disabled={numPages > 0 ? page >= numPages : !onNext}
           className="p-2 rounded hover:bg-gray-200 disabled:opacity-40 min-h-[44px] min-w-[44px] flex items-center justify-center"
-          aria-label="Next page"
-          title="Next"
+          aria-label={t("common.next")}
+          title={t("common.next")}
         >
           <ChevronRight size={18} />
         </button>
