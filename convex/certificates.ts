@@ -21,12 +21,20 @@ type TemplateUpsertArgs = {
   logoStorageId?: Id<"_storage"> | null;
   secondLogoUrl?: string | null;
   secondLogoStorageId?: Id<"_storage"> | null;
+  thirdLogoUrl?: string | null;
+  thirdLogoStorageId?: Id<"_storage"> | null;
+  logoScale?: number | null;
+  secondLogoScale?: number | null;
+  thirdLogoScale?: number | null;
   signatureLine?: string | null;
   signature2Line?: string | null;
+  signature3Line?: string | null;
   signatureImageUrl?: string | null;
   signatureImageStorageId?: Id<"_storage"> | null;
   signature2ImageUrl?: string | null;
   signature2ImageStorageId?: Id<"_storage"> | null;
+  signature3ImageUrl?: string | null;
+  signature3ImageStorageId?: Id<"_storage"> | null;
   borderColor: string;
   accentColor?: string | null;
   backgroundImageUrl?: string | null;
@@ -49,6 +57,7 @@ function buildTemplateFields(args: TemplateUpsertArgs) {
   assign("programSubtitle", args.programSubtitle?.trim() || null);
   assign("signatureLine", args.signatureLine?.trim() || null);
   assign("signature2Line", args.signature2Line?.trim() || null);
+  assign("signature3Line", args.signature3Line?.trim() || null);
   assign("accentColor", args.accentColor || null);
   assign("footerText", args.footerText?.trim() || null);
 
@@ -56,10 +65,17 @@ function buildTemplateFields(args: TemplateUpsertArgs) {
   assign("logoStorageId", args.logoStorageId ?? null);
   assign("secondLogoUrl", args.secondLogoUrl ?? null);
   assign("secondLogoStorageId", args.secondLogoStorageId ?? null);
+  assign("thirdLogoUrl", args.thirdLogoUrl ?? null);
+  assign("thirdLogoStorageId", args.thirdLogoStorageId ?? null);
+  assign("logoScale", args.logoScale ?? null);
+  assign("secondLogoScale", args.secondLogoScale ?? null);
+  assign("thirdLogoScale", args.thirdLogoScale ?? null);
   assign("signatureImageUrl", args.signatureImageUrl ?? null);
   assign("signatureImageStorageId", args.signatureImageStorageId ?? null);
   assign("signature2ImageUrl", args.signature2ImageUrl ?? null);
   assign("signature2ImageStorageId", args.signature2ImageStorageId ?? null);
+  assign("signature3ImageUrl", args.signature3ImageUrl ?? null);
+  assign("signature3ImageStorageId", args.signature3ImageStorageId ?? null);
   assign("backgroundImageUrl", args.backgroundImageUrl ?? null);
   assign("backgroundImageStorageId", args.backgroundImageStorageId ?? null);
 
@@ -301,12 +317,20 @@ export const upsertTemplate = adminMutation({
     logoStorageId: nullableStorageId,
     secondLogoUrl: nullableString,
     secondLogoStorageId: nullableStorageId,
+    thirdLogoUrl: nullableString,
+    thirdLogoStorageId: nullableStorageId,
+    logoScale: v.optional(v.union(v.number(), v.null())),
+    secondLogoScale: v.optional(v.union(v.number(), v.null())),
+    thirdLogoScale: v.optional(v.union(v.number(), v.null())),
     signatureLine: nullableString,
     signature2Line: nullableString,
+    signature3Line: nullableString,
     signatureImageUrl: nullableString,
     signatureImageStorageId: nullableStorageId,
     signature2ImageUrl: nullableString,
     signature2ImageStorageId: nullableStorageId,
+    signature3ImageUrl: nullableString,
+    signature3ImageStorageId: nullableStorageId,
     borderColor: v.string(),
     accentColor: nullableString,
     backgroundImageUrl: nullableString,

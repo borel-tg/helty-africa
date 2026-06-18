@@ -282,6 +282,11 @@
     "emailBodyEmail": "E-mail",
     "emailBodyRole": "Rôle"
   },
+  "learnerCategories": {
+    "national": "National",
+    "provincial": "Provincial",
+    "zonal": "Zonal"
+  },
   "leaderboard": {
     "title": "Classement des apprenants",
     "subtitleLearner": "Les apprenants les plus actifs",
@@ -497,6 +502,7 @@
     "openExternal": "Ouvrir dans un nouvel onglet",
     "documentLoading": "Chargement du document…",
     "documentError": "Impossible d'afficher ce document",
+    "documentPdfLoadError": "Impossible de charger le PDF.",
     "documentZoomStatus": "Page {{page}} sur {{total}}, zoom {{zoom}} %",
     "documentPptBlocked": "Ce fichier PowerPoint ne peut pas être affiché directement. Utilisez un lien Google Drive ou Google Slides.",
     "hello": "Bonjour, {{name}} 👋",
@@ -589,17 +595,34 @@
     "loading": "Chargement du certificat…",
     "backgroundWatermark": "Filigrane d'arrière-plan (optionnel)",
     "headerLogos": "Logos d'en-tête",
+    "logo1": "Logo 1 (gauche)",
+    "logo2": "Logo 2 (centre)",
+    "logo3": "Logo 3 (droite)",
+    "adjustLogoSize": "Ajuster la taille",
     "secondLogo": "Second logo (droite)",
     "signatures": "Signatures",
     "signature1": "Signature 1",
     "signature2": "Signature 2",
+    "signature3": "Signature 3",
     "colours": "Couleurs",
     "programNamePlaceholder": "Programme de formation des employés",
     "signatory1Placeholder": "ex. Dr Jane Smith, Directrice de formation",
     "signatory2Placeholder": "ex. Dr John Doe, Directeur médical",
+    "signatory3Placeholder": "ex. Mme Awa Koné, Coordinatrice",
     "verifyLoadError": "Impossible de charger le certificat",
     "verifyConvexMissing": "VITE_CONVEX_URL n'est pas configuré. Les certificats ne peuvent pas être vérifiés.",
-    "verifyLoadTimeout": "Le serveur met trop de temps à répondre. Vérifiez la connexion et VITE_CONVEX_URL."
+    "verifyLoadTimeout": "Le serveur met trop de temps à répondre. Vérifiez la connexion et VITE_CONVEX_URL.",
+    "convexSeedRequired": "Connectez-vous avec un compte admin et exécutez le seed Convex.",
+    "templateSaveFailed": "Enregistrement impossible",
+    "debugTitle": "Débogage vérification",
+    "debugStatus": "statut",
+    "debugRef": "réf.",
+    "debugUrl": "url",
+    "debugUrlDebug": "url debug",
+    "debugConvexUrl": "VITE_CONVEX_URL",
+    "debugConvexNotSet": "(non défini)",
+    "debugConvexPlaceholder": "(placeholder — invalide)",
+    "debugConsoleHint": "Console : [verify-certificate]. Journaux Convex : verifyByNumber, getTemplate."
   },
   "admin": {
     "overviewTitle": "Vue d'ensemble",
@@ -933,7 +956,17 @@
     "clickUploadFile": "Cliquez pour téléverser un fichier",
     "uploadedFile": "Fichier téléversé",
     "uploadPreview": "Aperçu du téléversement",
-    "uploadedCompressed": "Téléversé ({{saved}} % plus petit après compression)"
+    "uploadedCompressed": "Téléversé ({{saved}} % plus petit après compression)",
+    "fileTooLarge": "Fichier trop volumineux. Taille maximale : {{maxMb}} MB.",
+    "storageUrlFailed": "Impossible d'obtenir l'URL du fichier stocké.",
+    "uploadHttpFailed": "Échec du téléversement ({{status}}).",
+    "unsupportedFileType": "Type de fichier non pris en charge : {{type}}.",
+    "presetHints": {
+      "thumbnail": "PNG ou JPG, compressé automatiquement",
+      "logo": "PNG, JPG ou SVG. Les images raster sont compressées.",
+      "certificateBackground": "Filigrane PNG ou JPG léger",
+      "document": "PDF, PowerPoint ou Word, max. 50 MB"
+    }
   },
   "notifications": {
     "passedExam": "{{name}} a réussi {{module}} avec {{score}} %"

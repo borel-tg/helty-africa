@@ -1,10 +1,11 @@
 import { forwardRef } from "react";
 import { useTranslation } from "react-i18next";
-import { Award } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { formatDate } from "../../lib/utils";
 import { mergeTemplate } from "../../lib/certificate/defaults";
 import { CertificateBadge } from "./CertificateBadge";
+import { CertificateSignaturesFooter } from "./CertificateSignaturesFooter";
+import { CertificateHeader } from "./CertificateHeader";
 
 /**
  * Template 1 — Classic landscape certificate (default layout).
@@ -68,51 +69,7 @@ export const CertificateViewClassic = forwardRef(
 
         <div className="relative z-10 flex h-full min-h-0">
           <div className="cert-main flex-1 flex flex-col min-w-0">
-            <div className="cert-header flex items-center justify-between">
-              {template.logoUrl ? (
-                <img
-                  src={template.logoUrl}
-                  alt=""
-                  className="cert-logo object-contain"
-                />
-              ) : (
-                <div
-                  className="cert-logo-fallback rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: accent }}
-                >
-                  <Award className="text-white" />
-                </div>
-              )}
-
-              <div className="flex-1 text-center min-w-0 px-1">
-                <h1
-                  className="cert-org-title font-bold"
-                  style={{ color: accent }}
-                >
-                  {template.organizationName}
-                </h1>
-                {template.programSubtitle && (
-                  <p className="cert-org-subtitle uppercase text-text-secondary font-medium">
-                    {template.programSubtitle}
-                  </p>
-                )}
-              </div>
-
-              {template.secondLogoUrl ? (
-                <img
-                  src={template.secondLogoUrl}
-                  alt=""
-                  className="cert-logo object-contain"
-                />
-              ) : (
-                <div
-                  className="cert-logo-fallback rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: accent }}
-                >
-                  <Award className="text-white" />
-                </div>
-              )}
-            </div>
+            <CertificateHeader template={template} accent={accent} variant="classic" />
 
             <div className="cert-body flex-1 flex flex-col justify-center min-h-0">
               <p className="cert-date text-text-secondary">{dateStr}</p>
@@ -145,48 +102,13 @@ export const CertificateViewClassic = forwardRef(
               )}
             </div>
 
-            <div className="cert-footer flex items-end justify-between border-t border-gray-100">
-              <div className="min-w-0 flex-1">
-                {template.signatureImageUrl ? (
-                  <img
-                    src={template.signatureImageUrl}
-                    alt=""
-                    className="cert-signature-img object-contain object-left"
-                  />
-                ) : (
-                  <div className="cert-signature-line border-b-2 border-gray-300" />
-                )}
-                <p className="cert-signature-label text-text-secondary">
-                  {template.signatureLine}
-                </p>
-              </div>
-
-              {(template.signature2ImageUrl || template.signature2Line) && (
-                <div className="min-w-0 flex-1">
-                  {template.signature2ImageUrl ? (
-                    <img
-                      src={template.signature2ImageUrl}
-                      alt=""
-                      className="cert-signature-img object-contain object-left"
-                    />
-                  ) : (
-                    <div className="cert-signature-line border-b-2 border-gray-300" />
-                  )}
-                  <p className="cert-signature-label text-text-secondary">
-                    {template.signature2Line}
-                  </p>
-                </div>
-              )}
-
-              <div className="cert-date-block text-right shrink-0">
-                <p className="cert-date-block-label font-medium text-text-primary">
-                  {dateStr}
-                </p>
-                <p className="cert-date-block-sub text-text-secondary">
-                  {t("certificate.dateOfCompletion")}
-                </p>
-              </div>
-            </div>
+            <CertificateSignaturesFooter
+              template={template}
+              dateStr={dateStr}
+              dateLabel={t("certificate.dateOfCompletion")}
+              variant="classic"
+              className="border-t border-gray-100"
+            />
 
             {template.footerText && (
               <p className="cert-disclaimer text-text-secondary">

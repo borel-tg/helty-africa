@@ -12,8 +12,20 @@
 }
 
 .cert-header {
-  gap: clamp(0.25rem, 1.2cqi, 0.75rem);
+  gap: clamp(0.35rem, 1.6cqi, 1rem);
   margin-bottom: clamp(0.15rem, 1cqi, 1rem);
+}
+
+.cert-logos-row {
+  gap: clamp(0.25rem, 1.5cqi, 1.25rem);
+}
+
+.cert-logo-slot {
+  min-height: clamp(1.75rem, 7.5cqi, 3.5rem);
+}
+
+.cert-title-section {
+  padding-top: clamp(0.1rem, 0.5cqi, 0.35rem);
 }
 
 .cert-logo,
@@ -21,6 +33,11 @@
   width: clamp(1.75rem, 7.5cqi, 3.5rem);
   height: clamp(1.75rem, 7.5cqi, 3.5rem);
   flex-shrink: 0;
+}
+
+.cert-logo-scaled {
+  width: calc(clamp(1.75rem, 7.5cqi, 3.5rem) * var(--logo-scale, 1));
+  height: calc(clamp(1.75rem, 7.5cqi, 3.5rem) * var(--logo-scale, 1));
 }
 
 .cert-logo-fallback svg {
@@ -71,9 +88,17 @@
 }
 
 .cert-footer {
-  gap: clamp(0.25rem, 1.5cqi, 1rem);
+  gap: clamp(0.35rem, 1.8cqi, 1.25rem);
   margin-top: clamp(0.25rem, 1.5cqi, 1rem);
   padding-top: clamp(0.25rem, 1.5cqi, 1rem);
+}
+
+.cert-signatures-row {
+  gap: clamp(0.25rem, 1.5cqi, 1.25rem);
+}
+
+.cert-date-row {
+  margin-top: clamp(0.1rem, 0.6cqi, 0.35rem);
 }
 
 .cert-signature-img {
@@ -82,7 +107,8 @@
 }
 
 .cert-signature-line {
-  width: clamp(3.5rem, 18cqi, 9rem);
+  width: clamp(2.5rem, 14cqi, 7rem);
+  max-width: 100%;
   margin-bottom: clamp(0.05rem, 0.4cqi, 0.25rem);
 }
 
@@ -162,13 +188,12 @@
 }
 
 @container cert (max-width: 420px) {
-  .cert-footer {
+  .cert-signatures-row {
     flex-wrap: wrap;
   }
 
-  .cert-date-block {
-    width: 100%;
-    text-align: left;
-    margin-top: 0.15rem;
+  .cert-signatures-row > div {
+    flex: 1 1 40%;
+    min-width: 0;
   }
 }

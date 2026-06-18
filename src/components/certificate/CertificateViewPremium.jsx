@@ -1,10 +1,11 @@
 import { forwardRef } from "react";
 import { useTranslation } from "react-i18next";
-import { Award } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { formatDate } from "../../lib/utils";
 import { mergeTemplate } from "../../lib/certificate/defaults";
 import { CertificateBadge } from "./CertificateBadge";
+import { CertificateSignaturesFooter } from "./CertificateSignaturesFooter";
+import { CertificateHeader } from "./CertificateHeader";
 
 const GOLD = "#C9A227";
 
@@ -131,60 +132,12 @@ export const CertificateViewPremium = forwardRef(function CertificateViewPremium
 
       <div className="relative z-10 flex h-full min-h-0">
         <div className="cert-main flex-1 flex flex-col min-w-0">
-          <div className="cert-header flex items-center justify-between">
-            {template.logoUrl ? (
-              <img
-                src={template.logoUrl}
-                alt=""
-                className="cert-logo object-contain"
-              />
-            ) : (
-              <div
-                className="cert-logo-fallback rounded-full flex items-center justify-center shadow-sm"
-                style={{
-                  background: `linear-gradient(135deg, ${accent}, ${accent}cc)`,
-                  border: `2px solid ${GOLD}`,
-                }}
-              >
-                <Award className="text-white" />
-              </div>
-            )}
-
-            <div className="flex-1 text-center min-w-0 px-1">
-              <h1
-                className="cert-org-title font-bold tracking-tight"
-                style={{ color: accent }}
-              >
-                {template.organizationName}
-              </h1>
-              {template.programSubtitle && (
-                <p
-                  className="cert-org-subtitle uppercase font-semibold"
-                  style={{ color: "#6B7280", letterSpacing: "0.18em" }}
-                >
-                  {template.programSubtitle}
-                </p>
-              )}
-            </div>
-
-            {template.secondLogoUrl ? (
-              <img
-                src={template.secondLogoUrl}
-                alt=""
-                className="cert-logo object-contain"
-              />
-            ) : (
-              <div
-                className="cert-logo-fallback rounded-full flex items-center justify-center shadow-sm"
-                style={{
-                  background: `linear-gradient(135deg, ${accent}, ${accent}cc)`,
-                  border: `2px solid ${GOLD}`,
-                }}
-              >
-                <Award className="text-white" />
-              </div>
-            )}
-          </div>
+          <CertificateHeader
+            template={template}
+            accent={accent}
+            variant="premium"
+            gold={GOLD}
+          />
 
           <div className="cert-divider flex items-center">
             <div className="flex-1 h-px" style={{ backgroundColor: GOLD, opacity: 0.6 }} />
@@ -231,57 +184,16 @@ export const CertificateViewPremium = forwardRef(function CertificateViewPremium
             )}
           </div>
 
-          <div
-            className="cert-footer flex items-end justify-between"
-            style={{ borderTop: `1px solid ${accent}22` }}
-          >
-            <div className="min-w-0 flex-1">
-              {template.signatureImageUrl ? (
-                <img
-                  src={template.signatureImageUrl}
-                  alt=""
-                  className="cert-signature-img object-contain object-left"
-                />
-              ) : (
-                <div
-                  className="cert-signature-line"
-                  style={{ borderBottom: `2px solid ${GOLD}`, opacity: 0.7 }}
-                />
-              )}
-              <p className="cert-signature-label" style={{ color: "#6B7280" }}>
-                {template.signatureLine}
-              </p>
-            </div>
-
-            {(template.signature2ImageUrl || template.signature2Line) && (
-              <div className="min-w-0 flex-1">
-                {template.signature2ImageUrl ? (
-                  <img
-                    src={template.signature2ImageUrl}
-                    alt=""
-                    className="cert-signature-img object-contain object-left"
-                  />
-                ) : (
-                  <div
-                    className="cert-signature-line"
-                    style={{ borderBottom: `2px solid ${GOLD}`, opacity: 0.7 }}
-                  />
-                )}
-                <p className="cert-signature-label" style={{ color: "#6B7280" }}>
-                  {template.signature2Line}
-                </p>
-              </div>
-            )}
-
-            <div className="cert-date-block text-right shrink-0">
-              <p className="cert-date-block-label font-semibold" style={{ color: "#1A1A1A" }}>
-                {dateStr}
-              </p>
-              <p className="cert-date-block-sub" style={{ color: "#6B7280" }}>
-                {t("certificate.dateOfCompletion")}
-              </p>
-            </div>
-          </div>
+          <CertificateSignaturesFooter
+            template={template}
+            dateStr={dateStr}
+            dateLabel={t("certificate.dateOfCompletion")}
+            borderTopStyle={{ borderTop: `1px solid ${accent}22` }}
+            signatureLineStyle={{
+              borderBottom: `2px solid ${GOLD}`,
+              opacity: 0.7,
+            }}
+          />
         </div>
 
         <div

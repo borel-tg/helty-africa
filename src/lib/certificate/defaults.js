@@ -1,3 +1,8 @@
+/** Default logo size as a percentage (50–200). 100 = base size. */
+export const DEFAULT_LOGO_SCALE = 100;
+export const LOGO_SCALE_MIN = 50;
+export const LOGO_SCALE_MAX = 200;
+
 /** Certificate layout variants. */
 export const CERTIFICATE_LAYOUTS = {
   classic: "classic",
@@ -11,18 +16,24 @@ export const DEFAULT_LAYOUT_ID = CERTIFICATE_LAYOUTS.classic;
 export const DEFAULT_CERTIFICATE_TEMPLATE = {
   layoutId: DEFAULT_LAYOUT_ID,
   organizationName: "PolioFree Africa NGO",
-  programSubtitle: "Employee Training Programme",
-  signatureLine: "Dr. Amara Diallo, Training Director",
+  programSubtitle: "Programme de formation des employés",
+  signatureLine: "Dr Amara Diallo, Directrice de la formation",
   signature2Line: null,
+  signature3Line: null,
   signatureImageUrl: null,
   signature2ImageUrl: null,
+  signature3ImageUrl: null,
   borderColor: "#2E7D64",
   accentColor: "#2E7D64",
   logoUrl: null,
   secondLogoUrl: null,
+  thirdLogoUrl: null,
+  logoScale: DEFAULT_LOGO_SCALE,
+  secondLogoScale: DEFAULT_LOGO_SCALE,
+  thirdLogoScale: DEFAULT_LOGO_SCALE,
   backgroundImageUrl: null,
   footerText:
-    "This document certifies completion of the stated training module as recorded in the organization's training system.",
+    "Ce document atteste de la réussite du module de formation indiqué, tel qu'enregistré dans le système de formation de l'organisation.",
 };
 
 export function mergeTemplate(saved) {
@@ -35,5 +46,8 @@ export function mergeTemplate(saved) {
       saved.accentColor ??
       saved.borderColor ??
       DEFAULT_CERTIFICATE_TEMPLATE.accentColor,
+    logoScale: saved.logoScale ?? DEFAULT_LOGO_SCALE,
+    secondLogoScale: saved.secondLogoScale ?? DEFAULT_LOGO_SCALE,
+    thirdLogoScale: saved.thirdLogoScale ?? DEFAULT_LOGO_SCALE,
   };
 }

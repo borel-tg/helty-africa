@@ -16,7 +16,9 @@ import {
   DEFAULT_CERTIFICATE_TEMPLATE,
   CERTIFICATE_LAYOUTS,
   DEFAULT_LAYOUT_ID,
+  DEFAULT_LOGO_SCALE,
 } from "../../lib/certificate/defaults";
+import { LogoSizeControl } from "../../components/certificate/LogoSizeControl";
 
 export default function CertificateTemplatePage() {
   const { t } = useTranslation();
@@ -37,6 +39,7 @@ export default function CertificateTemplatePage() {
     programSubtitle: DEFAULT_CERTIFICATE_TEMPLATE.programSubtitle,
     signatureLine: DEFAULT_CERTIFICATE_TEMPLATE.signatureLine,
     signature2Line: "",
+    signature3Line: "",
     borderColor: DEFAULT_CERTIFICATE_TEMPLATE.borderColor,
     accentColor: DEFAULT_CERTIFICATE_TEMPLATE.accentColor,
     footerText: DEFAULT_CERTIFICATE_TEMPLATE.footerText,
@@ -44,10 +47,17 @@ export default function CertificateTemplatePage() {
     logoStorageId: null,
     secondLogoUrl: null,
     secondLogoStorageId: null,
+    thirdLogoUrl: null,
+    thirdLogoStorageId: null,
+    logoScale: DEFAULT_LOGO_SCALE,
+    secondLogoScale: DEFAULT_LOGO_SCALE,
+    thirdLogoScale: DEFAULT_LOGO_SCALE,
     signatureImageUrl: null,
     signatureImageStorageId: null,
     signature2ImageUrl: null,
     signature2ImageStorageId: null,
+    signature3ImageUrl: null,
+    signature3ImageStorageId: null,
     backgroundImageUrl: null,
     backgroundImageStorageId: null,
   });
@@ -61,6 +71,7 @@ export default function CertificateTemplatePage() {
         programSubtitle: savedTemplate.programSubtitle ?? "",
         signatureLine: savedTemplate.signatureLine ?? "",
         signature2Line: savedTemplate.signature2Line ?? "",
+        signature3Line: savedTemplate.signature3Line ?? "",
         borderColor: savedTemplate.borderColor,
         accentColor: savedTemplate.accentColor ?? savedTemplate.borderColor,
         footerText: savedTemplate.footerText ?? "",
@@ -68,11 +79,19 @@ export default function CertificateTemplatePage() {
         logoStorageId: savedTemplate.logoStorageId ?? null,
         secondLogoUrl: savedTemplate.secondLogoUrl ?? null,
         secondLogoStorageId: savedTemplate.secondLogoStorageId ?? null,
+        thirdLogoUrl: savedTemplate.thirdLogoUrl ?? null,
+        thirdLogoStorageId: savedTemplate.thirdLogoStorageId ?? null,
+        logoScale: savedTemplate.logoScale ?? DEFAULT_LOGO_SCALE,
+        secondLogoScale: savedTemplate.secondLogoScale ?? DEFAULT_LOGO_SCALE,
+        thirdLogoScale: savedTemplate.thirdLogoScale ?? DEFAULT_LOGO_SCALE,
         signatureImageUrl: savedTemplate.signatureImageUrl ?? null,
         signatureImageStorageId: savedTemplate.signatureImageStorageId ?? null,
         signature2ImageUrl: savedTemplate.signature2ImageUrl ?? null,
         signature2ImageStorageId:
           savedTemplate.signature2ImageStorageId ?? null,
+        signature3ImageUrl: savedTemplate.signature3ImageUrl ?? null,
+        signature3ImageStorageId:
+          savedTemplate.signature3ImageStorageId ?? null,
         backgroundImageUrl: savedTemplate.backgroundImageUrl ?? null,
         backgroundImageStorageId:
           savedTemplate.backgroundImageStorageId ?? null,
@@ -85,9 +104,7 @@ export default function CertificateTemplatePage() {
 
   const handleSave = async () => {
     if (!convexUser?._id || !convexUser?.organizationId) {
-      toast.error(
-        "Connectez-vous avec un compte admin et exécutez le seed Convex.",
-      );
+      toast.error(t("certificate.convexSeedRequired"));
       return;
     }
     setSaving(true);
@@ -99,6 +116,7 @@ export default function CertificateTemplatePage() {
         programSubtitle: form.programSubtitle.trim() || undefined,
         signatureLine: form.signatureLine.trim() || undefined,
         signature2Line: form.signature2Line.trim() || undefined,
+        signature3Line: form.signature3Line.trim() || undefined,
         borderColor: form.borderColor,
         accentColor: form.accentColor || form.borderColor,
         footerText: form.footerText.trim() || undefined,
@@ -106,17 +124,24 @@ export default function CertificateTemplatePage() {
         logoStorageId: form.logoStorageId ?? undefined,
         secondLogoUrl: form.secondLogoUrl ?? undefined,
         secondLogoStorageId: form.secondLogoStorageId ?? undefined,
+        thirdLogoUrl: form.thirdLogoUrl ?? undefined,
+        thirdLogoStorageId: form.thirdLogoStorageId ?? undefined,
+        logoScale: form.logoScale,
+        secondLogoScale: form.secondLogoScale,
+        thirdLogoScale: form.thirdLogoScale,
         signatureImageUrl: form.signatureImageUrl ?? undefined,
         signatureImageStorageId: form.signatureImageStorageId ?? undefined,
         signature2ImageUrl: form.signature2ImageUrl ?? undefined,
         signature2ImageStorageId: form.signature2ImageStorageId ?? undefined,
+        signature3ImageUrl: form.signature3ImageUrl ?? undefined,
+        signature3ImageStorageId: form.signature3ImageStorageId ?? undefined,
         backgroundImageUrl: form.backgroundImageUrl ?? undefined,
         backgroundImageStorageId: form.backgroundImageStorageId ?? undefined,
       });
       toast.success(t("certificate.templateSaved"));
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Enregistrement impossible",
+        err instanceof Error ? err.message : t("certificate.templateSaveFailed"),
       );
     } finally {
       setSaving(false);
@@ -210,30 +235,73 @@ export default function CertificateTemplatePage() {
             <p className="text-sm font-semibold text-text-primary border-b pb-1">
               {t("certificate.headerLogos")}
             </p>
-            <FileUpload
-              preset="logo"
-              label={t("admin.orgLogo") + " (left)"}
-              value={form.logoUrl}
-              onUploaded={(result) =>
-                setForm((p) => ({
-                  ...p,
-                  logoUrl: result?.url ?? null,
-                  logoStorageId: result?.storageId ?? null,
-                }))
-              }
-            />
-            <FileUpload
-              preset="logo"
-              label={t("certificate.secondLogo")}
-              value={form.secondLogoUrl}
-              onUploaded={(result) =>
-                setForm((p) => ({
-                  ...p,
-                  secondLogoUrl: result?.url ?? null,
-                  secondLogoStorageId: result?.storageId ?? null,
-                }))
-              }
-            />
+            <div className="space-y-2 p-3 rounded-lg bg-gray-50 border border-gray-100">
+              <FileUpload
+                preset="logo"
+                label={t("certificate.logo1")}
+                value={form.logoUrl}
+                onUploaded={(result) =>
+                  setForm((p) => ({
+                    ...p,
+                    logoUrl: result?.url ?? null,
+                    logoStorageId: result?.storageId ?? null,
+                  }))
+                }
+              />
+              {form.logoUrl && (
+                <LogoSizeControl
+                  label={t("certificate.adjustLogoSize")}
+                  value={form.logoScale}
+                  onChange={(logoScale) => setForm((p) => ({ ...p, logoScale }))}
+                />
+              )}
+            </div>
+            <div className="space-y-2 p-3 rounded-lg bg-gray-50 border border-gray-100">
+              <FileUpload
+                preset="logo"
+                label={t("certificate.logo2")}
+                value={form.secondLogoUrl}
+                onUploaded={(result) =>
+                  setForm((p) => ({
+                    ...p,
+                    secondLogoUrl: result?.url ?? null,
+                    secondLogoStorageId: result?.storageId ?? null,
+                  }))
+                }
+              />
+              {form.secondLogoUrl && (
+                <LogoSizeControl
+                  label={t("certificate.adjustLogoSize")}
+                  value={form.secondLogoScale}
+                  onChange={(secondLogoScale) =>
+                    setForm((p) => ({ ...p, secondLogoScale }))
+                  }
+                />
+              )}
+            </div>
+            <div className="space-y-2 p-3 rounded-lg bg-gray-50 border border-gray-100">
+              <FileUpload
+                preset="logo"
+                label={t("certificate.logo3")}
+                value={form.thirdLogoUrl}
+                onUploaded={(result) =>
+                  setForm((p) => ({
+                    ...p,
+                    thirdLogoUrl: result?.url ?? null,
+                    thirdLogoStorageId: result?.storageId ?? null,
+                  }))
+                }
+              />
+              {form.thirdLogoUrl && (
+                <LogoSizeControl
+                  label={t("certificate.adjustLogoSize")}
+                  value={form.thirdLogoScale}
+                  onChange={(thirdLogoScale) =>
+                    setForm((p) => ({ ...p, thirdLogoScale }))
+                  }
+                />
+              )}
+            </div>
           </div>
 
           {/* ── Signatures ── */}
@@ -290,6 +358,34 @@ export default function CertificateTemplatePage() {
                     ...p,
                     signature2ImageUrl: result?.url ?? null,
                     signature2ImageStorageId: result?.storageId ?? null,
+                  }))
+                }
+              />
+            </div>
+
+            {/* Signature 3 (optional) */}
+            <div className="space-y-3 p-3 rounded-lg bg-gray-50 border border-gray-100">
+              <p className="text-xs font-medium text-text-secondary uppercase tracking-wide">
+                {t("certificate.signature3")}{" "}
+                <span className="normal-case font-normal text-text-secondary">
+                  ({t("common.optional")})
+                </span>
+              </p>
+              <Input
+                label={t("certificate.signatureLine")}
+                value={form.signature3Line}
+                onChange={update("signature3Line")}
+                placeholder={t("certificate.signatory3Placeholder")}
+              />
+              <FileUpload
+                preset="logo"
+                label={t("certificate.signatureImage")}
+                value={form.signature3ImageUrl}
+                onUploaded={(result) =>
+                  setForm((p) => ({
+                    ...p,
+                    signature3ImageUrl: result?.url ?? null,
+                    signature3ImageStorageId: result?.storageId ?? null,
                   }))
                 }
               />

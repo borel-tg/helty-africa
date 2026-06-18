@@ -25,12 +25,15 @@ export async function enrichCertificateTemplate(
   const [
     logoUrl,
     secondLogoUrl,
+    thirdLogoUrl,
     signatureImageUrl,
     signature2ImageUrl,
+    signature3ImageUrl,
     backgroundImageUrl,
   ] = await Promise.all([
     resolveStorageUrl(ctx, template.logoStorageId, template.logoUrl),
     resolveStorageUrl(ctx, template.secondLogoStorageId, template.secondLogoUrl),
+    resolveStorageUrl(ctx, template.thirdLogoStorageId, template.thirdLogoUrl),
     resolveStorageUrl(
       ctx,
       template.signatureImageStorageId,
@@ -43,6 +46,11 @@ export async function enrichCertificateTemplate(
     ),
     resolveStorageUrl(
       ctx,
+      template.signature3ImageStorageId,
+      template.signature3ImageUrl
+    ),
+    resolveStorageUrl(
+      ctx,
       template.backgroundImageStorageId,
       template.backgroundImageUrl
     ),
@@ -52,8 +60,10 @@ export async function enrichCertificateTemplate(
     ...template,
     logoUrl,
     secondLogoUrl,
+    thirdLogoUrl,
     signatureImageUrl,
     signature2ImageUrl,
+    signature3ImageUrl,
     backgroundImageUrl,
   };
 }
