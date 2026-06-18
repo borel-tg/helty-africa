@@ -13,6 +13,8 @@ import { api } from "../../../convex/_generated/api";
 import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { ProgressBar } from "../../components/ui/Progress";
+import { OverviewStat } from "../../components/ui/OverviewStat";
+import { MetricLabel } from "../../components/ui/MetricTooltip";
 import { LeaderboardCard } from "../../components/leaderboard/LeaderboardCard";
 import { ProgramModuleCard } from "../../components/learner/ProgramModuleCard";
 import { useProgramEvaluation } from "../../hooks/useProgramEvaluation";
@@ -149,15 +151,18 @@ export default function ProgramHubPage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
               <OverviewStat
                 label={t("trainings.statModules")}
+                tooltip={t("tooltips.trainings.statModules")}
                 value={`${modulesWithLessonsDone}/${totalModules}`}
               />
               <OverviewStat
                 label={t("trainings.statModuleTests")}
+                tooltip={t("tooltips.trainings.statModuleTests")}
                 value={`${modulesComplete}/${totalModules}`}
               />
               {policy.generalExamEnabled && (
                 <OverviewStat
                   label={t("trainings.statFinalExam")}
+                  tooltip={t("tooltips.trainings.statFinalExam")}
                   value={
                     evaluation.generalUnlocked
                       ? evaluation.bestGeneralScore != null
@@ -169,6 +174,7 @@ export default function ProgramHubPage() {
               )}
               <OverviewStat
                 label={t("trainings.statFinalScore")}
+                tooltip={t("tooltips.trainings.statFinalScore")}
                 value={
                   evaluation.finalScore != null && modulesComplete > 0
                     ? `${evaluation.finalScore}%`
@@ -178,7 +184,9 @@ export default function ProgramHubPage() {
             </div>
             <div className="flex items-center gap-3">
               <span className="text-sm text-text-secondary shrink-0">
-                {t("trainings.lessonsProgress")}
+                <MetricLabel tooltip={t("tooltips.trainings.lessonsProgress")}>
+                  {t("trainings.lessonsProgress")}
+                </MetricLabel>
               </span>
               <ProgressBar value={overviewPct} className="flex-1" size="md" />
               <span className="text-sm font-medium text-primary">{overviewPct}%</span>
@@ -340,17 +348,6 @@ export default function ProgramHubPage() {
           </Card>
         </>
       )}
-    </div>
-  );
-}
-
-function OverviewStat({ label, value }) {
-  return (
-    <div className="bg-gray-50 rounded-lg p-3 text-center">
-      <p className="text-lg font-bold text-text-primary tabular-nums">{value}</p>
-      <p className="text-[10px] sm:text-xs text-text-secondary mt-0.5 leading-tight">
-        {label}
-      </p>
     </div>
   );
 }

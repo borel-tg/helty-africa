@@ -15,6 +15,7 @@ import { useToast } from "../../components/ui/Toast";
 import { useConvexSession } from "../../hooks/useConvexSession";
 import { formatTimeAgo } from "../../lib/utils";
 import { LearnerTerritoryFields } from "../../components/auth/LearnerTerritoryFields";
+import { StatCard } from "../../components/ui/StatCard";
 import { validateLearnerTerritoryFields } from "../../lib/validateLearnerTerritory";
 import {
   clearFormFieldError,
@@ -424,22 +425,33 @@ export default function EmployeesPage() {
 
       {/* Funnel stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-        <div className="bg-white rounded-card shadow-card p-4">
-          <p className="text-xs text-text-secondary">{t("admin.totalLearners")}</p>
-          <p className="text-2xl font-bold text-text-primary">{employeeList.filter((e) => e.role === "learner").length}</p>
-        </div>
-        <div className="bg-white rounded-card shadow-card p-4">
-          <p className="text-xs text-text-secondary">{t("admin.pendingInvites")}</p>
-          <p className="text-2xl font-bold text-amber-600">{pendingInvites}</p>
-        </div>
-        <div className="bg-white rounded-card shadow-card p-4">
-          <p className="text-xs text-text-secondary">{t("status.signed_up")}</p>
-          <p className="text-2xl font-bold text-green-600">{signedUpInvites}</p>
-        </div>
-        <div className="bg-white rounded-card shadow-card p-4">
-          <p className="text-xs text-text-secondary">{t("admin.activationRate")}</p>
-          <p className="text-2xl font-bold text-primary">{activationRate}%</p>
-        </div>
+        <StatCard
+          variant="funnel"
+          label={t("admin.totalLearners")}
+          tooltip={t("tooltips.admin.totalLearners")}
+          value={employeeList.filter((e) => e.role === "learner").length}
+        />
+        <StatCard
+          variant="funnel"
+          label={t("admin.pendingInvites")}
+          tooltip={t("tooltips.admin.pendingInvites")}
+          value={pendingInvites}
+          valueClassName="text-amber-600"
+        />
+        <StatCard
+          variant="funnel"
+          label={t("status.signed_up")}
+          tooltip={t("tooltips.admin.signedUp")}
+          value={signedUpInvites}
+          valueClassName="text-green-600"
+        />
+        <StatCard
+          variant="funnel"
+          label={t("admin.activationRate")}
+          tooltip={t("tooltips.admin.activationRate")}
+          value={`${activationRate}%`}
+          valueClassName="text-primary"
+        />
       </div>
 
       {/* Filters */}

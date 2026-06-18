@@ -7,6 +7,7 @@ import { api } from "../../../convex/_generated/api";
 import { useAuth } from "../../hooks/useAuth";
 import { useConvexSession } from "../../hooks/useConvexSession";
 import { ProgressBar } from "../../components/ui/Progress";
+import { StatCard } from "../../components/ui/StatCard";
 import { formatTimeAgo } from "../../lib/utils";
 
 export default function LeadDashboard() {
@@ -80,6 +81,7 @@ export default function LeadDashboard() {
   const statCards = [
     {
       labelKey: "lead.teamLearners",
+      tooltipKey: "tooltips.lead.teamLearners",
       value: learners.length,
       icon: Users,
       color: "text-blue-500",
@@ -87,6 +89,7 @@ export default function LeadDashboard() {
     },
     {
       labelKey: "lead.teamCompleted",
+      tooltipKey: "tooltips.lead.teamCompleted",
       value: completedCount,
       icon: CheckCircle,
       color: "text-green-500",
@@ -94,6 +97,7 @@ export default function LeadDashboard() {
     },
     {
       labelKey: "lead.teamInProgress",
+      tooltipKey: "tooltips.lead.teamInProgress",
       value: inProgressCount,
       icon: Clock,
       color: "text-secondary",
@@ -112,18 +116,16 @@ export default function LeadDashboard() {
 
       <div className="grid grid-cols-3 gap-3 mb-6">
         {statCards.map((s) => (
-          <div
+          <StatCard
             key={s.labelKey}
-            className="bg-white rounded-card shadow-card p-4 text-center"
-          >
-            <div
-              className={`w-9 h-9 rounded-full ${s.bg} flex items-center justify-center mx-auto mb-2`}
-            >
-              <s.icon size={18} className={s.color} />
-            </div>
-            <p className="text-2xl font-bold text-text-primary">{s.value}</p>
-            <p className="text-xs text-text-secondary mt-0.5">{t(s.labelKey)}</p>
-          </div>
+            variant="centered"
+            label={t(s.labelKey)}
+            tooltip={t(s.tooltipKey)}
+            value={s.value}
+            icon={s.icon}
+            color={s.color}
+            iconClassName={s.bg}
+          />
         ))}
       </div>
 

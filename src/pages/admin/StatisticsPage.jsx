@@ -17,6 +17,8 @@ import { ProgressBar } from "../../components/ui/Progress";
 import { useConvexSession } from "../../hooks/useConvexSession";
 import { formatTimeAgo } from "../../lib/utils";
 import { LeaderboardCard } from "../../components/leaderboard/LeaderboardCard";
+import { StatCard } from "../../components/ui/StatCard";
+import { MetricLabel } from "../../components/ui/MetricTooltip";
 import {
   LEARNER_CATEGORIES,
   getLearnerCategoryLabel,
@@ -152,7 +154,9 @@ export default function StatisticsPage() {
                 }`}
               >
                 <p className="text-sm font-semibold text-text-primary">
-                  {getLearnerCategoryLabel(row.key, i18n.language)}
+                  <MetricLabel tooltip={t("tooltips.admin.categoryTotal")}>
+                    {getLearnerCategoryLabel(row.key, i18n.language)}
+                  </MetricLabel>
                 </p>
                 <p className="text-2xl font-bold text-primary mt-1">
                   {row.total}
@@ -169,33 +173,30 @@ export default function StatisticsPage() {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {[
-          {
-            label: t("admin.activeLearners"),
-            value: stats.enrolledLearners,
-            color: "bg-blue-500",
-          },
-          {
-            label: t("admin.completionRate"),
-            value: `${stats.completionRate}%`,
-            color: "bg-green-500",
-          },
-          {
-            label: t("admin.avgTimeModule"),
-            value: stats.avgTimePerModule,
-            color: "bg-secondary",
-          },
-        ].map((s) => (
-          <div key={s.label} className="bg-white rounded-card shadow-card p-5">
-            <div
-              className={`w-8 h-8 rounded-lg ${s.color} mb-3 flex items-center justify-center`}
-            >
-              <TrendingUp size={16} className="text-white" />
-            </div>
-            <p className="text-2xl font-bold text-text-primary">{s.value}</p>
-            <p className="text-xs text-text-secondary mt-0.5">{s.label}</p>
-          </div>
-        ))}
+        <StatCard
+          variant="compact"
+          label={t("admin.activeLearners")}
+          tooltip={t("tooltips.admin.enrolledLearners")}
+          value={stats.enrolledLearners}
+          icon={TrendingUp}
+          color="bg-blue-500"
+        />
+        <StatCard
+          variant="compact"
+          label={t("admin.completionRate")}
+          tooltip={t("tooltips.admin.programCompletionRate")}
+          value={`${stats.completionRate}%`}
+          icon={TrendingUp}
+          color="bg-green-500"
+        />
+        <StatCard
+          variant="compact"
+          label={t("admin.avgTimeModule")}
+          tooltip={t("tooltips.admin.avgTimeModule")}
+          value={stats.avgTimePerModule}
+          icon={TrendingUp}
+          color="bg-secondary"
+        />
       </div>
 
       <LeaderboardCard
@@ -221,7 +222,11 @@ export default function StatisticsPage() {
               {t("admin.statsNoModulesInProgram")}
             </p>
           ) : (
-            stats.moduleStats.map((m) => (
+            stats.moduleStats.map((m) => {
+              const passRate =
+                m.started > 0 ? Math.round((m.passed / m.started) * 100) : 0;
+
+              return (
               <div key={m.moduleId} className="px-5 py-4">
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div>
@@ -235,32 +240,39 @@ export default function StatisticsPage() {
                       })}
                     </p>
                   </div>
-                  <span className="text-lg font-bold text-primary">
+                  <MetricLabel
+                    tooltip={t("tooltips.admin.moduleAvgScore")}
+                    className="text-lg font-bold text-primary"
+                  >
                     {m.avgScore}%
-                  </span>
+                  </MetricLabel>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
                   {[
                     {
                       label: t("admin.moduleStatsStartedLabel"),
+                      tooltip: t("tooltips.admin.moduleStarted"),
                       value: m.started,
                       icon: Clock,
                       color: "text-blue-500",
                     },
                     {
                       label: t("admin.moduleStatsLessonsDone"),
+                      tooltip: t("tooltips.admin.lessonsCompleted"),
                       value: m.completedLessons,
                       icon: CheckCircle,
                       color: "text-primary",
                     },
                     {
                       label: t("admin.moduleStatsPassed"),
+                      tooltip: t("tooltips.admin.modulePassed"),
                       value: m.passed,
                       icon: CheckCircle,
                       color: "text-green-500",
                     },
                     {
                       label: t("admin.moduleStatsFailed"),
+                      tooltip: t("tooltips.admin.moduleFailed"),
                       value: m.failed,
                       icon: XCircle,
                       color: "text-red-400",
@@ -278,11 +290,16 @@ export default function StatisticsPage() {
                         {stat.value}
                       </p>
                       <p className="text-[10px] text-text-secondary">
-                        {stat.label}
+                        <MetricLabel tooltip={stat.tooltip}>{stat.label}</MetricLabel>
                       </p>
                     </div>
                   ))}
                 </div>
+                <p className="text-[10px] text-text-secondary mb-1 text-right">
+                  <MetricLabel tooltip={t("tooltips.admin.modulePassRate")}>
+                    {t("admin.modulePassRate", { rate: passRate })}
+                  </MetricLabel>
+                </p>
                 <ProgressBar
                   value={m.passed}
                   max={m.started || 1}
@@ -290,7 +307,8 @@ export default function StatisticsPage() {
                   color="success"
                 />
               </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>

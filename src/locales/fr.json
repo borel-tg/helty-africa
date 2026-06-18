@@ -798,6 +798,7 @@
     "moduleStatsLessonsDone": "Leçons terminées",
     "moduleStatsPassed": "Réussis",
     "moduleStatsFailed": "Échoués",
+    "modulePassRate": "Taux de réussite : {{rate}} %",
     "learnerProgressTitle": "Progression des apprenants",
     "exportCsv": "Exporter CSV",
     "lastActive": "Dernière activité",
@@ -966,6 +967,49 @@
       "logo": "PNG, JPG ou SVG. Les images raster sont compressées.",
       "certificateBackground": "Filigrane PNG ou JPG léger",
       "document": "PDF, PowerPoint ou Word, max. 50 MB"
+    }
+  },
+  "tooltips": {
+    "admin": {
+      "activeLearners": "Apprenants avec un compte actif dans l'organisation.",
+      "publishedModules": "Modules de formation publiés et accessibles aux apprenants.",
+      "completionRate": "Pourcentage d'apprenants ayant réussi tous les modules publiés de l'organisation.",
+      "avgTimeModule": "Temps moyen passé par apprenant pour terminer un module (leçons + examen).",
+      "enrolledLearners": "Apprenants inscrits au programme sélectionné.",
+      "programCompletionRate": "Pourcentage d'apprenants inscrits ayant réussi tous les modules de ce programme.",
+      "categoryTotal": "Nombre d'apprenants inscrits dans cette catégorie pour ce programme.",
+      "moduleStarted": "Apprenants ayant commencé au moins une leçon de ce module.",
+      "modulePassed": "Apprenants ayant atteint le score minimum à l'examen du module.",
+      "moduleFailed": "Apprenants ayant épuisé leurs tentatives sans réussir l'examen.",
+      "lessonsCompleted": "Nombre total de leçons marquées comme terminées pour ce module.",
+      "moduleAvgScore": "Score moyen obtenu à l'examen de ce module par les apprenants qui ont tenté.",
+      "modulePassRate": "Part des apprenants ayant commencé le module qui ont réussi l'examen (réussis ÷ commencés).",
+      "totalLearners": "Nombre total de comptes apprenants enregistrés dans l'organisation.",
+      "pendingInvites": "Invitations envoyées dont l'inscription n'est pas encore finalisée.",
+      "signedUp": "Invitations acceptées — le compte a été créé.",
+      "activationRate": "Part des invitations converties en comptes actifs (inscrits ÷ invitations envoyées)."
+    },
+    "lead": {
+      "teamLearners": "Apprenants qui vous sont assignés en tant que responsable.",
+      "teamSize": "Nombre total d'apprenants dans votre équipe.",
+      "teamCompleted": "Apprenants ayant terminé tous les modules publiés.",
+      "completedAll": "Apprenants ayant réussi tous les modules du programme.",
+      "teamInProgress": "Apprenants ayant commencé au moins un module sans tout avoir terminé.",
+      "statusCompleted": "Apprenants dont tous les modules sont marqués comme terminés.",
+      "statusInProgress": "Apprenants ayant au moins un module en cours.",
+      "notStarted": "Apprenants n'ayant commencé aucun module."
+    },
+    "trainings": {
+      "statModules": "Modules dont toutes les leçons sont terminées, sur le total des modules du programme.",
+      "statModuleTests": "Modules dont l'examen a été réussi, sur le total des modules.",
+      "statFinalExam": "Examen final du programme — disponible une fois les conditions remplies.",
+      "statFinalScore": "Score final du programme, calculé selon les règles d'évaluation (modules + examen final).",
+      "lessonsProgress": "Pourcentage global de leçons terminées dans tous les modules du programme."
+    },
+    "evaluation": {
+      "statModuleTestsSubmitted": "Modules pour lesquels au moins une tentative d'examen a été soumise.",
+      "statModuleTestsPassed": "Modules réussis selon le score minimum requis.",
+      "progressToPass": "Avancement vers le score minimum requis pour valider le programme."
     }
   },
   "notifications": {

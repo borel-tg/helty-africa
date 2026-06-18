@@ -15,30 +15,14 @@ import { Button } from "../../components/ui/Button";
 import { Card } from "../../components/ui/Card";
 import { Select } from "../../components/ui/Input";
 import { ProgressBar } from "../../components/ui/Progress";
+import { OverviewStat } from "../../components/ui/OverviewStat";
+import { MetricLabel } from "../../components/ui/MetricTooltip";
 import {
   useProgramEvaluation,
   useAvailablePrograms,
 } from "../../hooks/useProgramEvaluation";
 import { average, roundScore1 } from "../../lib/evaluation";
 import { cn } from "../../lib/utils";
-
-function OverviewStat({ label, value, highlight }) {
-  return (
-    <div
-      className={cn(
-        "rounded-lg p-3 text-center",
-        highlight ? "bg-primary-50 border border-primary-100" : "bg-gray-50",
-      )}
-    >
-      <p className="text-lg font-bold text-text-primary tabular-nums">
-        {value}
-      </p>
-      <p className="text-[10px] sm:text-xs text-text-secondary mt-0.5 leading-tight">
-        {label}
-      </p>
-    </div>
-  );
-}
 
 export default function ProgramEvaluationPage() {
   const { t } = useTranslation();
@@ -206,15 +190,18 @@ export default function ProgramEvaluationPage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
               <OverviewStat
                 label={t("evaluation.statModuleTestsSubmitted")}
+                tooltip={t("tooltips.evaluation.statModuleTestsSubmitted")}
                 value={`${modulesSubmitted}/${modules.length}`}
               />
               <OverviewStat
                 label={t("evaluation.statModuleTestsPassed")}
+                tooltip={t("tooltips.evaluation.statModuleTestsPassed")}
                 value={`${modulesPassed}/${modules.length}`}
               />
               {generalExamEnabled && (
                 <OverviewStat
                   label={t("trainings.statFinalExam")}
+                  tooltip={t("tooltips.trainings.statFinalExam")}
                   value={
                     !generalUnlocked
                       ? t("trainings.locked")
@@ -229,13 +216,16 @@ export default function ProgramEvaluationPage() {
               )}
               <OverviewStat
                 label={t("trainings.statFinalScore")}
+                tooltip={t("tooltips.trainings.statFinalScore")}
                 value={moduleBestScores.length > 0 ? `${finalScore}%` : "—"}
                 highlight={passed && moduleBestScores.length > 0}
               />
             </div>
             <div className="flex items-center gap-3">
               <span className="text-sm text-text-secondary shrink-0">
-                {t("evaluation.progressToPass")}
+                <MetricLabel tooltip={t("tooltips.evaluation.progressToPass")}>
+                  {t("evaluation.progressToPass")}
+                </MetricLabel>
               </span>
               <ProgressBar
                 value={Math.min(

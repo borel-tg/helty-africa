@@ -17,25 +17,8 @@ import { Card } from "../../components/ui/Card";
 import { ProgressBar } from "../../components/ui/Progress";
 import { Button } from "../../components/ui/Button";
 import { RoleBadge, StatusBadge } from "../../components/ui/Badge";
-
-function StatCard({ label, value, icon: Icon, color, sub }) {
-  return (
-    <Card className="p-5">
-      <div className="flex flex-col items-center text-center gap-2 sm:flex-row sm:items-start sm:justify-between sm:text-left sm:gap-0">
-        <div
-          className={`w-10 h-10 rounded-lg flex items-center justify-center ${color} order-1 sm:order-2`}
-        >
-          <Icon size={20} className="text-white" />
-        </div>
-        <div className="order-2 sm:order-1">
-          <p className="text-sm text-text-secondary mb-1">{label}</p>
-          <p className="text-3xl font-bold text-text-primary">{value}</p>
-          {sub && <p className="text-xs text-text-secondary mt-1">{sub}</p>}
-        </div>
-      </div>
-    </Card>
-  );
-}
+import { StatCard } from "../../components/ui/StatCard";
+import { MetricLabel } from "../../components/ui/MetricTooltip";
 
 export default function AdminDashboard() {
   const { t } = useTranslation();
@@ -62,18 +45,21 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           label={t("admin.activeLearners")}
+          tooltip={t("tooltips.admin.activeLearners")}
           value={stats.totalEmployees}
           icon={Users}
           color="bg-blue-500"
         />
         <StatCard
           label={t("admin.publishedModules")}
+          tooltip={t("tooltips.admin.publishedModules")}
           value={stats.totalModulesPublished}
           icon={BookOpen}
           color="bg-primary"
         />
         <StatCard
           label={t("admin.completionRate")}
+          tooltip={t("tooltips.admin.completionRate")}
           value={`${stats.overallCompletionRate}%`}
           icon={Award}
           color="bg-green-500"
@@ -81,6 +67,7 @@ export default function AdminDashboard() {
         />
         <StatCard
           label={t("admin.avgTimeModule")}
+          tooltip={t("tooltips.admin.avgTimeModule")}
           value={stats.avgTimePerModule}
           icon={Clock}
           color="bg-secondary"
@@ -108,20 +95,29 @@ export default function AdminDashboard() {
                 <h3 className="text-sm font-medium text-text-primary">
                   {m.title}
                 </h3>
-                <span className="text-sm font-bold text-primary whitespace-nowrap">
+                <MetricLabel
+                  tooltip={t("tooltips.admin.moduleAvgScore")}
+                  className="text-sm font-bold text-primary whitespace-nowrap"
+                >
                   {t("admin.avgScore", { score: m.avgScore })}
-                </span>
+                </MetricLabel>
               </div>
               <div className="flex items-center gap-4 text-xs text-text-secondary mb-2">
                 <span className="flex items-center gap-1">
                   <CheckCircle size={11} className="text-green-500" />
-                  {t("admin.passedCount", { count: m.passed })}
+                  <MetricLabel tooltip={t("tooltips.admin.modulePassed")}>
+                    {t("admin.passedCount", { count: m.passed })}
+                  </MetricLabel>
                 </span>
                 <span className="flex items-center gap-1">
                   <XCircle size={11} className="text-red-400" />
-                  {t("admin.failedCount", { count: m.failed })}
+                  <MetricLabel tooltip={t("tooltips.admin.moduleFailed")}>
+                    {t("admin.failedCount", { count: m.failed })}
+                  </MetricLabel>
                 </span>
-                <span>{t("admin.startedCount", { count: m.started })}</span>
+                <MetricLabel tooltip={t("tooltips.admin.moduleStarted")}>
+                  {t("admin.startedCount", { count: m.started })}
+                </MetricLabel>
               </div>
               <ProgressBar
                 value={m.passed}

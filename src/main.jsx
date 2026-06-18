@@ -7,6 +7,7 @@ import "./i18n";
 import "./index.css";
 import { AuthProvider } from "./hooks/useAuth";
 import { ToastProvider } from "./components/ui/Toast";
+import { TooltipProvider } from "./components/ui/Tooltip";
 import { registerSW } from "virtual:pwa-register";
 import { APP_BRAND_NAME } from "./lib/brand";
 
@@ -24,7 +25,9 @@ function AppProviders({ children }) {
   return (
     <ConvexAuthProvider client={convex}>
       <AuthProvider>
-        <ToastProvider>{children}</ToastProvider>
+        <ToastProvider>
+          <TooltipProvider>{children}</TooltipProvider>
+        </ToastProvider>
       </AuthProvider>
     </ConvexAuthProvider>
   );
